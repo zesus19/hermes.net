@@ -1,0 +1,82 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Arch.CMessaging.Client.Core.Utils;
+using Arch.CMessaging.Client.Core.Result;
+using Arch.CMessaging.Client.Core.Future;
+using Arch.CMessaging.Client.Core.Pipeline;
+using Arch.CMessaging.Client.Core.Service;
+using Arch.CMessaging.Client.Core.Message;
+
+namespace Arch.CMessaging.Client.Producer
+{
+    public class DefaultProducer : Producer
+    {
+        //ioc inject
+        private IPipeline<IFuture<SendResult>> pipeline;
+        //ioc inject
+        private ISystemClockService systemClockService;
+
+        public override IMessageHolder Message(string topic, string partitionKey, object body)
+        {
+            return new DefaultMessageHolder(topic, partitionKey, body, pipeline, systemClockService);
+        }
+
+        private class DefaultMessageHolder : IMessageHolder
+        {
+            private ProducerMessage message;
+            private IPipeline<IFuture<SendResult>> pipeline;
+            private ISystemClockService systemClockService;
+
+            public DefaultMessageHolder(
+                string topic, 
+                string partitionKey, 
+                object body,
+                IPipeline<IFuture<SendResult>> pipeline,
+                ISystemClockService systemClockService)
+            {
+                this.message = new ProducerMessage(topic, body);
+                this.message.PartitionKey = partitionKey;
+                this.pipeline = pipeline;
+                this.systemClockService = systemClockService;
+            }
+
+            #region IMessageHolder Members
+
+            public IMessageHolder WithPriority()
+            {
+                message.IsPriority = true;
+                return this;
+            }
+
+            public IMessageHolder WithRefKey(string key)
+            {
+                if (!string.IsNullOrEmpty(key) && key.Length > 90)
+                    throw new ArgumentException(string.Format("RefKey's length must not larger than 90 characters(refKey={0})", key));
+                message.Key = key;
+                return this;
+            }
+
+            public IFuture<SendResult> Send()
+            {
+                message.BornTime = systemClockService.Now();
+                return pipeline.Put(message);
+            }
+
+            public IMessageHolder AddProperty(string key, string value)
+            {
+                message.AddDurableAppProperty(key, value);
+                return this;
+            }
+
+            public IMessageHolder SetCallback(ICallback callback)
+            {
+                message.Callback = callback;
+                return this;
+            }
+
+            #endregion
+        }
+    }
+}
