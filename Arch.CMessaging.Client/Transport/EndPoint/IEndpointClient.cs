@@ -10,6 +10,6 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
     public interface IEndpointClient
     {
         void WriteCommand(Endpoint endpoint, ICommand command);
-        void WriteCommand(Endpoint endpoint, ICommand command, long timeoutInMills);
+        void WriteCommand(Endpoint endpoint, ICommand command, int timeoutInMills);
     }
 }

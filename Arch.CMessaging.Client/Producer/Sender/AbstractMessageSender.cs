@@ -15,22 +15,28 @@ namespace Arch.CMessaging.Client.Producer.Sender
     public abstract class AbstractMessageSender : IMessageSender
     {
         //ioc inject
-        protected IEndpointManager endpointManager;
+        private IEndpointManager endpointManager;
 
         //ioc inject
-        protected IEndpointClient endpointClient;
+        private IEndpointClient endpointClient;
 
         //ioc inject
-        protected IPartitioningStrategy partitioningAlgo;
+        private IPartitioningStrategy partitioningAlgo;
 
         //ioc inject
-        protected IMetaService metaService;
+        private IMetaService metaService;
 
         //ioc inject
-        protected ISendMessageAcceptanceMonitor messageAcceptanceMonitor;
+        private ISendMessageAcceptanceMonitor messageAcceptanceMonitor;
 
         //ioc inject
-        protected ISendMessageResultMonitor messageResultMonitor;
+        private ISendMessageResultMonitor messageResultMonitor;
+
+        public IEndpointManager EndpointManager { get { return endpointManager; } }
+        public IEndpointClient EndpointClient { get { return endpointClient; } }
+        public IMetaService MetaService { get { return metaService; } }
+        public ISendMessageAcceptanceMonitor SendMessageAcceptanceMonitor { get { return messageAcceptanceMonitor; } }
+        public ISendMessageResultMonitor SendMessageResultMonitor { get { return messageResultMonitor; } }
 
         #region IMessageSender Members
 

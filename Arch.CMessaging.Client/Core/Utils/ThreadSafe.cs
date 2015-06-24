@@ -351,5 +351,74 @@ namespace Arch.CMessaging.Client.Core.Utils
                 return value ? True : False;
             }
         }
+
+        public class AtomicReference<T>
+            where T : class 
+        {
+            private T _value;
+
+            public AtomicReference(T value)
+            {
+                _value = value;
+            }
+
+            public T ReadUnfenced()
+            {
+                return _value;
+            }
+
+            public T ReadAcquireFence()
+            {
+                var value = _value;
+                Thread.MemoryBarrier();
+                return value;
+            }
+
+            public T ReadFullFence()
+            {
+                var value = _value;
+                Thread.MemoryBarrier();
+                return value;
+            }
+
+            [MethodImpl(MethodImplOptions.NoOptimization)]
+            public T ReadCompilerOnlyFence()
+            {
+                return _value;
+            }
+
+            public void WriteReleaseFence(T newValue)
+            {
+                _value = newValue;
+                Thread.MemoryBarrier();
+            }
+
+            public void WriteFullFence(T newValue)
+            {
+                _value = newValue;
+                Thread.MemoryBarrier();
+            }
+
+            [MethodImpl(MethodImplOptions.NoOptimization)]
+            public void WriteCompilerOnlyFence(T newValue)
+            {
+                _value = newValue;
+            }
+
+            public void WriteUnfenced(T newValue)
+            {
+                _value = newValue;
+            }
+
+            public bool AtomicCompareExchange(T newValue, T comparand)
+            {
+                return Interlocked.CompareExchange(ref _value, newValue, comparand) == comparand;
+            }
+
+            public T AtomicExchange(T newValue)
+            {
+                return Interlocked.Exchange(ref _value, newValue);
+            }
+        }
     }
 }

@@ -16,10 +16,10 @@ namespace Arch.CMessaging.Client.Core.Config
         public int SendBufferSize { get { return 65535; } }
         public int ReceiveBufferSize { get {return 65535; } }
         public int EndpointSessionSendBufferSize { get { return 1000; } }
-        public long EndpointSessionWriterCheckInterval { get { return 20; } }
-        public long EndpointSessionWriteRetryDealy { get { return 20; } }
-        public long EndpointSessionAutoReconnectDelay { get { return 1; } }
-        public long EndpointSessionDefaultWrtieTimeout { get { return 3600 * 1000L; } }
+        public int EndpointSessionWriterCheckInterval { get { return 20; } }
+        public int EndpointSessionWriteRetryDealy { get { return 20; } }
+        public int EndpointSessionAutoReconnectDelay { get { return 1; } }
+        public int EndpointSessionDefaultWrtieTimeout { get { return 3600 * 1000; } }
         public int EndpointSessionMaxIdleTime { get { return 60; } }
         public string AvroSchemaRetryUrlKey { get { return "schema.registry.url"; } }
     }

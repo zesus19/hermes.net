@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,15 +15,48 @@ using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Net;
 using Arch.CMessaging.Client.Net.Core.Session;
 using Arch.CMessaging.Client.Transport.EndPoint;
-
+using Arch.CMessaging.Client.Core.Collections;
+using Arch.CMessaging.Client.Core.Future;
+using Arch.CMessaging.Client.Core.Result;
 namespace Producer
 {
+    public class A
+    {
+        private int a;
+        public A(int val)
+        {
+            this.a = val;
+        }
+
+        public void Do()
+        {
+            var b = new B(this);
+            b.Do();
+        }
+
+        private class B
+        {
+            private A a;
+            public B(A a) { this.a = a; }
+            public void Do()
+            {
+                var s = string.Empty;
+            }
+        }
+    }
+
+
     class Program
     {
         static void Main(string[] args)
         {
             try
             {
+                var a = new A(1);
+                a.Do();
+
+
+
                 var future = new Bootstrap()
                     .Option(SessionOption.SO_KEEPALIVE, true)
                     .Option(SessionOption.CONNECT_TIMEOUT_MILLIS, 5000)
@@ -48,7 +82,7 @@ namespace Producer
                 message.PropertiesHolder.DurableProperties.Add("SYS.ServerMessageId", "hermes-c0a8cc01-398166-30000");
                 message.PropertiesHolder.DurableProperties.Add("SYS.CurrentMessageId", "hermes-c0a8cc01-398166-30001");
                 var command = new SendMessageCommand("cmessage_fws", 0);
-                command.AddMessage(message);
+                command.AddMessage(message, new SettableFuture<SendResult>());
 
                 var writeFuture = session.Write(command);
                 writeFuture.Await();

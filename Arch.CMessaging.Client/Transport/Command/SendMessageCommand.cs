@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Arch.CMessaging.Client.Core.Message;
 using Arch.CMessaging.Client.Net.Core.Buffer;
 using Arch.CMessaging.Client.Core.Utils;
+using Arch.CMessaging.Client.Core.Future;
+using Arch.CMessaging.Client.Core.Result;
 
 namespace Arch.CMessaging.Client.Transport.Command
 {
@@ -15,7 +17,9 @@ namespace Arch.CMessaging.Client.Transport.Command
     {
         private int msgCounter;
         private const long serialVersionUID = 8443575812437722822L;
+        private ThreadSafe.Long expireTime;
         private ConcurrentDictionary<int, IList<ProducerMessage>> messages;
+        private Dictionary<int, IFuture<SendResult>> futures;
 
         public SendMessageCommand() : this(null, 0) { }
 
@@ -24,13 +28,20 @@ namespace Arch.CMessaging.Client.Transport.Command
         {
             this.Topic = topic;
             this.Partition = partition;
-            messages = new ConcurrentDictionary<int, IList<ProducerMessage>>();
+            this.expireTime = new ThreadSafe.Long(0);
+            this.messages = new ConcurrentDictionary<int, IList<ProducerMessage>>();
+            this.futures = new Dictionary<int, IFuture<SendResult>>();
         }
 
         public string Topic { get; private set; }
         public int Partition { get; private set; }
+        public long ExpireTime 
+        {
+            get { return expireTime.ReadFullFence(); }
+            set { expireTime.WriteFullFence(value); }
+        }
 
-        public void AddMessage(ProducerMessage message)
+        public void AddMessage(ProducerMessage message, IFuture<SendResult> future)
         {
             Validate(message);
             message.SequenceNo = Interlocked.Increment(ref msgCounter);
@@ -45,7 +56,7 @@ namespace Arch.CMessaging.Client.Transport.Command
                 messages[1].Add(message);
             }
 
-            //put future
+            futures[message.SequenceNo] = future;
         }
 
         protected override void Parse0(IoBuffer buf)

@@ -7,5 +7,6 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 {
     public class EndpointSession
     {
+        
     }
 }
