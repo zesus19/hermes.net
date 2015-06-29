@@ -22,9 +22,9 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Lease
 
 	public class ConsumerLeaseKey : ISessionIdAware
 	{
-		public Tpg Tpg { get; }
+        public Tpg Tpg { get; private set; }
 
-		public String SessionId { get; }
+        public String SessionId { get; private set; }
 
 		public ConsumerLeaseKey (Tpg tpg, String sessionId)
 		{
