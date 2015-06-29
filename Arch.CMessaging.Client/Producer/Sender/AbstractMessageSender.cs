@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Arch.CMessaging.Client.Core.Message.Partition;
-using Arch.CMessaging.Client.Core.Meta;
+using Arch.CMessaging.Client.Core.MetaService;
 using Arch.CMessaging.Client.Producer.Monitor;
 using Arch.CMessaging.Client.Transport.EndPoint;
 using Arch.CMessaging.Client.Core.Result;

@@ -1,49 +1,123 @@
 ﻿using System;
+using Freeway.Logging;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Arch.CMessaging.Client.Core.Ioc;
+using Arch.CMessaging.Client.Core.Utils;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Configuration;
+using System.Collections.Specialized;
 
 namespace Arch.CMessaging.Client.Core.Env
 {
-    public class DefaultClientEnvironment : IClientEnvironment, IInitializable
-    {
-        #region IClientEnvironment Members
+	public class DefaultClientEnvironment : IClientEnvironment
+	{
+		private static String PRODUCER_DEFAULT_FILE = "/hermes-producer.properties";
 
-        public bool IsLocalMode()
-        {
-            throw new NotImplementedException();
-        }
+		private  static String PRODUCER_PATTERN = "/hermes-producer-{0}.properties";
 
-        public Env GetEnv()
-        {
-            throw new NotImplementedException();
-        }
+		private  static String CONSUMER_DEFAULT_FILE = "/hermes-consumer.properties";
 
-        public Utils.Properties GetProducerConfig(string topic)
-        {
-            throw new NotImplementedException();
-        }
+		private  static String CONSUMER_PATTERN = "/hermes-consumer-{0}.properties";
 
-        public Utils.Properties GetConsumerConfig(string topic)
-        {
-            throw new NotImplementedException();
-        }
+		private  static String GLOBAL_DEFAULT_FILE = "/hermes.properties";
 
-        public Utils.Properties GetGlobalConfig()
-        {
-            throw new NotImplementedException();
-        }
+		private static  String KEY_IS_LOCAL_MODE = "isLocalMode";
 
-        #endregion
+		private ConcurrentDictionary<String, Properties> ProducerCache = new ConcurrentDictionary<String, Properties> ();
 
-        #region IInitializable Members
+		private ConcurrentDictionary<String, Properties> ConsumerCache = new ConcurrentDictionary<String, Properties> ();
 
-        public void Initialize()
-        {
-            throw new NotImplementedException();
-        }
+		private Properties m_producerDefault;
 
-        #endregion
-    }
+		private Properties m_consumerDefault;
+
+		public Properties m_globalDefault { get; set; }
+
+		private static readonly ILog log = LogManager.GetLogger (typeof(DefaultClientEnvironment));
+
+		private volatile Env m_env;
+
+
+		public Properties GetGlobalConfig ()
+		{
+			return m_globalDefault;
+		}
+
+		public Properties GetProducerConfig (String topic)
+		{
+			Properties properties = ProducerCache [topic];
+			if (properties == null) {
+				properties = readConfigFile (String.Format (PRODUCER_PATTERN, topic), m_producerDefault);
+				ProducerCache.GetOrAdd (topic, properties);
+			}
+
+			return properties;
+		}
+
+		public Properties GetConsumerConfig (String topic)
+		{
+			Properties properties = ConsumerCache [topic];
+			if (properties == null) {
+				properties = readConfigFile (String.Format (CONSUMER_PATTERN, topic), m_consumerDefault);
+				ConsumerCache.GetOrAdd (topic, properties);
+			}
+
+			return properties;
+		}
+
+		private Properties readConfigFile (String configPath)
+		{
+			return readConfigFile (configPath, null);
+		}
+
+		private Properties readConfigFile (String configPath, Properties defaults)
+		{
+			return null;
+		}
+
+		
+		public void initialize ()
+		{
+			m_producerDefault = readConfigFile (PRODUCER_DEFAULT_FILE);
+			m_consumerDefault = readConfigFile (CONSUMER_DEFAULT_FILE);
+			m_globalDefault = readConfigFile (GLOBAL_DEFAULT_FILE);
+
+			Env? resultEnv = Hermes.getEnv ();
+
+			NameValueCollection config = ConfigurationManager.GetSection ("hermes/global") as NameValueCollection;
+			if (config != null && config ["env"] != null) {
+				Env newEnv = (Env)Enum.Parse (typeof(Env), config ["env"]);
+				if (resultEnv != null && newEnv != resultEnv) {
+					throw new Exception (string.Format ("Inconsist Hermes env {0} {1}", resultEnv, newEnv));
+				} else {
+					resultEnv = newEnv;
+				}
+			}
+
+			if (resultEnv == null) {
+				throw new Exception ("Hermes env is not set");
+			}
+
+			m_env = (Env)resultEnv;
+		}
+
+		
+		public Env GetEnv ()
+		{
+			return m_env;
+		}
+
+		
+		public bool IsLocalMode ()
+		{
+			bool isLocalMode;
+			if (GetGlobalConfig ().ContainsKey (KEY_IS_LOCAL_MODE)) {
+				isLocalMode = Convert.ToBoolean (GetGlobalConfig ().GetProperty (KEY_IS_LOCAL_MODE));
+			} else {
+				isLocalMode = false;
+			}
+			return isLocalMode;
+		}
+
+	}
 }

@@ -7,7 +7,7 @@ using Arch.CMessaging.Client.Core.Ioc;
 using Arch.CMessaging.Client.Core.Message;
 using Arch.CMessaging.Client.Core.Pipeline;
 using Arch.CMessaging.Client.Core.Result;
-using Arch.CMessaging.Client.Meta.Entity;
+using Arch.CMessaging.Client.MetaEntity.Entity;
 using Arch.CMessaging.Client.Producer.Sender;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline

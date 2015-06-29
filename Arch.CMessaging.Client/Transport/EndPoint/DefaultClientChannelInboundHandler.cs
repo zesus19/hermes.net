@@ -17,11 +17,11 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
         private EndpointSession endpointSession;
         private DefaultEndpointClient endpointClient;
         private CommandProcessorManager cmdProcessorManager;
-        private Arch.CMessaging.Client.Meta.Entity.Endpoint endpoint;
+		private Arch.CMessaging.Client.MetaEntity.Entity.Endpoint endpoint;
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultClientChannelInboundHandler));
         public DefaultClientChannelInboundHandler(
             CommandProcessorManager cmdProcessorManager,
-            Arch.CMessaging.Client.Meta.Entity.Endpoint endpoint,
+			Arch.CMessaging.Client.MetaEntity.Entity.Endpoint endpoint,
             EndpointSession endpointSession,
             DefaultEndpointClient endpointClient,
             CoreConfig config)

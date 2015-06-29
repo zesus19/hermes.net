@@ -6,7 +6,7 @@ using Arch.CMessaging.Client.Core.Ioc;
 using Arch.CMessaging.Client.Core.Future;
 using Arch.CMessaging.Client.Core.Result;
 using Arch.CMessaging.Client.Core.Pipeline;
-using Arch.CMessaging.Client.Core.Meta;
+using Arch.CMessaging.Client.Core.MetaService;
 using Arch.CMessaging.Client.Core.Utils;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline

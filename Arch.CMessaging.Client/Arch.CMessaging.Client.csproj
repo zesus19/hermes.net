@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -32,9 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Framework.Logging.V2.API">
-      <HintPath>..\..\..\WorkItem\TFS_192.168.83.70\Common\Lib\Framework\Release\Framework.Logging.V2.API.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -44,6 +41,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Framework.Logging.V2.API">
+      <HintPath>..\Framework.Logging.V2.API.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Bo\SchemaView.cs" />
@@ -104,8 +105,6 @@
     <Compile Include="Core\Message\ProducerMessage.cs" />
     <Compile Include="Core\Message\PropertiesHolder.cs" />
     <Compile Include="Core\Message\Retry\IRetryPolicy.cs" />
-    <Compile Include="Core\Meta\DefaultMetaService.cs" />
-    <Compile Include="Core\Meta\IMetaService.cs" />
     <Compile Include="Core\Pipeline\AbstractValveRegistry.cs" />
     <Compile Include="Core\Pipeline\DefaultPipelineContext.cs" />
     <Compile Include="Core\Pipeline\IPipeline.cs" />
@@ -129,15 +128,6 @@
     <Compile Include="Core\Utils\TimeExtension.cs" />
     <Compile Include="Core\Env\Env.cs" />
     <Compile Include="Core\Utils\Triple.cs" />
-    <Compile Include="Meta\Entity\Codec.cs" />
-    <Compile Include="Meta\Entity\ConsumerGroup.cs" />
-    <Compile Include="Meta\Entity\DataSource.cs" />
-    <Compile Include="Meta\Entity\Endpoint.cs" />
-    <Compile Include="Meta\Entity\Partition.cs" />
-    <Compile Include="Meta\Entity\Producer.cs" />
-    <Compile Include="Meta\Entity\Property.cs" />
-    <Compile Include="Meta\Entity\Storage.cs" />
-    <Compile Include="Meta\Entity\Topic.cs" />
     <Compile Include="Net\Bootstrap.cs" />
     <Compile Include="Net\Core\Buffer\AbstractIoBuffer.cs" />
     <Compile Include="Net\Core\Buffer\Buffer.cs" />
@@ -539,8 +529,6 @@
     <Compile Include="Newtonsoft.Json\Utilities\ValidationUtils.cs" />
     <Compile Include="Newtonsoft.Json\WriteState.cs" />
     <Compile Include="Producer\Api\Producer.cs" />
-    <Compile Include="Producer\Build\BuildConstants.cs" />
-    <Compile Include="Producer\Build\ComponentsConfigurator.cs" />
     <Compile Include="Producer\Config\ProducerConfig.cs" />
     <Compile Include="Producer\DefaultProducer.cs" />
     <Compile Include="Producer\Monitor\DefaultSendMessageAcceptanceMonitor.cs" />
@@ -585,6 +573,121 @@
     <Compile Include="Transport\LengthFieldPrepender.cs" />
     <Compile Include="Transport\Magic.cs" />
     <Compile Include="Transport\MagicNumberPrepender.cs" />
+    <Compile Include="Transport\Command\PullMessageCommand.cs" />
+    <Compile Include="Transport\Command\PullMessageResultCommand.cs" />
+    <Compile Include="Core\Message\TppConsumerMessageBatch.cs" />
+    <Compile Include="Consumer\Engine\ConsumerContext.cs" />
+    <Compile Include="Consumer\ConsumerType.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\BaseConsumerBootstrap.cs" />
+    <Compile Include="Transport\ITransferCallback.cs" />
+    <Compile Include="Consumer\Engine\ISubscribeHandle.cs" />
+    <Compile Include="Core\Message\IConsumerMessage.cs" />
+    <Compile Include="Consumer\Api\IMessageListener.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\IConsumerBootstrap.cs" />
+    <Compile Include="Consumer\Engine\Notifier\IConsumerNotifier.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\BrokerConsumerBootstrap.cs" />
+    <Compile Include="Consumer\Engine\CompositeSubscribeHandle.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\Strategy\IBrokerConsumptionStrategyRegistry.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\Strategy\IBrokerConsumptionStrategy.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\Strategy\DefaultBrokerConsumptionRegistry.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\Strategy\BrokerLongPollingConsumptionStrategy.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\Strategy\LongPollingConsumerTask.cs" />
+    <Compile Include="Consumer\Engine\Lease\ConsumerLeaseManager.cs" />
+    <Compile Include="Consumer\Engine\Config\ConsumerConfig.cs" />
+    <Compile Include="Consumer\Engine\Monitor\IPullMessageResultMonitor.cs" />
+    <Compile Include="Consumer\Engine\Notifier\DefaultConsumerNotifier.cs" />
+    <Compile Include="Core\Message\Payload\AvroPayloadCodec.cs" />
+    <Compile Include="Avro\CodeGen\AvroRuntimeException.cs" />
+    <Compile Include="Avro\CodeGen\CodeGen.cs" />
+    <Compile Include="Avro\CodeGen\CodeGenException.cs" />
+    <Compile Include="Avro\CodeGen\CodeGenUtil.cs" />
+    <Compile Include="Avro\File\Codec.cs" />
+    <Compile Include="Avro\File\DataBlock.cs" />
+    <Compile Include="Avro\File\DataFileConstants.cs" />
+    <Compile Include="Avro\File\DataFileReader.cs" />
+    <Compile Include="Avro\File\DataFileWriter.cs" />
+    <Compile Include="Avro\File\DeflateCodec.cs" />
+    <Compile Include="Avro\File\Header.cs" />
+    <Compile Include="Avro\File\IFileReader.cs" />
+    <Compile Include="Avro\File\IFileWriter.cs" />
+    <Compile Include="Avro\File\NullCodec.cs" />
+    <Compile Include="Avro\Generic\DatumReader.cs" />
+    <Compile Include="Avro\Generic\DatumWriter.cs" />
+    <Compile Include="Avro\Generic\GenericDatumReader.cs" />
+    <Compile Include="Avro\Generic\GenericDatumWriter.cs" />
+    <Compile Include="Avro\Generic\GenericEnum.cs" />
+    <Compile Include="Avro\Generic\GenericFixed.cs" />
+    <Compile Include="Avro\Generic\GenericReader.cs" />
+    <Compile Include="Avro\Generic\GenericRecord.cs" />
+    <Compile Include="Avro\Generic\GenericWriter.cs" />
+    <Compile Include="Avro\Generic\PreresolvingDatumReader.cs" />
+    <Compile Include="Avro\Generic\PreresolvingDatumWriter.cs" />
+    <Compile Include="Avro\IO\BinaryDecoder.cs" />
+    <Compile Include="Avro\IO\BinaryEncoder.cs" />
+    <Compile Include="Avro\IO\ByteBufferInputStream.cs" />
+    <Compile Include="Avro\IO\ByteBufferOutputStream.cs" />
+    <Compile Include="Avro\IO\Decoder.cs" />
+    <Compile Include="Avro\IO\Encoder.cs" />
+    <Compile Include="Avro\IO\ICallback.cs" />
+    <Compile Include="Avro\IO\InputStream.cs" />
+    <Compile Include="Avro\IO\OutputStream.cs" />
+    <Compile Include="Avro\IO\Resolver.cs" />
+    <Compile Include="Avro\Properties\Settings.Designer.cs" />
+    <Compile Include="Avro\Protocol\Message.cs" />
+    <Compile Include="Avro\Protocol\Protocol.cs" />
+    <Compile Include="Avro\Protocol\ProtocolParseException.cs" />
+    <Compile Include="Avro\Schema\ArraySchema.cs" />
+    <Compile Include="Avro\Schema\AvroException.cs" />
+    <Compile Include="Avro\Schema\AvroTypeException.cs" />
+    <Compile Include="Avro\Schema\EnumSchema.cs" />
+    <Compile Include="Avro\Schema\Field.cs" />
+    <Compile Include="Avro\Schema\FixedSchema.cs" />
+    <Compile Include="Avro\Schema\JsonHelper.cs" />
+    <Compile Include="Avro\Schema\MapSchema.cs" />
+    <Compile Include="Avro\Schema\NamedSchema.cs" />
+    <Compile Include="Avro\Schema\PrimitiveSchema.cs" />
+    <Compile Include="Avro\Schema\Property.cs" />
+    <Compile Include="Avro\Schema\RecordSchema.cs" />
+    <Compile Include="Avro\Schema\Schema.cs" />
+    <Compile Include="Avro\Schema\SchemaName.cs" />
+    <Compile Include="Avro\Schema\SchemaNormalization.cs" />
+    <Compile Include="Avro\Schema\SchemaParseException.cs" />
+    <Compile Include="Avro\Schema\UnionSchema.cs" />
+    <Compile Include="Avro\Schema\UnnamedSchema.cs" />
+    <Compile Include="Avro\Specific\ObjectCreator.cs" />
+    <Compile Include="Avro\Specific\SpecificDatumReader.cs" />
+    <Compile Include="Avro\Specific\SpecificDatumWriter.cs" />
+    <Compile Include="Avro\Specific\SpecificException.cs" />
+    <Compile Include="Avro\Specific\SpecificFixed.cs" />
+    <Compile Include="Avro\Specific\SpecificProtocol.cs" />
+    <Compile Include="Avro\Specific\SpecificReader.cs" />
+    <Compile Include="Avro\Specific\SpecificRecord.cs" />
+    <Compile Include="Avro\Specific\SpecificWriter.cs" />
+    <Compile Include="Core\Message\MessagePropertyNames.cs" />
+    <Compile Include="Core\Env\Hermes.cs" />
+    <Compile Include="Core\MetaService\IMetaService.cs" />
+    <Compile Include="Core\MetaService\Internal\DefaultMetaService.cs" />
+    <Compile Include="Core\MetaService\Internal\IMetaManager.cs" />
+    <Compile Include="Core\MetaService\Internal\IMetaProxy.cs" />
+    <Compile Include="MetaEntity\Entity\Codec.cs" />
+    <Compile Include="MetaEntity\Entity\ConsumerGroup.cs" />
+    <Compile Include="MetaEntity\Entity\DataSource.cs" />
+    <Compile Include="MetaEntity\Entity\Endpoint.cs" />
+    <Compile Include="MetaEntity\Entity\Partition.cs" />
+    <Compile Include="MetaEntity\Entity\Producer.cs" />
+    <Compile Include="MetaEntity\Entity\Property.cs" />
+    <Compile Include="MetaEntity\Entity\Storage.cs" />
+    <Compile Include="MetaEntity\Entity\Topic.cs" />
+    <Compile Include="MetaEntity\Entity\Meta.cs" />
+    <Compile Include="MetaEntity\Entity\App.cs" />
+    <Compile Include="MetaEntity\Entity\Server.cs" />
+    <Compile Include="MetaEntity\Entity\BaseEntity.cs" />
+    <Compile Include="MetaEntity\Entity\IVisitor.cs" />
+    <Compile Include="Core\Lease\ILeaseManager.cs" />
+    <Compile Include="Core\Lease\ISessionIdAware.cs" />
+    <Compile Include="Core\Message\Retry\RetryPolicyFactory.cs" />
+    <Compile Include="Core\Message\Retry\FrequencySpecifiedRetryPolicy.cs" />
+    <Compile Include="Producer\Build\BuildConstants.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -600,11 +703,27 @@
     <Content Include="Newtonsoft.Json\Newtonsoft.Json.WinRT.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="Consumer\" />
+    <Folder Include="Consumer\Engine\" />
+    <Folder Include="Consumer\Engine\Bootstrap\" />
+    <Folder Include="Consumer\Api\" />
+    <Folder Include="Consumer\Engine\Notifier\" />
+    <Folder Include="Consumer\Engine\Bootstrap\Strategy\" />
+    <Folder Include="Consumer\Engine\Lease\" />
+    <Folder Include="Consumer\Engine\Config\" />
+    <Folder Include="Consumer\Engine\Monitor\" />
+    <Folder Include="Core\Env\" />
+    <Folder Include="Avro\" />
+    <Folder Include="Core\MetaService\Internal\" />
+    <Folder Include="MetaEntity\Transform\" />
+    <Folder Include="Producer\Build\" />
+  </ItemGroup>
 </Project>
