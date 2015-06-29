@@ -6,20 +6,18 @@ namespace Arch.CMessaging.Client.Core.Message.Retry
 	{
 		public static IRetryPolicy create (String policyValue)
 		{
-			return null;
-			/*
 			if (policyValue != null) {
-				if (policyValue.indexOf (":") != -1) {
-					String[] splits = policyValue.split (":");
-					if (splits != null && splits.length == 2) {
+				if (policyValue.IndexOf (":") != -1) {
+					String[] splits = policyValue.Split (new string[]{ ":" }, StringSplitOptions.None);
+					if (splits != null && splits.Length == 2) {
 						String type = splits [0];
 						String value = splits [1];
 
-						if (type != null && !"".equals (type.trim ()) && value != null && !"".equals (value.trim ())) {
+						if (type != null && !"".Equals (type.Trim ()) && value != null && !"".Equals (value.Trim ())) {
 
-							switch (type.trim ()) {
+							switch (type.Trim ()) {
 							case "1":
-								return new FrequencySpecifiedRetryPolicy (value.trim ());
+								return new FrequencySpecifiedRetryPolicy (value.Trim ());
 
 							default:
 								break;
@@ -29,7 +27,6 @@ namespace Arch.CMessaging.Client.Core.Message.Retry
 				}
 			}
 			throw new Exception (string.Format ("Unknown retry policy for value {0}", policyValue));
-			*/
 		}
 	}
 }

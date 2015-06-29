@@ -213,6 +213,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
 				} catch (Exception e) {
 					log.Warn ("Failed to refresh meta", e);
 				} finally {
+					metaService.timer.Dispose ();
 					metaService.timer = new Timer (metaService.metaRefresher.Refresh, null, interval, interval);
 				}
 			}
