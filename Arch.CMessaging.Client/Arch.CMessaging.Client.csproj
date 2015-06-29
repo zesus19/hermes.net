@@ -529,6 +529,7 @@
     <Compile Include="Newtonsoft.Json\Utilities\ValidationUtils.cs" />
     <Compile Include="Newtonsoft.Json\WriteState.cs" />
     <Compile Include="Producer\Api\Producer.cs" />
+    <Compile Include="Producer\Build\ComponentsConfigurator.cs" />
     <Compile Include="Producer\Config\ProducerConfig.cs" />
     <Compile Include="Producer\DefaultProducer.cs" />
     <Compile Include="Producer\Monitor\DefaultSendMessageAcceptanceMonitor.cs" />
@@ -689,7 +690,9 @@
     <Compile Include="Core\Message\Retry\FrequencySpecifiedRetryPolicy.cs" />
     <Compile Include="Producer\Build\BuildConstants.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="MetaEntity\Transform\" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="Newtonsoft.Json\Newtonsoft.Json.ruleset" />
   </ItemGroup>
@@ -710,20 +713,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="Consumer\" />
-    <Folder Include="Consumer\Engine\" />
-    <Folder Include="Consumer\Engine\Bootstrap\" />
-    <Folder Include="Consumer\Api\" />
-    <Folder Include="Consumer\Engine\Notifier\" />
-    <Folder Include="Consumer\Engine\Bootstrap\Strategy\" />
-    <Folder Include="Consumer\Engine\Lease\" />
-    <Folder Include="Consumer\Engine\Config\" />
-    <Folder Include="Consumer\Engine\Monitor\" />
-    <Folder Include="Core\Env\" />
-    <Folder Include="Avro\" />
-    <Folder Include="Core\MetaService\Internal\" />
-    <Folder Include="MetaEntity\Transform\" />
-    <Folder Include="Producer\Build\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

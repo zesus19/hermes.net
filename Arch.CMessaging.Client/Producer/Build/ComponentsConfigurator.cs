@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using Arch.CMessaging.Client.Core.Env;
 using Arch.CMessaging.Client.Core.Message.Partition;
-using Arch.CMessaging.Client.Core.Meta;
+using Arch.CMessaging.Client.MetaEntity.Entity;
 using Arch.CMessaging.Client.Core.Pipeline;
 using Arch.CMessaging.Client.Core.Service;
 using Arch.CMessaging.Client.Core.Utils;
-using Arch.CMessaging.Client.Meta.Entity;
 using Arch.CMessaging.Client.Producer.Config;
 using Arch.CMessaging.Client.Producer.Monitor;
 using Arch.CMessaging.Client.Producer.Pipeline;
@@ -16,6 +15,7 @@ using Arch.CMessaging.Client.Producer.Sender;
 using Arch.CMessaging.Client.Transport.Command;
 using Arch.CMessaging.Client.Transport.Command.Processor;
 using Arch.CMessaging.Client.Transport.EndPoint;
+using Arch.CMessaging.Client.Core.MetaService.Internal;
 
 namespace Arch.CMessaging.Client.Producer.Build
 {
