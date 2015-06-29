@@ -8,14 +8,18 @@ using Arch.CMessaging.Client.Core.Future;
 using Arch.CMessaging.Client.Core.Pipeline;
 using Arch.CMessaging.Client.Core.Service;
 using Arch.CMessaging.Client.Core.Message;
+using Arch.CMessaging.Client.Core.Ioc;
+using Arch.CMessaging.Client.Producer.Build;
 
 namespace Arch.CMessaging.Client.Producer
 {
+    [Named]
     public class DefaultProducer : Producer
     {
-        //ioc inject
+        [Inject(BuildConstants.PRODUCER)]
         private IPipeline<IFuture<SendResult>> pipeline;
-        //ioc inject
+        
+        [Inject]
         private ISystemClockService systemClockService;
 
         public override IMessageHolder Message(string topic, string partitionKey, object body)

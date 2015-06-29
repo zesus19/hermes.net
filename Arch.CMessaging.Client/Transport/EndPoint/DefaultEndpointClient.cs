@@ -9,33 +9,49 @@ using Freeway.Logging;
 using Arch.CMessaging.Client.Core.Config;
 using Arch.CMessaging.Client.Transport.Command.Processor;
 using Arch.CMessaging.Client.Core.Service;
+using Arch.CMessaging.Client.Net.Core.Future;
+using Arch.CMessaging.Client.Core.Utils;
+using Arch.CMessaging.Client.Core.Collections;
+using Arch.CMessaging.Client.Net.Core.Session;
+using Arch.CMessaging.Client.Net;
+using Arch.CMessaging.Client.Net.Filter.Codec;
+using System.Net;
+using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Transport.EndPoint
 {
     public class DefaultEndpointClient : IEndpointClient
     {
-        //ioc inject
+        [Inject]
         private CoreConfig config;
-        //ioc inject
+        [Inject]
         private CommandProcessorManager commandProcessorManager;
-        //ioc inject
+        [Inject]
         private ISystemClockService systemClockService;
         private object syncRoot = new object();
         private ConcurrentDictionary<Endpoint, EndpointSession> sessions;
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultEndpointClient));
         #region IEndpointClient Members
 
+        public CoreConfig Config { get { return config; } }
+        public ISystemClockService ClockService { get { return systemClockService; } }
+        public ILog Log { get { return log; } }
+
         public void WriteCommand(Endpoint endpoint, ICommand command)
         {
-            WriteCommand(endpoint, command, config.EndpointSessionDefaultWrtieTimeout);
+            WriteCommand(endpoint, command, config.EndpointSessionDefaultWrtieTimeoutInMills);
         }
 
         public void WriteCommand(Endpoint endpoint, ICommand command, int timeoutInMills)
         {
-           
+            GetSession(endpoint).Write(command, timeoutInMills);
         }
 
         #endregion
+        public void Initialize()
+        {
+            
+        }
 
         private EndpointSession GetSession(Endpoint endpoint)
         {
@@ -62,12 +78,77 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 
         private EndpointSession CreateSession(Endpoint endpoint)
         {
-            return null;
+            var session = new EndpointSession(this);
+            Connect(endpoint, session);
+            return session;
         }
 
         private void Connect(Endpoint endpoint, EndpointSession endpointSession)
         {
- 
+            var future = CreateBootstrap(endpoint, endpointSession)
+                .Connect(new IPEndPoint(IPAddress.Parse(endpoint.Host), endpoint.Port));
+            future.Complete += (s, e) =>
+                {
+                    var connectFuture = e.Future as DefaultConnectFuture;
+                    if (!endpointSession.IsClosed)
+                    {
+                        if (!connectFuture.Connected)
+                        {
+                            endpointSession.SetSessionFuture(null);
+                            System.Threading.Thread.Sleep(config.EndpointSessionAutoReconnectDelay * 1000);
+                            Connect(endpoint, endpointSession);
+                        }
+                        else endpointSession.SetSessionFuture(connectFuture);
+                    }
+                    else
+                    {
+                        if (connectFuture.Connected) future.Session.Close(true);
+                    }
+                };
+        }
+
+        private void RemoveSession(Endpoint endpoint, EndpointSession endpointSession)
+        {
+            EndpointSession removedSession = null;
+            if (Endpoint.BROKER.Equals(endpoint.Type) && sessions.ContainsKey(endpoint))
+            {
+                lock (syncRoot)
+                {
+                    if (sessions.ContainsKey(endpoint))
+                    {
+                        EndpointSession tmp = sessions[endpoint];
+                        if (tmp == endpointSession)
+                        {
+                            if (tmp.IsClosed) sessions.TryRemove(endpoint, out removedSession);
+                            else if (!tmp.IsFlushing && !tmp.HasUnflushOps) 
+                                sessions.TryRemove(endpoint, out removedSession);
+                        }
+                    }
+                }
+            }
+            if (removedSession != null)
+            {
+                log.Info(string.Format("Closing idle connection to broker({0}:{1})", endpoint.Host, endpoint.Port));
+                removedSession.Close();
+            }
+        }
+
+        private Bootstrap CreateBootstrap(Endpoint endpoint, EndpointSession endpointSession)
+        {
+            return new Bootstrap()
+                    .Option(SessionOption.SO_KEEPALIVE, true)
+                    .Option(SessionOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                    .Option(SessionOption.TCP_NODELAY, true)
+                    .Option(SessionOption.SO_SNDBUF, config.SendBufferSize)
+                    .Option(SessionOption.SO_RCVBUF, config.ReceiveBufferSize)
+                    .Handler(chain =>
+                    {
+                        chain.AddLast(
+                            new MagicNumberPrepender(),
+                            new LengthFieldPrepender(4),
+                            new ProtocolCodecFilter(new CommandCodecFactory()));
+                    })
+                    .Handler(new DefaultClientChannelInboundHandler(commandProcessorManager, endpoint, endpointSession, this, config));
         }
     }
 }

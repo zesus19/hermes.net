@@ -6,16 +6,16 @@ using Arch.CMessaging.Client.Core.Pipeline.spi;
 
 namespace Arch.CMessaging.Client.Core.Pipeline
 {
-    public class DefaultPipelineContext<T> : IPipelineContext
+    public class DefaultPipelineContext : IPipelineContext
     {
-        private IPipelineSink<T> sink;
+        private IPipelineSink sink;
         private int index;
         private IList<IValve> valves;
         private object source;
         private Dictionary<string, object> attrs;
-        private T result;
+        private object result;
 
-        public DefaultPipelineContext(IList<IValve> valves, IPipelineSink<T> sink)
+        public DefaultPipelineContext(IList<IValve> valves, IPipelineSink sink)
         {
             this.valves = valves;
             this.sink = sink;
@@ -57,6 +57,6 @@ namespace Arch.CMessaging.Client.Core.Pipeline
 
         public V Get<V>(string name) { return (V)((IPipelineContext)(this)).Get(name); }
 
-        public T GetResult() { return result; }
+        public T GetResult<T>() { return (T)result; }
     }
 }

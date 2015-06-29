@@ -9,27 +9,28 @@ using Arch.CMessaging.Client.Transport.EndPoint;
 using Arch.CMessaging.Client.Core.Result;
 using Arch.CMessaging.Client.Core.Future;
 using Arch.CMessaging.Client.Core.Message;
+using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Producer.Sender
 {
     public abstract class AbstractMessageSender : IMessageSender
     {
-        //ioc inject
+        [Inject]
         private IEndpointManager endpointManager;
 
-        //ioc inject
+        [Inject]
         private IEndpointClient endpointClient;
 
-        //ioc inject
+        [Inject]
         private IPartitioningStrategy partitioningAlgo;
 
-        //ioc inject
+        [Inject]
         private IMetaService metaService;
 
-        //ioc inject
+        [Inject]
         private ISendMessageAcceptanceMonitor messageAcceptanceMonitor;
 
-        //ioc inject
+        [Inject]
         private ISendMessageResultMonitor messageResultMonitor;
 
         public IEndpointManager EndpointManager { get { return endpointManager; } }

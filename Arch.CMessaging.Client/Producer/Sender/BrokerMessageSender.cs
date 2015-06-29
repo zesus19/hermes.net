@@ -15,6 +15,7 @@ using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Core.Collections;
 using Arch.CMessaging.Client.Transport.Command;
 using System.Diagnostics;
+using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Producer.Sender
 {
@@ -23,13 +24,13 @@ namespace Arch.CMessaging.Client.Producer.Sender
         private Timer endpointSenderScheduler;
         private static readonly ILog log = LogManager.GetLogger(typeof(BrokerMessageSender));
 
-        //ioc inject
+        [Inject]
         private ProducerConfig config;
 
-        //ioc inject
+        [Inject]
         private IClientEnvironment clientEnv;
 
-        //ioc inject
+        [Inject]
         private ISystemClockService systemClockService;
 
         private ConcurrentDictionary<Pair<string, int>, TaskQueue> taskQueues;

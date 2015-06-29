@@ -20,43 +20,12 @@ using Arch.CMessaging.Client.Core.Future;
 using Arch.CMessaging.Client.Core.Result;
 namespace Producer
 {
-    public class A
-    {
-        private int a;
-        public A(int val)
-        {
-            this.a = val;
-        }
-
-        public void Do()
-        {
-            var b = new B(this);
-            b.Do();
-        }
-
-        private class B
-        {
-            private A a;
-            public B(A a) { this.a = a; }
-            public void Do()
-            {
-                var s = string.Empty;
-            }
-        }
-    }
-
-
     class Program
     {
         static void Main(string[] args)
         {
             try
             {
-                var a = new A(1);
-                a.Do();
-
-
-
                 var future = new Bootstrap()
                     .Option(SessionOption.SO_KEEPALIVE, true)
                     .Option(SessionOption.CONNECT_TIMEOUT_MILLIS, 5000)
@@ -84,11 +53,11 @@ namespace Producer
                 var command = new SendMessageCommand("cmessage_fws", 0);
                 command.AddMessage(message, new SettableFuture<SendResult>());
 
-                var writeFuture = session.Write(command);
-                writeFuture.Await();
+                var writeFuture1 = session.Write(command);
+                writeFuture1.Await();
                 System.Threading.Thread.Sleep(1000);
-                writeFuture = session.Write(command);
-                writeFuture.Await();
+                var writeFuture2 = session.Write(command);
+                writeFuture2.Complete += writeFuture2_Complete;
                 Console.ReadLine();
 
             }
@@ -97,6 +66,11 @@ namespace Producer
                 Console.WriteLine(ex.Message);
                 Console.ReadLine();
             }
+        }
+
+        static void writeFuture2_Complete(object sender, Arch.CMessaging.Client.Net.Core.Future.IoFutureEventArgs e)
+        {
+            
         }
     }
 }

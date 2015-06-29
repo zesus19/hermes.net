@@ -5,8 +5,8 @@ using System.Text;
 
 namespace Arch.CMessaging.Client.Core.Pipeline
 {
-    public interface IPipelineSink<T>
+    public interface IPipelineSink
     {
-        T Handle(IPipelineContext context, object payload);
+        object Handle(IPipelineContext context, object payload);
     }
 }

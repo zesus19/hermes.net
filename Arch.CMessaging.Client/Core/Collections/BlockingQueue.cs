@@ -97,6 +97,13 @@ namespace Arch.CMessaging.Client.Core.Collections
                 return idx;
             }
         }
-    }
 
+        public TItem Peek()
+        {
+            lock (syncRoot)
+            {
+                return queue.Count == 0 ? default(TItem) : queue.Peek();
+            }
+        }
+    }
 }

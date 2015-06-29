@@ -13,29 +13,120 @@ using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Net;
 using Arch.CMessaging.Client.Net.Core.Session;
 using Arch.CMessaging.Client.Transport.EndPoint;
+using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Consumer
 {
     class Program
     {
+        static VenusContainer c = new VenusContainer();
         static void Main(string[] args)
         {
-            var future = new Bootstrap()
-                .Option(SessionOption.SO_KEEPALIVE, true)
-                .Option(SessionOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .Option(SessionOption.TCP_NODELAY, true)
-                .Option(SessionOption.SO_SNDBUF, 4096)
-                .Option(SessionOption.SO_RCVBUF, 4096)
-                .Handler(chain =>
-                {
-                    chain.AddLast(
-                        new ProtocolCodecFilter(new CommandCodecFactory()));
-                })
-                .Handler(new DefaultClientChannelInboundHandler(null, null, null, null, null))
-                .Connect(args[0], 4376);
-            future.Await();
-            var session = future.Session;
-            Console.ReadLine();
+        //    c.Define<A1>();
+        //    c.Define<B1>();
+        //    var a = c.Lookup<A1>();
+        //    var b = c.Lookup<A1>();
+
+
+            //var c = new VenusContainer();
+            //c.Define<A>();
+            //c.Define<B>();
+            //c.Define<C>();
+            //c.Define<D>();
+            //var b = c.Lookup<B>();
+
+            //b.Do();
+            //string s = string.Empty;
+
+            var c = new VenusContainer();
+            c.Define(typeof(S<BB<int>>), typeof(FF<BB2<int>>));
+            var map = c.LookupMap<S<BB<int>>>();
+            var d = string.Empty;
         }
+
+        #region example 1
+        [Named]
+        public abstract class A
+        {
+            [Inject]
+            private D d;
+
+            public void Do()
+            {
+                string s = string.Empty;
+            }
+            
+        }
+
+        [Named]
+        public class B : A
+        {
+            [Inject]
+            private C c;
+
+            public void Do()
+            {
+                string s = string.Empty;
+                base.Do();
+            }
+        }
+
+        [Named]
+        public class C
+        {
+ 
+        }
+
+        [Named]
+        public class D
+        {
+
+        }
+        #endregion
+
+        #region example2
+        [Named]
+        public class A1 : IInitializable
+        {
+            private IList<B1> list = new List<B1>();
+            #region IInitializable Members
+
+            public void Initialize()
+            {
+                try
+                {
+                    list.Add(c.Lookup<B1>());
+                }
+                catch (Exception ex)
+                {
+                    string s = string.Empty;
+                }
+            }
+
+            #endregion
+        }
+        [Named]
+        public class B1
+        { 
+
+        }
+        #endregion
+
+        #region example3
+        public interface S<in T>
+        {
+            void Do();
+        }
+
+        public class FF<T> : S<T>
+        {
+            public void Do() { }
+        }
+
+        public interface BB<in T> { }
+
+        public class BB2<T> : BB<T> { }
+
+        #endregion
     }
 }

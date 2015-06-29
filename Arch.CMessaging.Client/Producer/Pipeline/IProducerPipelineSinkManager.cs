@@ -10,6 +10,6 @@ namespace Arch.CMessaging.Client.Producer.Pipeline
 {
     public interface IProducerPipelineSinkManager
     {
-        IPipelineSink<IFuture<SendResult>> GetSink(string topic);
+        IPipelineSink GetSink(string topic);
     }
 }

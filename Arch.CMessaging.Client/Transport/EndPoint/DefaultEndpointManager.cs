@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Arch.CMessaging.Client.Core.Ioc;
 using Arch.CMessaging.Client.Core.Meta;
 using Arch.CMessaging.Client.Meta.Entity;
 
@@ -9,7 +10,7 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 {
     public class DefaultEndpointManager : IEndpointManager
     {
-        //ioc inject
+        [Inject]
         private IMetaService metaService;
 
         #region IEndpointManager Members
