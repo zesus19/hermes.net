@@ -8,6 +8,7 @@ using System.Configuration;
 using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Test
 {
@@ -16,11 +17,41 @@ namespace Test
 		A,B
 	}
 
+
 	class MainClass
 	{
 
+		public Task task{ get; set;}
+		public Timer t { get; set;}
+
+		public class Task {
+
+			private MainClass mc;
+			public Task(MainClass mc) {
+				this.mc = mc;
+			}
+			public void go(object param) {
+				Console.WriteLine ("go");
+				mc.t.Dispose ();
+
+				mc.t = new Timer (mc.task.go, null, 1000, 1000);
+			}
+		}
+
+		public MainClass()
+		{
+			task = new Task (this);
+			t = new Timer (task.go, null, 1000, 1000);
+		}
+
 
 		public static void Main (string[] args)
+		{
+			new MainClass ();
+			Console.ReadLine ();
+		}
+
+		public static void test2()
 		{
 			NameValueCollection config = ConfigurationManager.GetSection ("hermes/global") as NameValueCollection;
 			Console.WriteLine(config["Hellox"] == null);

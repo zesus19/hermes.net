@@ -7,24 +7,25 @@ using Arch.CMessaging.Client.Core.Lease;
 using Arch.CMessaging.Client.Core.Message.Retry;
 using Arch.CMessaging.Client.Core.Bo;
 using System.Threading;
+using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Internal
 {
-	public class DefaultMetaService : IMetaService
+	public class DefaultMetaService : IMetaService, IInitializable
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(DefaultMetaService));
 
-		//@Inject
+		[Inject]
 		private IMetaManager m_manager;
 
-		//@Inject
+		[Inject]
 		private CoreConfig m_config;
-
-		//private ScheduledExecutorService executor;
 
 		private volatile Meta MetaCache = null;
 
-		private Timer timer;
+		public Timer timer { get; set; }
+
+		public MetaRefresher metaRefresher { get; set; }
 
 		
 		public String FindEndpointTypeByTopic (String topicName)
@@ -193,30 +194,38 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
 			return m_manager.getMetaProxy ().tryAcquireBrokerLease (topic, partition, sessionId, brokerPort);
 		}
 
-		
+		public class MetaRefresher
+		{
+
+			private DefaultMetaService metaService;
+			private int interval;
+
+			public MetaRefresher (DefaultMetaService metaService, int interval)
+			{
+				this.metaService = metaService;
+				this.interval = interval;
+			}
+
+			public void Refresh (object param)
+			{
+				try {
+					metaService.Refresh ();
+				} catch (Exception e) {
+					log.Warn ("Failed to refresh meta", e);
+				} finally {
+					metaService.timer = new Timer (metaService.metaRefresher.Refresh, null, interval, interval);
+				}
+			}
+
+		}
+
 		public void Initialize ()
 		{
-			/*
-			RefreshMeta(m_manager.loadMeta());
+			RefreshMeta (m_manager.loadMeta ());
 
-			timer = new Timer ();
-
-			executor = Executors.newSingleThreadScheduledExecutor(HermesThreadFactory.create("RefreshMeta", true));
-			executor
-				.scheduleWithFixedDelay(new Runnable() {
-
-					
-					public void run() {
-						try {
-							refresh();
-						} catch (Exception e) {
-							log.warn("Failed to refresh meta", e);
-						}
-					}
-
-				}, m_config.getMetaCacheRefreshIntervalMinutes(), m_config.getMetaCacheRefreshIntervalMinutes(),
-					TimeUnit.MINUTES);
-					*/
+			int interval = (int)m_config.MetaCacheRefreshIntervalMinutes * 60 * 1000;
+			metaRefresher = new MetaRefresher (this, interval);
+			timer = new Timer (metaRefresher.Refresh, null, interval, interval);
 		}
 
 		
