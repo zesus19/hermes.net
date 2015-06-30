@@ -64,6 +64,8 @@
     <Compile Include="Core\Config\CoreConfig.cs" />
     <Compile Include="Core\Env\DefaultClientEnvironment.cs" />
     <Compile Include="Core\Env\IClientEnvironment.cs" />
+    <Compile Include="Core\Exceptions\MessageSendException.cs" />
+    <Compile Include="Core\Future\AbstractFuture.cs" />
     <Compile Include="Core\Future\IFuture.cs" />
     <Compile Include="Core\Future\SettableFuture.cs" />
     <Compile Include="Core\Ioc\Adapters\Lifetime\AdapterLifetime.cs" />
@@ -558,7 +560,9 @@
     <Compile Include="Transport\Command\Parser\ICommandParser.cs" />
     <Compile Include="Transport\Command\Processor\CommandProcessorContext.cs" />
     <Compile Include="Transport\Command\Processor\CommandProcessorManager.cs" />
+    <Compile Include="Transport\Command\Processor\DefaultCommandProcessorRegistry.cs" />
     <Compile Include="Transport\Command\Processor\ICommandProcessor.cs" />
+    <Compile Include="Transport\Command\Processor\ICommandProcessorRegistry.cs" />
     <Compile Include="Transport\Command\Processor\SendMessageAckCommandProcessor.cs" />
     <Compile Include="Transport\Command\Processor\SendMessageResultCommandProcessor.cs" />
     <Compile Include="Transport\Command\SendMessageAckCommand.cs" />

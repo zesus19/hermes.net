@@ -2,21 +2,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Arch.CMessaging.Client.Core.Ioc;
+using Arch.CMessaging.Client.Producer.Monitor;
 
 namespace Arch.CMessaging.Client.Transport.Command.Processor
 {
     public class SendMessageResultCommandProcessor : ICommandProcessor
     {
+        [Inject]
+        private ISendMessageResultMonitor messageResultMonitor;
+
         #region ICommandProcessor Members
 
-        public List<CommandType> commandTypes()
+        public List<CommandType> CommandTypes()
         {
-            throw new NotImplementedException();
+            return new List<CommandType> { CommandType.ResultMessageSend };
         }
 
         public void Process(CommandProcessorContext ctx)
         {
-            throw new NotImplementedException();
+            var command = ctx.Command as SendMessageResultCommand;
+            messageResultMonitor.ResultReceived(command);
         }
 
         #endregion

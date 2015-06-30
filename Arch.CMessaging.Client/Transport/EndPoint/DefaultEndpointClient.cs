@@ -16,11 +16,12 @@ using Arch.CMessaging.Client.Net.Core.Session;
 using Arch.CMessaging.Client.Net;
 using Arch.CMessaging.Client.Net.Filter.Codec;
 using System.Net;
+using System.Threading;
 using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Transport.EndPoint
 {
-    public class DefaultEndpointClient : IEndpointClient
+    public class DefaultEndpointClient : IEndpointClient, IInitializable
     {
         [Inject]
         private CoreConfig config;
@@ -28,6 +29,8 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
         private CommandProcessorManager commandProcessorManager;
         [Inject]
         private ISystemClockService systemClockService;
+
+        private Timer timer;
         private object syncRoot = new object();
         private ConcurrentDictionary<Endpoint, EndpointSession> sessions;
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultEndpointClient));
@@ -50,7 +53,7 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
         #endregion
         public void Initialize()
         {
-            
+            timer = new Timer(EndpointSessionFlush, null, config.EndpointSessionWriterCheckInterval, Timeout.Infinite);
         }
 
         private EndpointSession GetSession(Endpoint endpoint)
@@ -149,6 +152,26 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
                             new ProtocolCodecFilter(new CommandCodecFactory()));
                     })
                     .Handler(new DefaultClientChannelInboundHandler(commandProcessorManager, endpoint, endpointSession, this, config));
+        }
+
+        private void EndpointSessionFlush(object state)
+        {
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+            try
+            {
+                foreach (var session in sessions.Values)
+                {
+                    if (!session.IsClosed) session.Flush();
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex);
+            }
+            finally
+            {
+                timer.Change(config.EndpointSessionWriterCheckInterval, Timeout.Infinite);
+            }
         }
     }
 }

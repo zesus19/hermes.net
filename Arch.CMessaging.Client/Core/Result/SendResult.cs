@@ -7,12 +7,8 @@ namespace Arch.CMessaging.Client.Core.Result
 {
     public class SendResult
     {
-        private bool success;
-        public SendResult(bool success)
+        public SendResult()
         {
-            this.success = success;
         }
-
-        public bool IsSuccess { get { return success; } }
     }
 }

@@ -42,6 +42,11 @@ namespace Arch.CMessaging.Client.Core.Utils
             return @default;
         }
 
+        public static IList<T> LookupList<T>()
+        {
+            return new List<T>(container.LookupList<T>());
+        }
+
         public static IDictionary<string, T> LookupMap<T>()
         {
             return container.LookupMap<T>();

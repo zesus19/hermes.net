@@ -33,7 +33,6 @@ namespace Arch.CMessaging.Client.Transport.Command
 
         public void Release()
         {
-            
         }
 
         public void Correlate(ICommand req)

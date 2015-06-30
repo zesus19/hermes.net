@@ -8,7 +8,7 @@ namespace Arch.CMessaging.Client.Producer.Monitor
 {
     public interface ISendMessageResultMonitor
     {
-        void Monitor(SendMessageCommand cmd);
-        void resultReceived(SendMessageResultCommand result);
+        void Monitor(SendMessageCommand command);
+        void ResultReceived(SendMessageResultCommand result);
     }
 }

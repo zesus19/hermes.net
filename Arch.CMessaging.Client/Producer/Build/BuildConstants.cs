@@ -4,7 +4,7 @@ namespace Arch.CMessaging.Client.Producer.Build
 {
 	public class BuildConstants
 	{
-		public const string PRODUCER = "";
+		public const string PRODUCER = "producer";
 	}
 }
 

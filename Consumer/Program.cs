@@ -28,19 +28,19 @@ namespace Consumer
         //    var b = c.Lookup<A1>();
 
 
-            //var c = new VenusContainer();
-            //c.Define<A>();
-            //c.Define<B>();
-            //c.Define<C>();
-            //c.Define<D>();
-            //var b = c.Lookup<B>();
-
-            //b.Do();
-            //string s = string.Empty;
-
             var c = new VenusContainer();
-            c.Define(typeof(S<BB<int>>), typeof(FF<BB2<int>>));
-            var map = c.LookupMap<S<BB<int>>>();
+            c.Define<A>();
+            c.Define<B>();
+            c.Define<C>();
+            c.Define<D>();
+            var b = c.Lookup<B>();
+
+            b.Do();
+            string s = string.Empty;
+
+            //var c = new VenusContainer();
+            //c.Define(typeof(S<BB<int>>), typeof(FF<BB2<int>>));
+            //var map = c.LookupMap<S<BB<int>>>();
             var d = string.Empty;
         }
 

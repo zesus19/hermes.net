@@ -10,16 +10,17 @@ using Arch.CMessaging.Client.Net.Core.Buffer;
 using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Core.Future;
 using Arch.CMessaging.Client.Core.Result;
+using Arch.CMessaging.Client.Core.Exceptions;
 
 namespace Arch.CMessaging.Client.Transport.Command
 {
     public class SendMessageCommand : AbstractCommand
     {
-        private int msgCounter;
         private const long serialVersionUID = 8443575812437722822L;
         private ThreadSafe.Long expireTime;
+        private ThreadSafe.Integer msgCounter;
         private ConcurrentDictionary<int, IList<ProducerMessage>> messages;
-        private Dictionary<int, IFuture<SendResult>> futures;
+        private Dictionary<int, SettableFuture<SendResult>> futures;
 
         public SendMessageCommand() : this(null, 0) { }
 
@@ -29,8 +30,9 @@ namespace Arch.CMessaging.Client.Transport.Command
             this.Topic = topic;
             this.Partition = partition;
             this.expireTime = new ThreadSafe.Long(0);
+            this.msgCounter = new ThreadSafe.Integer(0);
             this.messages = new ConcurrentDictionary<int, IList<ProducerMessage>>();
-            this.futures = new Dictionary<int, IFuture<SendResult>>();
+            this.futures = new Dictionary<int, SettableFuture<SendResult>>();
         }
 
         public string Topic { get; private set; }
@@ -40,11 +42,13 @@ namespace Arch.CMessaging.Client.Transport.Command
             get { return expireTime.ReadFullFence(); }
             set { expireTime.WriteFullFence(value); }
         }
+        public int MessageCount { get { return msgCounter.ReadFullFence(); } }
+        public IEnumerable<IList<ProducerMessage>> ProducerMessages { get { return messages.Values; } }
 
-        public void AddMessage(ProducerMessage message, IFuture<SendResult> future)
+        public void AddMessage(ProducerMessage message, SettableFuture<SendResult> future)
         {
             Validate(message);
-            message.SequenceNo = Interlocked.Increment(ref msgCounter);
+            message.SequenceNo = msgCounter.AtomicIncrementAndGet();
             if (message.IsPriority)
             {
                 messages.TryAdd(0, new List<ProducerMessage>());
@@ -59,15 +63,35 @@ namespace Arch.CMessaging.Client.Transport.Command
             futures[message.SequenceNo] = future;
         }
 
+        public void OnResultReceived(SendMessageResultCommand result)
+        {
+            foreach (var entry in futures)
+            {
+                if (result.IsSuccess(entry.Key)) entry.Value.Set(new SendResult());
+                else entry.Value.SetException(new MessageSendException("Send failed"));
+            }
+        }
+
+        public void OnTimeout()
+        {
+            Exception ex = new TimeoutException("Send timeout");
+            foreach (var entry in futures) entry.Value.SetException(ex);
+        }
+
         protected override void Parse0(IoBuffer buf)
         {
-            throw new NotImplementedException();
+            Buf = buf;
+            var codec = new HermesPrimitiveCodec(buf);
+            msgCounter.WriteFullFence(codec.ReadInt());
+            Topic = codec.ReadString();
+            Partition = codec.ReadInt();
+            
         }
 
         protected override void ToBytes0(IoBuffer buf)
         {
             var codec = new HermesPrimitiveCodec(buf);
-            codec.WriteInt(Thread.VolatileRead(ref msgCounter));
+            codec.WriteInt(msgCounter.ReadFullFence());
             codec.WriteString(Topic);
             codec.WriteInt(Partition);
             WriteDatas(buf, codec, messages);
@@ -108,6 +132,16 @@ namespace Arch.CMessaging.Client.Transport.Command
             buf.Position = indexAfterPayload;
         }
 
+        private void ReadDatas(ByteBuffer buf, HermesPrimitiveCodec codec, string topic)
+        {
+            var size = codec.ReadInt();
+            for (int i = 0; i < size; i++)
+            {
+                var priority = codec.ReadInt();
+                //todo
+            }
+        }
+
         private void Validate(ProducerMessage message)
         {
             if (string.IsNullOrEmpty(Topic))
@@ -122,6 +156,11 @@ namespace Arch.CMessaging.Client.Transport.Command
                 throw new ArgumentException(string.Format("Illegal message[topic={0}, partition={1}] try to add to SendMessageCommand[topic={0}, partition={1}]",
                     message.Topic, message.Partition, Topic, Partition));
             }
+        }
+
+        private class MessageBatchWithRawData
+        {
+ 
         }
     }
 }
