@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Arch.CMessaging.Client.Newtonsoft.Json;
+using Arch.CMessaging.Client.MetaEntity.Transform;
 
 namespace Arch.CMessaging.Client.MetaEntity.Entity
 {
@@ -13,7 +15,9 @@ namespace Arch.CMessaging.Client.MetaEntity.Entity
         public string StorageType { get; set; }
         public string Description { get; set; }
         public string Status { get; set; }
+		[JsonConverter(typeof(MillSecondEpochConverter))]
         public DateTime CreateTime { get; set; }
+		[JsonConverter(typeof(MillSecondEpochConverter))]
         public DateTime LastModifiedTime { get; set; }
         public long SchemaID { get; set; }
         public string ConsumerRetryPolicy { get; set; }

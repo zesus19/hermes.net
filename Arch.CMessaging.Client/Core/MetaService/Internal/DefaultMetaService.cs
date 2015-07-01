@@ -194,32 +194,6 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
 			return m_manager.getMetaProxy ().tryAcquireBrokerLease (topic, partition, sessionId, brokerPort);
 		}
 
-		public class MetaRefresher
-		{
-
-			private DefaultMetaService metaService;
-			private int interval;
-
-			public MetaRefresher (DefaultMetaService metaService, int interval)
-			{
-				this.metaService = metaService;
-				this.interval = interval;
-			}
-
-			public void Refresh (object param)
-			{
-				try {
-					metaService.Refresh ();
-				} catch (Exception e) {
-					log.Warn ("Failed to refresh meta", e);
-				} finally {
-					metaService.timer.Dispose ();
-					metaService.timer = new Timer (metaService.metaRefresher.Refresh, null, interval, interval);
-				}
-			}
-
-		}
-
 		public void Initialize ()
 		{
 			RefreshMeta (m_manager.loadMeta ());
@@ -267,28 +241,45 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
 		
 		public List<SubscriptionView> ListSubscriptions ()
 		{
-			return null;
-			/*
-			return m_manager.getMetaProxy().listSubscriptions();
-			*/
+			return m_manager.getMetaProxy ().listSubscriptions ();
 		}
 
 		
 		public List<SchemaView> ListSchemas ()
 		{
-			return null;
-			/*
-			return m_manager.getMetaProxy().listSchemas();
-			*/
+			return m_manager.getMetaProxy ().listSchemas ();
 		}
 
 		
 		public bool ContainsEndpoint (Endpoint endpoint)
 		{
-			return true;
-			/*
-			return m_metaCache.get().getEndpoints().containsKey(endpoint.getId());
-			*/
+			return MetaCache.Endpoints.ContainsKey (endpoint.ID);
+		}
+
+		public class MetaRefresher
+		{
+
+			private DefaultMetaService metaService;
+			private int interval;
+
+			public MetaRefresher (DefaultMetaService metaService, int interval)
+			{
+				this.metaService = metaService;
+				this.interval = interval;
+			}
+
+			public void Refresh (object param)
+			{
+				try {
+					metaService.Refresh ();
+				} catch (Exception e) {
+					log.Warn ("Failed to refresh meta", e);
+				} finally {
+					metaService.timer.Dispose ();
+					metaService.timer = new Timer (this.Refresh, null, interval, interval);
+				}
+			}
+
 		}
 	}
 }

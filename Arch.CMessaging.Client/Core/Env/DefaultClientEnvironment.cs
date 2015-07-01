@@ -6,10 +6,11 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Configuration;
 using System.Collections.Specialized;
+using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Core.Env
 {
-	public class DefaultClientEnvironment : IClientEnvironment
+	public class DefaultClientEnvironment : IClientEnvironment, IInitializable
 	{
 		private static String PRODUCER_DEFAULT_FILE = "/hermes-producer.properties";
 
@@ -72,11 +73,12 @@ namespace Arch.CMessaging.Client.Core.Env
 
 		private Properties readConfigFile (String configPath, Properties defaults)
 		{
-			return null;
+			// TODO support read config file
+			return new Properties ();
 		}
 
 		
-		public void initialize ()
+		public void Initialize ()
 		{
 			m_producerDefault = readConfigFile (PRODUCER_DEFAULT_FILE);
 			m_consumerDefault = readConfigFile (CONSUMER_DEFAULT_FILE);

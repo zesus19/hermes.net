@@ -18,6 +18,10 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
 		List<SchemaView> listSchemas ();
 
 		List<SubscriptionView> listSubscriptions ();
+
+		int registerSchema (String schema, String subject);
+
+		String getSchemaString (int schemaId);
 	}
 }
 

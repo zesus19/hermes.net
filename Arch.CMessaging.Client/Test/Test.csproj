@@ -29,16 +29,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="Avro">
-      <HintPath>..\..\..\..\Downloads\avro-csharp-1.7.7\main\Release\Avro.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\..\..\Downloads\avro-csharp-1.7.7\main\Release\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\Downloads\avro-csharp-1.7.7\main\Release\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -48,5 +40,11 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Arch.CMessaging.Client.csproj">
+      <Project>{06F3E3CD-6A8A-4614-A2CE-8A9B696B03A9}</Project>
+      <Name>Arch.CMessaging.Client</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
