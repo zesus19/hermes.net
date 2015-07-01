@@ -53,6 +53,16 @@ namespace Arch.CMessaging.Client.Producer.Monitor
                 this.correlationID = correlationID;
             }
 
+            public void Set(bool val)
+            {
+                base.Value = val;
+            }
+
+            public void SetException(Exception ex)
+            {
+                base.Value = ex;
+            }
+
             public override bool Cancel(bool mayInterruptIfRunning)
             {
                 base.Cancel(mayInterruptIfRunning);

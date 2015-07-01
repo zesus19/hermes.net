@@ -11,5 +11,15 @@ namespace Arch.CMessaging.Client.Core.Future
         {
             return new SettableFuture<T>();
         }
+
+        public void Set(T val)
+        {
+            base.Value = val;
+        }
+
+        public void SetException(Exception ex)
+        {
+            base.Value = ex;
+        }
     }
 }

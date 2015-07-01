@@ -27,6 +27,7 @@ namespace Consumer
         //    var a = c.Lookup<A1>();
         //    var b = c.Lookup<A1>();
 
+            var dddd = new OperationCanceledException() is Exception;
 
             var c = new VenusContainer();
             c.Define<A>();
