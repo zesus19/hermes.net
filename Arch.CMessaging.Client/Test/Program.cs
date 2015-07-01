@@ -9,13 +9,22 @@ using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Arch.CMessaging.Client.MetaEntity.Entity;
+using Arch.CMessaging.Client.Newtonsoft.Json;
+using System.Net;
+using System.Text;
+using System.Web;
+using System.Collections;
+using Arch.CMessaging.Client.Newtonsoft.Json.Linq;
+using Arch.CMessaging.Client.Core.Utils;
+using Arch.CMessaging.Client.Producer.Build;
 
 namespace Test
 {
 	public enum Xx
 	{
 		A,
-B
+		B
 	}
 
 
@@ -51,14 +60,33 @@ B
 			t = new Timer (task.go, null, 1000, 1000);
 		}
 
+		public static void fetchMeta()
+		{
+			string url = "http://meta.hermes.fws.qa.nt.ctripcorp.com/meta";
+			HttpWebRequest req = (HttpWebRequest)WebRequest.Create (url);
+			req.Timeout = 5000;
+
+			HttpWebResponse res = (HttpWebResponse)req.GetResponse ();
+
+			HttpStatusCode statusCode = res.StatusCode;
+			if (statusCode == HttpStatusCode.OK) {
+				string responseContent = new StreamReader (res.GetResponseStream (), Encoding.UTF8).ReadToEnd ();
+				//Console.WriteLine (responseContent);
+				JsonSerializerSettings settings = new JsonSerializerSettings();
+				settings.NullValueHandling = NullValueHandling.Ignore;
+				Meta meta = JsonConvert.DeserializeObject<Meta> (responseContent, settings);
+				Console.WriteLine (JsonConvert.SerializeObject (meta));
+			} else if (statusCode == HttpStatusCode.NotModified) {
+			}
+		}
+
 
 		public static void Main (string[] args)
 		{
-			string[] parts = "axbyc".Split (new string[]{ "x", "y" }, StringSplitOptions.None);
-			foreach (string p in parts) {
-				Console.WriteLine (p);
-			}
-
+			ComponentsConfigurator.DefineComponents ();
+			var p = Arch.CMessaging.Client.Producer.Producer.GetInstance ();
+			Console.WriteLine (p == null);
+//			p.Message ("order_new", "", "hello c#").Send ();
 		}
 
 		public static void test2 ()

@@ -45,6 +45,7 @@
       <HintPath>..\Framework.Logging.V2.API.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Bo\SchemaView.cs" />
@@ -693,9 +694,21 @@
     <Compile Include="Core\Message\Retry\RetryPolicyFactory.cs" />
     <Compile Include="Core\Message\Retry\FrequencySpecifiedRetryPolicy.cs" />
     <Compile Include="Producer\Build\BuildConstants.cs" />
+    <Compile Include="Core\MetaService\Internal\DefaultMetaManager.cs" />
+    <Compile Include="Core\MetaService\Internal\IMetaLoader.cs" />
+    <Compile Include="Core\MetaService\Internal\LocalMetaProxy.cs" />
+    <Compile Include="Core\MetaService\Internal\LocalMetaLoader.cs" />
+    <Compile Include="Core\MetaService\Remote\RemoteMetaLoader.cs" />
+    <Compile Include="Core\MetaService\Remote\RemoteMetaProxy.cs" />
+    <Compile Include="Core\MetaService\Remote\IMetaServerLocator.cs" />
+    <Compile Include="Core\MetaService\Remote\DefaultMetaServerLocator.cs" />
+    <Compile Include="MetaEntity\Transform\MillSecondEpochConverter.cs" />
+    <Compile Include="Core\Utils\CollectionUtil.cs" />
+    <Compile Include="Core\Utils\DNSUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MetaEntity\Transform\" />
+    <Folder Include="Core\MetaService\Remote\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Newtonsoft.Json\Newtonsoft.Json.ruleset" />
