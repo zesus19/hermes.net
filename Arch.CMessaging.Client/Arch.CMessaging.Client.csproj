@@ -706,12 +706,10 @@
     <Compile Include="Core\Utils\CollectionUtil.cs" />
     <Compile Include="Core\Utils\DNSUtil.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MetaEntity\Transform\" />
-    <Folder Include="Core\MetaService\Remote\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="Newtonsoft.Json\Newtonsoft.Json.ruleset" />
+    <EmbeddedResource Include="VenusIoc.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Newtonsoft.Json\Newtonsoft.Json.csproj" />

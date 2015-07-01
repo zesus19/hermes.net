@@ -11,7 +11,6 @@ using Arch.CMessaging.Client.Core.Utils;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
-    [Named]
     public class DefaultProducerPipelineSinkManager : IInitializable, IProducerPipelineSinkManager
     {
         private Dictionary<string, IPipelineSink> sinks;

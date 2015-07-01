@@ -18,6 +18,7 @@ using Arch.CMessaging.Client.Transport.EndPoint;
 using Arch.CMessaging.Client.Core.Collections;
 using Arch.CMessaging.Client.Core.Future;
 using Arch.CMessaging.Client.Core.Result;
+using Arch.CMessaging.Client.Producer.Build;
 namespace Producer
 {
     class Program
@@ -26,6 +27,15 @@ namespace Producer
         {
             try
             {
+                ComponentsConfigurator.DefineComponents();
+                var p = Arch.CMessaging.Client.Producer.Producer.GetInstance();
+                Console.WriteLine(p == null);
+
+                return; 
+
+
+
+
                 var future = new Bootstrap()
                     .Option(SessionOption.SO_KEEPALIVE, true)
                     .Option(SessionOption.CONNECT_TIMEOUT_MILLIS, 5000)

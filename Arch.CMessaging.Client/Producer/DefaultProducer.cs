@@ -13,13 +13,13 @@ using Arch.CMessaging.Client.Producer.Build;
 
 namespace Arch.CMessaging.Client.Producer
 {
-    [Named]
+    [Named(ServiceType=typeof(Producer))]
     public class DefaultProducer : Producer
     {
         [Inject(BuildConstants.PRODUCER)]
         private IPipeline<IFuture<SendResult>> pipeline;
         
-        [Inject]
+        //[Inject]
         private ISystemClockService systemClockService;
 
         public override IMessageHolder Message(string topic, string partitionKey, object body)

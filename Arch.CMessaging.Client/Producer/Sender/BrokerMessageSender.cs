@@ -19,6 +19,7 @@ using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Producer.Sender
 {
+    //[Named(ServiceType=typeof(IMessageSender))]
     public class BrokerMessageSender : AbstractMessageSender
     {
         private Timer endpointSenderScheduler;

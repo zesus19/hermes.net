@@ -8,7 +8,7 @@ using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
-    [Named]
+    //[Named(ServiceType=typeof(IValve))]
     public class TracingMessageValve : IValve
     {
         public const string ID = "tracing";

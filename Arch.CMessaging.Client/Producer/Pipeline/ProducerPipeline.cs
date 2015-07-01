@@ -12,13 +12,13 @@ using Arch.CMessaging.Client.Producer.Build;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
-    [Named]
+    [Named(ServiceType = typeof(IPipeline<IFuture<SendResult>>), ServiceName=BuildConstants.PRODUCER)]
     public class ProducerPipeline : IPipeline<IFuture<SendResult>>
     {
-        [Inject(BuildConstants.PRODUCER)]
+        //[Inject(BuildConstants.PRODUCER)]
         private IValveRegistry valveRegistry;
         
-        [Inject]
+        //[Inject]
         private IProducerPipelineSinkManager sinkManager;
 
         public IFuture<SendResult> Put(object payload)

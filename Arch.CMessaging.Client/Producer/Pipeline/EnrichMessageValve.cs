@@ -12,7 +12,6 @@ using Arch.CMessaging.Client.Core.Message;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
-	[Named]
 	public class EnrichMessageValve : IValve
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(EnrichMessageValve));
