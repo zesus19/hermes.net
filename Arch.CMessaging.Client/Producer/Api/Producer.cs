@@ -14,7 +14,7 @@ namespace Arch.CMessaging.Client.Producer
         IMessageHolder WithRefKey(string key);
         IFuture<SendResult> Send();
         IMessageHolder AddProperty(string key, string value);
-        IMessageHolder SetCallback(ICallback callback);
+        IMessageHolder SetCallback(ICompletionCallback<SendResult> callback);
     }
 
     public abstract class Producer

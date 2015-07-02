@@ -24,7 +24,7 @@ namespace Arch.CMessaging.Client.Core.Message
         public bool IsPriority { get; set; }
         public string Key { get; set; }
         public long BornTime { get; set; }
-        public ICallback Callback { get; set; }
+        public ICompletionCallback<SendResult> Callback { get; set; }
         public PropertiesHolder PropertiesHolder { get; set; }
 
         public T GetBody<T>()

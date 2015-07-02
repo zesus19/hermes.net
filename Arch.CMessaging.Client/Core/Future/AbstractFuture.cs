@@ -3,15 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Arch.CMessaging.Client.Core.Collections;
+using Arch.CMessaging.Client.Core.Utils;
 
 namespace Arch.CMessaging.Client.Core.Future
 {
-    public abstract class AbstractFuture<T> : IFuture<T>, IDisposable
+    public abstract class AbstractFuture<T> : IListenableFuture<T>, IDisposable
     {
         private object val;
         private bool disposed;
         private volatile Boolean ready;
+        private ThreadSafe.AtomicReference<ProducerConsumer<FutureCallbackItem<T>>> executor;
+        private IList<IFutureCallback<T>> callbackList = new List<IFutureCallback<T>>();
         private readonly ManualResetEventSlim readyEvent = new ManualResetEventSlim(false);
+        private object syncRoot = new object();
         
         #region IFuture<T> Members
 
@@ -48,6 +53,18 @@ namespace Arch.CMessaging.Client.Core.Future
 
         #endregion
 
+        #region IListenableFuture<T> Members
+        public void AddListener(IFutureCallback<T> callback, ProducerConsumer<FutureCallbackItem<T>> executor)
+        {
+            this.executor.AtomicCompareExchange(executor, null);
+            lock (syncRoot)
+            {
+                callbackList.Add(callback);
+            }
+        }
+
+        #endregion
+
         public void Dispose()
         {
             Dispose(true);
@@ -77,6 +94,7 @@ namespace Arch.CMessaging.Client.Core.Future
                     ready = true;
                     val = value;
                     readyEvent.Set();
+                    FireCallback(val);
                 }
             }
         }
@@ -89,6 +107,21 @@ namespace Arch.CMessaging.Client.Core.Future
             if (ready) readyEvent.Dispose();
 
             return ready;
+        }
+
+        private void FireCallback(object val)
+        {
+            IFutureCallback<T>[] callbacks;
+            lock (syncRoot)
+            {
+                callbacks = callbackList.ToArray();
+            }
+            var producer = this.executor.ReadFullFence();
+            if (producer != null)
+            {
+                foreach (var callback in callbacks)
+                    producer.Produce(new FutureCallbackItem<T> { Item = val, Callback = callback });
+            }
         }
     }
 }

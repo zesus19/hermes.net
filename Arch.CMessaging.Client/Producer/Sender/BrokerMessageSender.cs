@@ -35,6 +35,7 @@ namespace Arch.CMessaging.Client.Producer.Sender
         private ISystemClockService systemClockService;
 
         private ConcurrentDictionary<Pair<string, int>, TaskQueue> taskQueues;
+        private ProducerConsumer<FutureCallbackItem<SendResult>> callbackExecutor;
 
         public BrokerMessageSender()
         {
@@ -55,7 +56,7 @@ namespace Arch.CMessaging.Client.Producer.Sender
             TaskQueue task = null;
             if (!taskQueues.TryGetValue(tp, out task))
             {
-                task = new TaskQueue(message.Topic, message.Partition, Convert.ToInt32(queueSize));
+                task = new TaskQueue(message.Topic, message.Partition, Convert.ToInt32(queueSize), this);
                 taskQueues.TryAdd(tp, task);
             }
 
@@ -69,20 +70,44 @@ namespace Arch.CMessaging.Client.Producer.Sender
             endpointSenderScheduler = new Timer(
                 new EndpointSender(taskQueues, interval, this).Run, 
                 endpointSenderScheduler, interval, Timeout.Infinite);
+            this.callbackExecutor = new ProducerConsumer<FutureCallbackItem<SendResult>>(int.MaxValue,
+                Convert.ToInt32(clientEnv.GetGlobalConfig().GetProperty("producer.callback.threadcount", config.DefaultProducerCallbackThreadCount)));
+            this.callbackExecutor.OnConsume += callbackExecutor_OnConsume;
+        }
+
+        void callbackExecutor_OnConsume(object sender, ConsumeEventArgs e)
+        {
+            var callbackItem = e.ConsumingItem as SingleConsumingItem<FutureCallbackItem<SendResult>>;
+            try
+            {
+                var result = callbackItem.Item.Item;
+                if (result != null)
+                {
+                    if (result is Exception) callbackItem.Item.Callback.OnFailure(result as Exception);
+                    else callbackItem.Item.Callback.OnSuccess(result as SendResult);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+            }
         }
 
         private class TaskQueue
         {
             private string topic;
             private int partition;
+            private BrokerMessageSender sender;
             private BlockingQueue<ProducerWorkerContext> queue;
             private ThreadSafe.AtomicReference<SendMessageCommand> cmd;
             
-            public TaskQueue(string topic, int partition, int queueSize)
+            public TaskQueue(string topic, int partition, int queueSize, BrokerMessageSender sender)
             {
                 this.topic = topic;
+                this.sender = sender;
                 this.partition = partition;
                 this.queue = new BlockingQueue<ProducerWorkerContext>(queueSize);
+                this.cmd = new ThreadSafe.AtomicReference<SendMessageCommand>(null);
             }
 
             public void Pop()
@@ -102,7 +127,7 @@ namespace Arch.CMessaging.Client.Producer.Sender
                 queue.Offer(new ProducerWorkerContext(message, future));
                 if (message.Callback != null)
                 {
-                    //add callback
+                    Futures<SendResult>.AddCallback(future, new ProducerMessageCallback(message), sender.callbackExecutor);
                 }
                 return future;
             }
@@ -124,6 +149,29 @@ namespace Arch.CMessaging.Client.Producer.Sender
                 }
                 return command;
             }
+        }
+
+        private class ProducerMessageCallback : IFutureCallback<SendResult>
+        {
+            private ProducerMessage message;
+            public ProducerMessageCallback(ProducerMessage message)
+            {
+                this.message = message;
+            }
+
+            #region IFutureCallback<SendResult> Members
+
+            public void OnSuccess(SendResult success)
+            {
+                message.Callback.OnSuccess(success);
+            }
+
+            public void OnFailure(Exception ex)
+            {
+                message.Callback.OnFailure(ex);
+            }
+
+            #endregion
         }
 
         private class EndpointSender

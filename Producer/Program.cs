@@ -27,6 +27,10 @@ namespace Producer
         {
             try
             {
+                var bag = new ConcurrentBag<int>();
+                bag.Add(1);
+                bag.Add(1);
+
                 ComponentsConfigurator.DefineComponents();
                 var p = Arch.CMessaging.Client.Producer.Producer.GetInstance();
                 Console.WriteLine(p == null);

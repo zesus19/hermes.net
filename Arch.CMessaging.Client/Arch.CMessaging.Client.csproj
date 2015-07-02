@@ -67,7 +67,11 @@
     <Compile Include="Core\Env\IClientEnvironment.cs" />
     <Compile Include="Core\Exceptions\MessageSendException.cs" />
     <Compile Include="Core\Future\AbstractFuture.cs" />
+    <Compile Include="Core\Future\FutureCallbackItem.cs" />
+    <Compile Include="Core\Future\Futures.cs" />
+    <Compile Include="Core\Future\IFutureCallback.cs" />
     <Compile Include="Core\Future\IFuture.cs" />
+    <Compile Include="Core\Future\IListenableFuture.cs" />
     <Compile Include="Core\Future\SettableFuture.cs" />
     <Compile Include="Core\Ioc\Adapters\Lifetime\AdapterLifetime.cs" />
     <Compile Include="Core\Ioc\Adapters\Lifetime\ILifetime.cs" />
@@ -116,6 +120,7 @@
     <Compile Include="Core\Pipeline\IValveRegistry.cs" />
     <Compile Include="Core\Pipeline\spi\IValve.cs" />
     <Compile Include="Core\Result\ICallback.cs" />
+    <Compile Include="Core\Result\ICompletionCallback.cs" />
     <Compile Include="Core\Result\SendResult.cs" />
     <Compile Include="Core\Service\DefaultSystemClockService.cs" />
     <Compile Include="Core\Service\ISystemClockService.cs" />

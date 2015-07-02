@@ -74,7 +74,7 @@ namespace Arch.CMessaging.Client.Producer
                 return this;
             }
 
-            public IMessageHolder SetCallback(ICallback callback)
+            public IMessageHolder SetCallback(ICompletionCallback<SendResult> callback)
             {
                 message.Callback = callback;
                 return this;
