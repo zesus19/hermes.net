@@ -128,7 +128,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
 			switch (env) {
 			case Arch.CMessaging.Client.Core.Env.Env.LOCAL:
-				return "10.32.20.130";
+				return "127.0.0.1";
 			case Arch.CMessaging.Client.Core.Env.Env.DEV:
 				return "10.3.8.63";
 			case Arch.CMessaging.Client.Core.Env.Env.LPT:

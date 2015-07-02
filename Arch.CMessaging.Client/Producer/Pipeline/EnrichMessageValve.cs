@@ -22,13 +22,7 @@ namespace Arch.CMessaging.Client.Producer.Pipeline
 		public void Handle (IPipelineContext ctx, Object payload)
 		{
 			ProducerMessage msg = (ProducerMessage)payload;
-			String topic = msg.Topic;
 			String ip = "";
-
-			if (string.IsNullOrEmpty (topic)) {
-				log.Error ("Topic not set, won't send");
-				return;
-			}
 
 			enrichPartitionKey (msg, ip);
 			enrichRefKey (msg);

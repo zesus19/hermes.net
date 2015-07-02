@@ -60,11 +60,6 @@ namespace Arch.CMessaging.Client.Producer.Monitor
 				base.Value = val;
 			}
 
-			public void SetException (Exception ex)
-			{
-				base.Value = ex;
-			}
-
 			public override bool Cancel (bool mayInterruptIfRunning)
 			{
 				base.Cancel (mayInterruptIfRunning);

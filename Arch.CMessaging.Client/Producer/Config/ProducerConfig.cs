@@ -17,7 +17,7 @@ namespace Arch.CMessaging.Client.Producer.Config
 
 		public string DefaultBrokerSenderBatchSize { get { return "300"; } }
 
-		public string DefaultBrokerSenderSendTimeoutMillis { get { return "200000"; } }
+		public int DefaultBrokerSenderSendTimeoutMillis { get { return 200; } }
 
 		public string DefaultBrokerSenderTaskQueueSize { get { return "10000"; } }
 
