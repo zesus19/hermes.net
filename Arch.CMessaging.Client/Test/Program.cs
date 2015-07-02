@@ -83,7 +83,9 @@ namespace Test
 		{
 			ComponentsConfigurator.DefineComponents ();
 			var p = Arch.CMessaging.Client.Producer.Producer.GetInstance ();
-			p.Message ("order_new", "", "hello c#").Send ();
+			var future = p.Message ("order_new", "", "hello c#").Send ();
+            var result = future.Get();
+            Console.WriteLine("aaa");
 			Console.ReadLine ();
 		}
 

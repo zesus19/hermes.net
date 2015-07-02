@@ -36,6 +36,11 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 		private ConcurrentDictionary<Endpoint, EndpointSession> sessions;
 		private static readonly ILog log = LogManager.GetLogger (typeof(DefaultEndpointClient));
 
+        public DefaultEndpointClient()
+        {
+            this.sessions = new ConcurrentDictionary<Endpoint, EndpointSession>();
+        }
+
 		#region IEndpointClient Members
 
 		public CoreConfig Config { get { return config; } }
@@ -70,7 +75,8 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 					if (!sessions.TryGetValue (endpoint, out session)) {
 						lock (syncRoot) {
 							if (!sessions.TryGetValue (endpoint, out session)) {
-								sessions [endpoint] = CreateSession (endpoint);
+                                session = CreateSession (endpoint);
+                                sessions[endpoint] = session;
 							}
 						}
 					}

@@ -19,7 +19,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(DefaultMetaServerLocator));
 
-		private const int DEFAULT_MASTER_METASERVER_PORT = 80;
+		private const int DEFAULT_MASTER_METASERVER_PORT = 1248;
 
 		[Inject]
 		private IClientEnvironment m_clientEnv;
@@ -97,21 +97,29 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 			HttpWebRequest req = (HttpWebRequest)WebRequest.Create (url);
 			req.Timeout = m_coreConfig.MetaServerConnectTimeoutInMills + m_coreConfig.MetaServerReadTimeoutInMills;
 
-			HttpWebResponse res = (HttpWebResponse)req.GetResponse ();
+            using (var res = (HttpWebResponse)req.GetResponse())
+            {
+                HttpStatusCode statusCode = res.StatusCode;
+                if (statusCode == HttpStatusCode.OK)
+                {
+                    using (var reader = new StreamReader(res.GetResponseStream(), Encoding.UTF8))
+                    {
+                        string responseContent = reader.ReadToEnd();
+                        JArray serverArray = (JArray)JsonConvert.DeserializeObject(responseContent);
 
-			HttpStatusCode statusCode = res.StatusCode;
-			if (statusCode == HttpStatusCode.OK) {
-				string responseContent = new StreamReader (res.GetResponseStream (), Encoding.UTF8).ReadToEnd ();
-				JArray serverArray = (JArray)JsonConvert.DeserializeObject (responseContent);
-
-				List<string> servers = new List<string> ();
-				for (int i = 0; i < serverArray.Count; i++) {
-					servers.Add (serverArray [i].Value<string> ());
-				}
-				return servers;
-			} else {
-				throw new Exception (string.Format ("HTTP code is {0} when fetch meta server list"));
-			}
+                        List<string> servers = new List<string>();
+                        for (int i = 0; i < serverArray.Count; i++)
+                        {
+                            servers.Add(serverArray[i].Value<string>());
+                        }
+                        return servers;
+                    }
+                }
+                else
+                {
+                    throw new Exception(string.Format("HTTP code is {0} when fetch meta server list"));
+                }
+            }
 		}
 
 		private string getMetaServerDomainName ()
@@ -120,7 +128,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
 			switch (env) {
 			case Arch.CMessaging.Client.Core.Env.Env.LOCAL:
-				return "127.0.0.1";
+				return "10.32.20.130";
 			case Arch.CMessaging.Client.Core.Env.Env.DEV:
 				return "10.3.8.63";
 			case Arch.CMessaging.Client.Core.Env.Env.LPT:

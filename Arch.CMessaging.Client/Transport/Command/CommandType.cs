@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Arch.CMessaging.Client.Transport.Command
 {
+
+
     public enum CommandType
     {
         MessageSend = 101,

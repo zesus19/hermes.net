@@ -36,7 +36,7 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
         public override void MessageReceived(IoSession session, object message)
         {
             var command = message as ICommand;
-            var s = string.Empty;
+            cmdProcessorManager.Offer(new CommandProcessorContext(command, session));
         }
 
         public override void ExceptionCaught(IoSession session, Exception cause)

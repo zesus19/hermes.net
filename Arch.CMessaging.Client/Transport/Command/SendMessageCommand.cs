@@ -132,6 +132,15 @@ namespace Arch.CMessaging.Client.Transport.Command
             buf.Position = indexAfterPayload;
         }
 
+        /// <summary>
+        /// Read Datas
+        /// </summary>
+        /// <param name="buf"></param>
+        /// <param name="codec"></param>
+        /// <param name="topic"></param>
+        /// <remarks>
+        /// implements only in broker
+        /// </remarks>
         private void ReadDatas(ByteBuffer buf, HermesPrimitiveCodec codec, string topic)
         {
             var size = codec.ReadInt();

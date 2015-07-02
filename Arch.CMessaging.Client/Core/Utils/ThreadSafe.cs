@@ -57,7 +57,7 @@ namespace Arch.CMessaging.Client.Core.Utils
             return desiredVal;
         }
 
-        public struct Integer
+        public class Integer
         {
             private int _value;
 
@@ -156,7 +156,7 @@ namespace Arch.CMessaging.Client.Core.Utils
             }
         }
 
-        public struct Long
+        public class Long
         {
             private long _value;
 
@@ -254,7 +254,7 @@ namespace Arch.CMessaging.Client.Core.Utils
             }
         }
 
-        public struct Boolean
+        public class Boolean
         {
             private int _value;
             private const int False = 0;

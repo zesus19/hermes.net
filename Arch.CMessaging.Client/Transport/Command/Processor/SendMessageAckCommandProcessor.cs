@@ -7,6 +7,7 @@ using Arch.CMessaging.Client.Producer.Monitor;
 
 namespace Arch.CMessaging.Client.Transport.Command.Processor
 {
+    [Named(ServiceType = typeof(ICommandProcessor), ServiceName = "SendMessageAckCommandProcessor")]
     public class SendMessageAckCommandProcessor : ICommandProcessor
     {
         [Inject]

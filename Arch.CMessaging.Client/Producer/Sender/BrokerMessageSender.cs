@@ -191,7 +191,7 @@ namespace Arch.CMessaging.Client.Producer.Sender
 
 			public bool HasTask ()
 			{
-				return cmd.ReadFullFence () != null && queue.Count > 0;
+				return cmd.ReadFullFence () != null || queue.Count > 0;
 			}
 
 			private SendMessageCommand CreateSendMessageCommand (int size)
@@ -269,13 +269,16 @@ namespace Arch.CMessaging.Client.Producer.Sender
 					foreach (var kvp in taskQueues) {
 						var queue = kvp.Value;
 						if (queue.HasTask ()) {
-							runnings.TryAdd (kvp.Key, new ThreadSafe.Boolean (false));
-							ThreadSafe.Boolean running;
-							if (runnings.TryGetValue (kvp.Key, out running)) {
-								if (running.AtomicCompareExchange (true, false)) {
-									producer.Produce (new SendTask (
-										kvp.Key.Key, kvp.Key.Value, kvp.Value, running, sender));
-								}
+                            ThreadSafe.Boolean running;
+                            if (!runnings.TryGetValue(kvp.Key, out running))
+                            {
+                                running = new ThreadSafe.Boolean(false);
+                                runnings[kvp.Key] = running;
+                            }
+							if (running.AtomicCompareExchange (true, false)) 
+                            {
+								producer.Produce (new SendTask (
+									kvp.Key.Key, kvp.Key.Value, kvp.Value, running, sender));
 							}
 						}
 					}
