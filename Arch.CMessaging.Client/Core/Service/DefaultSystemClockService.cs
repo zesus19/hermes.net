@@ -8,29 +8,30 @@ using Arch.CMessaging.Client.Core.Utils;
 
 namespace Arch.CMessaging.Client.Core.Service
 {
-    public class DefaultSystemClockService : ISystemClockService, IInitializable
-    {
-        [Inject]
-        private CoreConfig config;
+	[Named (ServiceType = typeof(ISystemClockService))]
+	public class DefaultSystemClockService : ISystemClockService, IInitializable
+	{
+		[Inject]
+		private CoreConfig config;
 
-        [Inject]
-        private RunningStatusStatisticsService runningStatusStatService;
+		//[Inject]
+		private RunningStatusStatisticsService runningStatusStatService;
 
-        #region ISystemClockService Members
+		#region ISystemClockService Members
 
-        public long Now()
-        {
-            return DateTime.Now.CurrentTimeMillis();
-        }
+		public long Now ()
+		{
+			return DateTime.Now.CurrentTimeMillis ();
+		}
 
-        #endregion
+		#endregion
 
-        #region IInitializable Members
+		#region IInitializable Members
 
-        public void Initialize()
-        {
-        }
+		public void Initialize ()
+		{
+		}
 
-        #endregion
-    }
+		#endregion
+	}
 }

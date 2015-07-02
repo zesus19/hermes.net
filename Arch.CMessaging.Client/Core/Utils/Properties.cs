@@ -21,7 +21,9 @@ namespace Arch.CMessaging.Client.Core.Utils
 
 		public string GetProperty (string key)
 		{
-			return dict [key];
+			string result = null;
+			dict.TryGetValue (key, out result);
+			return result;
 		}
 
 		public string GetProperty (string key, string defaultValue)
@@ -30,6 +32,13 @@ namespace Arch.CMessaging.Client.Core.Utils
 				return GetProperty (key);
 			} else {
 				return defaultValue;
+			}
+		}
+
+		public void SetProperty (string key, string value)
+		{
+			if (!string.IsNullOrEmpty (key)) {
+				dict [key] = value;
 			}
 		}
 

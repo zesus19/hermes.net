@@ -10,6 +10,7 @@ using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Core.Env
 {
+	[Named (ServiceType = typeof(IClientEnvironment))]
 	public class DefaultClientEnvironment : IClientEnvironment, IInitializable
 	{
 		private static String PRODUCER_DEFAULT_FILE = "/hermes-producer.properties";
@@ -73,6 +74,19 @@ namespace Arch.CMessaging.Client.Core.Env
 
 		private Properties readConfigFile (String configPath, Properties defaults)
 		{
+
+			if (GLOBAL_DEFAULT_FILE.Equals (configPath)) {
+				var globalProperties = new Properties ();
+				NameValueCollection config = ConfigurationManager.GetSection ("hermes/global") as NameValueCollection;
+				if (config != null) {
+					foreach (string k in config) {
+						globalProperties.SetProperty (k, config [k]);
+					}
+				}
+
+				return globalProperties;
+			}
+
 			// TODO support read config file
 			return new Properties ();
 		}
@@ -88,7 +102,7 @@ namespace Arch.CMessaging.Client.Core.Env
 
 			NameValueCollection config = ConfigurationManager.GetSection ("hermes/global") as NameValueCollection;
 			if (config != null && config ["env"] != null) {
-				Env newEnv = (Env)Enum.Parse (typeof(Env), config ["env"]);
+				Env newEnv = (Env)Enum.Parse (typeof(Env), config ["env"].ToUpper ());
 				if (resultEnv != null && newEnv != resultEnv) {
 					throw new Exception (string.Format ("Inconsist Hermes env {0} {1}", resultEnv, newEnv));
 				} else {

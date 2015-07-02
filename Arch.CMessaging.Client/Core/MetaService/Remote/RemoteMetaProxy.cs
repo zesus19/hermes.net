@@ -14,6 +14,7 @@ using Arch.CMessaging.Client.Newtonsoft.Json;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Remote
 {
+	[Named (ServiceType = typeof(IMetaProxy), ServiceName = RemoteMetaProxy.ID)]
 	public class RemoteMetaProxy : IMetaProxy
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(RemoteMetaProxy));
@@ -88,7 +89,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
 					byte[] payloadJson = Encoding.UTF8.GetBytes (JsonConvert.SerializeObject (payload));
 					req.ContentLength = payloadJson.Length;
-					Stream reqStream = req.GetRequestStream();
+					Stream reqStream = req.GetRequestStream ();
 					reqStream.Write (payloadJson, 0, payloadJson.Length);
 					reqStream.Close ();
 				}

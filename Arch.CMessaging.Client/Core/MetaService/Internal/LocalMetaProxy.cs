@@ -1,4 +1,5 @@
 ﻿using System;
+using Arch.CMessaging.Client.Core.Ioc;
 using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Core.Lease;
 using Arch.CMessaging.Client.Core.Bo;
@@ -7,6 +8,7 @@ using Arch.CMessaging.Client.Core.MetaService.Internal;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Internal
 {
+	[Named (ServiceType = typeof(IMetaProxy), ServiceName = LocalMetaProxy.ID)]
 	public class LocalMetaProxy : IMetaProxy
 	{
 		public const String ID = "local";

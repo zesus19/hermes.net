@@ -8,18 +8,19 @@ using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
-    //[Named(ServiceType=typeof(IValve))]
-    public class TracingMessageValve : IValve
-    {
-        public const string ID = "tracing";
+	[Named (ServiceType = typeof(IValve), ServiceName = TracingMessageValve.ID)]
+	public class TracingMessageValve : IValve
+	{
+		public const string ID = "tracing";
 
-        #region IValve Members
+		#region IValve Members
 
-        public void Handle(IPipelineContext context, object payload)
-        {
-            //todo
-        }
+		public void Handle (IPipelineContext context, object payload)
+		{
+			//todo
+			context.Next (payload);
+		}
 
-        #endregion
-    }
+		#endregion
+	}
 }

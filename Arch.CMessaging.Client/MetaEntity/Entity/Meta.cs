@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Arch.CMessaging.Client.MetaEntity.Entity;
+using Arch.CMessaging.Client.Core.Utils;
 
 namespace Arch.CMessaging.Client.MetaEntity.Entity
 {
@@ -115,32 +116,33 @@ namespace Arch.CMessaging.Client.MetaEntity.Entity
 
 		public App FindApp (long id)
 		{
-			return Apps [id];
+			return CollectionUtil.TryGet (Apps, id);
 		}
 
 		public Codec FindCodec (String type)
 		{
-			return Codecs [type];
+			return CollectionUtil.TryGet (Codecs, type);
 		}
 
 		public Endpoint FindEndpoint (String id)
 		{
-			return Endpoints [id];
+			return CollectionUtil.TryGet (Endpoints, id);
 		}
 
 		public Server FindServer (String id)
 		{
-			return Servers [id];
+			return CollectionUtil.TryGet (Servers, id);
 		}
 
 		public Storage FindStorage (String type)
 		{
-			return Storages [type];
+			return CollectionUtil.TryGet (Storages, type);
 		}
 
 		public Topic FindTopic (String name)
 		{
-			return Topics [name];
+			return CollectionUtil.TryGet (Topics, name);
+
 		}
 
 		public override int GetHashCode ()

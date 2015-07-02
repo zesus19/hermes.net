@@ -14,6 +14,7 @@ using System.Text;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Remote
 {
+	[Named (ServiceType = typeof(IMetaLoader), ServiceName = RemoteMetaLoader.ID)]
 	public class RemoteMetaLoader : IMetaLoader
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(RemoteMetaLoader));
@@ -39,7 +40,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 				log.Debug (string.Format ("Loading meta from server: {0}", ipPort));
 
 				try {
-					string url = string.Format ("http://%s/meta", ipPort);
+					string url = string.Format ("http://{0}/meta", ipPort);
 					if (m_metaCache.ReadFullFence () != null) {
 						url += "?version=" + m_metaCache.ReadFullFence ().Version;
 					}
@@ -52,16 +53,18 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 					HttpStatusCode statusCode = res.StatusCode;
 					if (statusCode == HttpStatusCode.OK) {
 						string responseContent = new StreamReader (res.GetResponseStream (), Encoding.UTF8).ReadToEnd ();
-						m_metaCache.WriteFullFence (JsonConvert.DeserializeObject<Meta> (responseContent));
+						JsonSerializerSettings settings = new JsonSerializerSettings ();
+						settings.NullValueHandling = NullValueHandling.Ignore;
+						m_metaCache.WriteFullFence (JsonConvert.DeserializeObject<Meta> (responseContent, settings));
 						return m_metaCache.ReadFullFence ();
 					} else if (statusCode == HttpStatusCode.NotModified) {
 						return m_metaCache.ReadFullFence ();
 					}
 
 				} catch (Exception) {
-					// ignore
 				}
 			}
+
 			throw new Exception (string.Format ("Failed to load remote meta from {0}", ipPorts));
 		}
 	}

@@ -7,23 +7,24 @@ using Arch.CMessaging.Client.Core.MetaService.Remote;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Internal
 {
+	[Named (ServiceType = typeof(IMetaManager))]
 	public class DefaultMetaManager : IMetaManager, IInitializable
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(DefaultMetaManager));
 
-		[Inject(LocalMetaLoader.ID)]
+		[Inject (LocalMetaLoader.ID)]
 		private IMetaLoader m_localMeta;
 
-		[Inject(RemoteMetaLoader.ID)]
+		[Inject (RemoteMetaLoader.ID)]
 		private IMetaLoader m_remoteMeta;
 
 		[Inject]
 		private IClientEnvironment m_env;
 
-		[Inject(LocalMetaProxy.ID)]
+		[Inject (LocalMetaProxy.ID)]
 		private IMetaProxy m_localMetaProxy;
 
-		[Inject(RemoteMetaProxy.ID)]
+		[Inject (RemoteMetaProxy.ID)]
 		private IMetaProxy m_remoteMetaProxy;
 
 		private bool m_localMode = false;

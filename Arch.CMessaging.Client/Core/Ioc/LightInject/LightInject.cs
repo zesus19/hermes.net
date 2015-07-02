@@ -3960,7 +3960,9 @@ namespace Arch.CMessaging.Client.Core.Ioc.LightInject
                     catch (InvalidOperationException ex)
                     {
                         dependencyStack.Clear();
-                        throw new InvalidOperationException(
+
+
+						throw new InvalidOperationException(
                             string.Format("Unable to resolve type: {0}, service name: {1}", serviceType, serviceName),
                             ex);
                     }
@@ -3969,6 +3971,7 @@ namespace Arch.CMessaging.Client.Core.Ioc.LightInject
                 return null;
             }
         }
+
                     
         private void RegisterValue(Type serviceType, object value, string serviceName)
         {

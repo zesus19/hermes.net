@@ -12,14 +12,19 @@ using Arch.CMessaging.Client.Producer.Sender;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
-    public class DefaultProducerPipelineSink : IPipelineSink
-    {
-        [Inject]
-        private IMessageSender messageSender;
+	[Named (ServiceType = typeof(IPipelineSink), ServiceName = Endpoint.BROKER)]
+	public class DefaultProducerPipelineSink : IPipelineSink
+	{
 
-        public object Handle(IPipelineContext context, object input)
-        {
-            return messageSender.Send((ProducerMessage)input);
-        }
-    }
+
+		[Inject (Endpoint.BROKER)]
+		private IMessageSender messageSender;
+
+		public object Handle (IPipelineContext context, object input)
+		{
+			
+			return messageSender.Send ((ProducerMessage)input);
+		}
+
+	}
 }

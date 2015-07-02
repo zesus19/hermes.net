@@ -12,11 +12,12 @@ using Arch.CMessaging.Client.Core.Message;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
+	[Named (ServiceType = typeof(IValve), ServiceName = EnrichMessageValve.ID)]
 	public class EnrichMessageValve : IValve
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(EnrichMessageValve));
 
-		public static string ID = "enrich";
+		public const string ID = "enrich";
 
 		public void Handle (IPipelineContext ctx, Object payload)
 		{

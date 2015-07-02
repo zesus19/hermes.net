@@ -12,22 +12,23 @@ using Arch.CMessaging.Client.Producer.Build;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
-    [Named(ServiceType = typeof(IPipeline<IFuture<SendResult>>), ServiceName=BuildConstants.PRODUCER)]
-    public class ProducerPipeline : IPipeline<IFuture<SendResult>>
-    {
-        //[Inject(BuildConstants.PRODUCER)]
-        private IValveRegistry valveRegistry;
+	[Named (ServiceType = typeof(IPipeline<IFuture<SendResult>>), ServiceName = BuildConstants.PRODUCER)]
+	public class ProducerPipeline : IPipeline<IFuture<SendResult>>
+	{
+		[Inject (BuildConstants.PRODUCER)]
+		private IValveRegistry valveRegistry;
         
-        //[Inject]
-        private IProducerPipelineSinkManager sinkManager;
 
-        public IFuture<SendResult> Put(object payload)
-        {
-            var message = payload as ProducerMessage;
-            var sink = sinkManager.GetSink(message.Topic);
-            var context = new DefaultPipelineContext(valveRegistry.GetValveList(), sink);
-            context.Next(message);
-            return context.GetResult<IFuture<SendResult>>();
-        }
-    }
+		[Inject]
+		private IProducerPipelineSinkManager sinkManager;
+
+		public IFuture<SendResult> Put (object payload)
+		{
+			var message = payload as ProducerMessage;
+			var sink = sinkManager.GetSink (message.Topic);
+			var context = new DefaultPipelineContext (valveRegistry.GetValveList (), sink);
+			context.Next (message);
+			return context.GetResult<IFuture<SendResult>> ();
+		}
+	}
 }

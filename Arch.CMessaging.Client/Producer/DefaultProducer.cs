@@ -19,7 +19,7 @@ namespace Arch.CMessaging.Client.Producer
         [Inject(BuildConstants.PRODUCER)]
         private IPipeline<IFuture<SendResult>> pipeline;
         
-        //[Inject]
+        [Inject]
         private ISystemClockService systemClockService;
 
         public override IMessageHolder Message(string topic, string partitionKey, object body)
@@ -64,7 +64,8 @@ namespace Arch.CMessaging.Client.Producer
 
             public IFuture<SendResult> Send()
             {
-                message.BornTime = systemClockService.Now();
+
+				message.BornTime = systemClockService.Now();
                 return pipeline.Put(message);
             }
 

@@ -21,7 +21,8 @@ namespace Arch.CMessaging.Client.Producer
     {
         public static Producer GetInstance() 
         {
-            return ComponentLocator.Lookup<Producer>();
+
+			return ComponentLocator.Lookup<Producer>();
         }
         public abstract IMessageHolder Message(string topic, string partitionKey, object body);
     }

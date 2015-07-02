@@ -11,6 +11,7 @@ using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Internal
 {
+	[Named (ServiceType = (typeof(IMetaService)))]
 	public class DefaultMetaService : IMetaService, IInitializable
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(DefaultMetaService));
@@ -196,7 +197,9 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
 
 		public void Initialize ()
 		{
+
 			RefreshMeta (m_manager.loadMeta ());
+
 
 			int interval = (int)m_config.MetaCacheRefreshIntervalMinutes * 60 * 1000;
 			metaRefresher = new MetaRefresher (this, interval);

@@ -7,47 +7,48 @@ using Arch.CMessaging.Client.Core.Utils;
 
 namespace Arch.CMessaging.Client.Transport.Command.Processor
 {
-    public class DefaultCommandProcessorRegistry : ICommandProcessorRegistry, IInitializable
-    {
-        private Dictionary<CommandType, ICommandProcessor> processors = new Dictionary<CommandType, ICommandProcessor>();
-        #region ICommandProcessorRegistry Members
+	[Named (ServiceType = typeof(ICommandProcessorRegistry))]
+	public class DefaultCommandProcessorRegistry : ICommandProcessorRegistry, IInitializable
+	{
+		private Dictionary<CommandType, ICommandProcessor> processors = new Dictionary<CommandType, ICommandProcessor> ();
 
-        public void RegisterProcessor(CommandType type, ICommandProcessor processor)
-        {
-            if (processors.ContainsKey(type))
-                throw new ArgumentException(string.Format("Command processor for type {0} is already registered", type));
+		#region ICommandProcessorRegistry Members
 
-            if (processor != null) processors[type] = processor;
-        }
+		public void RegisterProcessor (CommandType type, ICommandProcessor processor)
+		{
+			if (processors.ContainsKey (type))
+				throw new ArgumentException (string.Format ("Command processor for type {0} is already registered", type));
 
-        public ICommandProcessor FindProcessor(CommandType type)
-        {
-            ICommandProcessor processor = null;
-            processors.TryGetValue(type, out processor);
-            return processor;
-        }
+			if (processor != null)
+				processors [type] = processor;
+		}
 
-        public HashSet<ICommandProcessor> ListAllProcessors()
-        {
-            return new HashSet<ICommandProcessor>(processors.Values);
-        }
+		public ICommandProcessor FindProcessor (CommandType type)
+		{
+			ICommandProcessor processor = null;
+			processors.TryGetValue (type, out processor);
+			return processor;
+		}
 
-        #endregion
+		public HashSet<ICommandProcessor> ListAllProcessors ()
+		{
+			return new HashSet<ICommandProcessor> (processors.Values);
+		}
 
-        #region IInitializable Members
+		#endregion
 
-        public void Initialize()
-        {
-            var list = ComponentLocator.LookupList<ICommandProcessor>();
-            foreach (var processor in list)
-            {
-                foreach (var type in processor.CommandTypes())
-                {
-                    RegisterProcessor(type, processor);
-                }
-            }
-        }
+		#region IInitializable Members
 
-        #endregion
-    }
+		public void Initialize ()
+		{
+			var list = ComponentLocator.LookupList<ICommandProcessor> ();
+			foreach (var processor in list) {
+				foreach (var type in processor.CommandTypes()) {
+					RegisterProcessor (type, processor);
+				}
+			}
+		}
+
+		#endregion
+	}
 }

@@ -71,7 +71,6 @@ namespace Test
 			HttpStatusCode statusCode = res.StatusCode;
 			if (statusCode == HttpStatusCode.OK) {
 				string responseContent = new StreamReader (res.GetResponseStream (), Encoding.UTF8).ReadToEnd ();
-				//Console.WriteLine (responseContent);
 				JsonSerializerSettings settings = new JsonSerializerSettings();
 				settings.NullValueHandling = NullValueHandling.Ignore;
 				Meta meta = JsonConvert.DeserializeObject<Meta> (responseContent, settings);
@@ -80,13 +79,12 @@ namespace Test
 			}
 		}
 
-
 		public static void Main (string[] args)
 		{
 			ComponentsConfigurator.DefineComponents ();
 			var p = Arch.CMessaging.Client.Producer.Producer.GetInstance ();
-			Console.WriteLine (p == null);
-//			p.Message ("order_new", "", "hello c#").Send ();
+			p.Message ("order_new", "", "hello c#").Send ();
+			Console.ReadLine ();
 		}
 
 		public static void test2 ()

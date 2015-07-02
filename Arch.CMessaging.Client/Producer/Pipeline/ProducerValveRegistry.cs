@@ -8,7 +8,7 @@ using Arch.CMessaging.Client.Producer.Build;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
-    //[Named(ServiceType=typeof(IValveRegistry), ServiceName=BuildConstants.PRODUCER)]
+    [Named(ServiceType=typeof(IValveRegistry), ServiceName=BuildConstants.PRODUCER)]
     public class ProducerValveRegistry : AbstractValveRegistry, IInitializable
     {
 

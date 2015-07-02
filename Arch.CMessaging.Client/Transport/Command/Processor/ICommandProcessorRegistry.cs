@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Collections.Generic;
 
 namespace Arch.CMessaging.Client.Transport.Command.Processor
 {

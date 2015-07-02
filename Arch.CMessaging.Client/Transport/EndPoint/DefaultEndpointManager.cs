@@ -9,18 +9,19 @@ using Arch.CMessaging.Client.MetaEntity.Entity;
 
 namespace Arch.CMessaging.Client.Transport.EndPoint
 {
-    public class DefaultEndpointManager : IEndpointManager
-    {
-        [Inject]
-        private IMetaService metaService;
+	[Named (ServiceType = typeof(IEndpointManager))]
+	public class DefaultEndpointManager : IEndpointManager
+	{
+		[Inject]
+		private IMetaService metaService;
 
-        #region IEndpointManager Members
+		#region IEndpointManager Members
 
-        public Endpoint GetEndpoint(string topic, int partition)
-        {
-            return metaService.FindEndpointByTopicAndPartition(topic, partition);
-        }
+		public Endpoint GetEndpoint (string topic, int partition)
+		{
+			return metaService.FindEndpointByTopicAndPartition (topic, partition);
+		}
 
-        #endregion
-    }
+		#endregion
+	}
 }

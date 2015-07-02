@@ -14,6 +14,7 @@ using System.Threading;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Remote
 {
+	[Named (ServiceType = typeof(IMetaServerLocator))]
 	public class DefaultMetaServerLocator : IMetaServerLocator, IInitializable
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(DefaultMetaServerLocator));
@@ -61,17 +62,17 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 					return result;
 				} catch (Exception) {
 					// ignore it
+
 				}
 			}
 
-			throw new Exception ("Failed to fetch meta server ip list from any meta server: "
-			+ metaServerList.ToString ());
+			throw new Exception ("Failed to fetch meta server ip list from any meta server: " + metaServerList.ToString ());
 		}
 
 		private List<string> domainToIpPorts ()
 		{
 			string domain = getMetaServerDomainName ();
-			log.Info (string.Format ("Meta server domain {}", domain));
+			log.Info (string.Format ("Meta server domain {0}", domain));
 			try {
 				List<string> ips = DNSUtil.resolve (domain);
 				if (CollectionUtil.IsNullOrEmpty (ips)) {
@@ -91,7 +92,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
 		private List<String> doFetch (String ipPort)
 		{
-			string url = string.Format ("http://%s%s", ipPort, "/metaserver/servers");
+			string url = string.Format ("http://{0}{1}", ipPort, "/metaserver/servers");
 
 			HttpWebRequest req = (HttpWebRequest)WebRequest.Create (url);
 			req.Timeout = m_coreConfig.MetaServerConnectTimeoutInMills + m_coreConfig.MetaServerReadTimeoutInMills;

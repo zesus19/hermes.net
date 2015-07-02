@@ -9,6 +9,13 @@ namespace Arch.CMessaging.Client.Core.Utils
 		{
 			return list == null || list.Count == 0;
 		}
+
+		public static V TryGet<K, V> (Dictionary<K, V> d, K key)
+		{
+			V result = default(V);
+			d.TryGetValue (key, out result);
+			return result;
+		}
 	}
 }
 
