@@ -710,6 +710,7 @@
     <Compile Include="MetaEntity\Transform\MillSecondEpochConverter.cs" />
     <Compile Include="Core\Utils\CollectionUtil.cs" />
     <Compile Include="Core\Utils\DNSUtil.cs" />
+    <Compile Include="Consumer\Build\BuildConstants.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -734,4 +735,7 @@
   </Target>
   -->
   <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Consumer\Build\" />
+  </ItemGroup>
 </Project>
