@@ -10,6 +10,7 @@ using Arch.CMessaging.Client.Core.Service;
 using Arch.CMessaging.Client.Core.Message;
 using Arch.CMessaging.Client.Core.Ioc;
 using Arch.CMessaging.Client.Producer.Build;
+using Arch.CMessaging.Client.Core.Exceptions;
 
 namespace Arch.CMessaging.Client.Producer
 {
@@ -79,6 +80,18 @@ namespace Arch.CMessaging.Client.Producer
             {
                 message.Callback = callback;
                 return this;
+            }
+
+            public SendResult SendSync()
+            {
+                try
+                {
+                    return Send().Get();
+                }
+                catch (Exception ex)
+                {
+                    throw new MessageSendException("send failed", ex);
+                }
             }
 
             #endregion

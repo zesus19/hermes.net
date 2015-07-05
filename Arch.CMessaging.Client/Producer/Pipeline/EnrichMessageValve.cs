@@ -9,6 +9,7 @@ using Arch.CMessaging.Client.Core.Pipeline.spi;
 using Freeway.Logging;
 using Arch.CMessaging.Client.Core.Pipeline;
 using Arch.CMessaging.Client.Core.Message;
+using Arch.CMessaging.Client.Core.Utils;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
@@ -16,25 +17,23 @@ namespace Arch.CMessaging.Client.Producer.Pipeline
 	public class EnrichMessageValve : IValve
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(EnrichMessageValve));
-
 		public const string ID = "enrich";
-
+            
 		public void Handle (IPipelineContext ctx, Object payload)
 		{
-			ProducerMessage msg = (ProducerMessage)payload;
-			String topic = msg.Topic;
-			String ip = "";
+            var msg = (ProducerMessage)payload;
+            var topic = msg.Topic;
+            if (string.IsNullOrEmpty(topic))
+            {
+                log.Error("Topic not set, won't send");
+                return;
+            }
 
-			if (string.IsNullOrEmpty (topic)) {
-				log.Error ("Topic not set, won't send");
-				return;
-			}
+            enrichPartitionKey(msg, Local.IPV4);
+            enrichRefKey(msg);
+            enrichMessageProperties(msg, Local.IPV4);
 
-			enrichPartitionKey (msg, ip);
-			enrichRefKey (msg);
-			enrichMessageProperties (msg, ip);
-
-			ctx.Next (payload);
+            ctx.Next (payload);
 		}
 
 		private void enrichRefKey (ProducerMessage msg)

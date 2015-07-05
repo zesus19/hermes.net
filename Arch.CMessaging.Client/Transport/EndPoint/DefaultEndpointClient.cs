@@ -114,58 +114,72 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 			};
 		}
 
-		private void RemoveSession (Endpoint endpoint, EndpointSession endpointSession)
+		public void RemoveSession (Endpoint endpoint, EndpointSession endpointSession)
 		{
 			EndpointSession removedSession = null;
-			if (Endpoint.BROKER.Equals (endpoint.Type) && sessions.ContainsKey (endpoint)) {
-				lock (syncRoot) {
-					if (sessions.ContainsKey (endpoint)) {
-						EndpointSession tmp = sessions [endpoint];
-						if (tmp == endpointSession) {
-							if (tmp.IsClosed)
-								sessions.TryRemove (endpoint, out removedSession);
-							else if (!tmp.IsFlushing && !tmp.HasUnflushOps)
-								sessions.TryRemove (endpoint, out removedSession);
-						}
-					}
-				}
-			}
-			if (removedSession != null) {
-				log.Info (string.Format ("Closing idle connection to broker({0}:{1})", endpoint.Host, endpoint.Port));
-				removedSession.Close ();
-			}
+            if (Endpoint.BROKER.Equals(endpoint.Type) && sessions.ContainsKey(endpoint))
+            {
+                lock (syncRoot)
+                {
+                    if (sessions.ContainsKey(endpoint))
+                    {
+                        EndpointSession tmp = sessions[endpoint];
+                        if (tmp == endpointSession)
+                        {
+                            if (tmp.IsClosed)
+                                sessions.TryRemove(endpoint, out removedSession);
+                            else if (!tmp.IsFlushing && !tmp.HasUnflushOps)
+                                sessions.TryRemove(endpoint, out removedSession);
+                        }
+                    }
+                }
+            }
+            if (removedSession != null)
+            {
+                log.Info(string.Format("Closing idle connection to broker({0}:{1})", endpoint.Host, endpoint.Port));
+                removedSession.Close();
+            }
 		}
 
 		private Bootstrap CreateBootstrap (Endpoint endpoint, EndpointSession endpointSession)
 		{
-			return new Bootstrap ()
-                    .Option (SessionOption.SO_KEEPALIVE, true)
-                    .Option (SessionOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                    .Option (SessionOption.TCP_NODELAY, true)
-                    .Option (SessionOption.SO_SNDBUF, config.SendBufferSize)
-                    .Option (SessionOption.SO_RCVBUF, config.ReceiveBufferSize)
-                    .Handler (chain => {
-				chain.AddLast (
-					new MagicNumberPrepender (),
-					new LengthFieldPrepender (4),
-					new ProtocolCodecFilter (new CommandCodecFactory ()));
-			})
-                    .Handler (new DefaultClientChannelInboundHandler (commandProcessorManager, endpoint, endpointSession, this, config));
+            return new Bootstrap()
+                    .Option(SessionOption.SO_KEEPALIVE, true)
+                    .Option(SessionOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                    .Option(SessionOption.TCP_NODELAY, true)
+                    .Option(SessionOption.SO_SNDBUF, config.SendBufferSize)
+                    .Option(SessionOption.SO_RCVBUF, config.ReceiveBufferSize)
+                    .Option(SessionOption.BOTH_IDLE_TIME, config.EndpointSessionMaxIdleTime)
+                    .Handler(chain =>
+                    {
+                        chain.AddLast(
+                            new ExceptionHandler(),
+                            new MagicNumberPrepender(),
+                            new LengthFieldPrepender(4),
+                            new ProtocolCodecFilter(new CommandCodecFactory()));
+                    })
+                    .Handler(new DefaultClientChannelInboundHandler(commandProcessorManager, endpoint, endpointSession, this, config));
 		}
 
 		private void EndpointSessionFlush (object state)
 		{
 			timer.Change (Timeout.Infinite, Timeout.Infinite);
-			try {
-				foreach (var session in sessions.Values) {
-					if (!session.IsClosed)
-						session.Flush ();
-				}
-			} catch (Exception ex) {
-				log.Error (ex);
-			} finally {
-				timer.Change (config.EndpointSessionWriterCheckInterval, Timeout.Infinite);
-			}
+            try
+            {
+                foreach (var session in sessions.Values)
+                {
+                    if (!session.IsClosed)
+                        session.Flush();
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex);
+            }
+            finally
+            {
+                timer.Change(config.EndpointSessionWriterCheckInterval, Timeout.Infinite);
+            }
 		}
 	}
 }

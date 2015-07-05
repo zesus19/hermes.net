@@ -61,7 +61,10 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 						return m_metaCache.ReadFullFence ();
 					}
 
-				} catch (Exception) {
+                }
+                catch (Exception ex)
+                {
+                    log.Error(ex);
 				}
 			}
 

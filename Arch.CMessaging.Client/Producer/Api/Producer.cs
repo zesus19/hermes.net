@@ -13,6 +13,7 @@ namespace Arch.CMessaging.Client.Producer
         IMessageHolder WithPriority();
         IMessageHolder WithRefKey(string key);
         IFuture<SendResult> Send();
+        SendResult SendSync();
         IMessageHolder AddProperty(string key, string value);
         IMessageHolder SetCallback(ICompletionCallback<SendResult> callback);
     }
