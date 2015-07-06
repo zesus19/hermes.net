@@ -14,62 +14,72 @@ using System.Text;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Remote
 {
-	[Named (ServiceType = typeof(IMetaLoader), ServiceName = RemoteMetaLoader.ID)]
-	public class RemoteMetaLoader : IMetaLoader
-	{
-		private static readonly ILog log = LogManager.GetLogger (typeof(RemoteMetaLoader));
+    [Named(ServiceType = typeof(IMetaLoader), ServiceName = RemoteMetaLoader.ID)]
+    public class RemoteMetaLoader : IMetaLoader
+    {
+        private static readonly ILog log = LogManager.GetLogger(typeof(RemoteMetaLoader));
 
-		public const String ID = "remote-meta-loader";
+        public const String ID = "remote-meta-loader";
 
-		[Inject]
-		private IMetaServerLocator m_metaServerLocator;
+        [Inject]
+        private IMetaServerLocator m_metaServerLocator;
 
-		[Inject]
-		private CoreConfig m_config;
+        [Inject]
+        private CoreConfig m_config;
 
-		private ThreadSafe.AtomicReference<Meta> m_metaCache = new ThreadSafe.AtomicReference<Meta> (null);
+        private ThreadSafe.AtomicReference<Meta> m_metaCache = new ThreadSafe.AtomicReference<Meta>(null);
 
-		public Meta load ()
-		{
-			List<string> ipPorts = m_metaServerLocator.getMetaServerList ();
-			if (ipPorts == null || ipPorts.Count == 0) {
-				throw new Exception ("No meta server found.");
-			}
+        public Meta load()
+        {
+            List<string> ipPorts = m_metaServerLocator.getMetaServerList();
+            if (ipPorts == null || ipPorts.Count == 0)
+            {
+                throw new Exception("No meta server found.");
+            }
 
-			foreach (string ipPort in ipPorts) {
-				log.Debug (string.Format ("Loading meta from server: {0}", ipPort));
+            foreach (string ipPort in ipPorts)
+            {
+                log.Debug(string.Format("Loading meta from server: {0}", ipPort));
 
-				try {
-					string url = string.Format ("http://{0}/meta", ipPort);
-					if (m_metaCache.ReadFullFence () != null) {
-						url += "?version=" + m_metaCache.ReadFullFence ().Version;
-					}
+                try
+                {
+                    string url = string.Format("http://{0}/meta", ipPort);
+                    if (m_metaCache.ReadFullFence() != null)
+                    {
+                        url += "?version=" + m_metaCache.ReadFullFence().Version;
+                    }
 
-					HttpWebRequest req = (HttpWebRequest)WebRequest.Create (url);
-					req.Timeout = m_config.MetaServerConnectTimeoutInMills + m_config.MetaServerReadTimeoutInMills;
+                    HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+                    req.Timeout = m_config.MetaServerConnectTimeoutInMills + m_config.MetaServerReadTimeoutInMills;
 
-					HttpWebResponse res = (HttpWebResponse)req.GetResponse ();
-
-					HttpStatusCode statusCode = res.StatusCode;
-					if (statusCode == HttpStatusCode.OK) {
-						string responseContent = new StreamReader (res.GetResponseStream (), Encoding.UTF8).ReadToEnd ();
-						JsonSerializerSettings settings = new JsonSerializerSettings ();
-						settings.NullValueHandling = NullValueHandling.Ignore;
-						m_metaCache.WriteFullFence (JsonConvert.DeserializeObject<Meta> (responseContent, settings));
-						return m_metaCache.ReadFullFence ();
-					} else if (statusCode == HttpStatusCode.NotModified) {
-						return m_metaCache.ReadFullFence ();
-					}
+                    using (HttpWebResponse res = (HttpWebResponse)req.GetResponse())
+                    {
+                        HttpStatusCode statusCode = res.StatusCode;
+                        if (statusCode == HttpStatusCode.OK)
+                        {
+                            using (var stream = new StreamReader(res.GetResponseStream(), Encoding.UTF8))
+                            {
+                                string responseContent = stream.ReadToEnd();
+                                JsonSerializerSettings settings = new JsonSerializerSettings();
+                                settings.NullValueHandling = NullValueHandling.Ignore;
+                                m_metaCache.WriteFullFence(JsonConvert.DeserializeObject<Meta>(responseContent, settings));
+                                return m_metaCache.ReadFullFence();
+                            }
+                        }
+                        else if (statusCode == HttpStatusCode.NotModified)
+                        {
+                            return m_metaCache.ReadFullFence();
+                        }
+                    }
 
                 }
                 catch (Exception ex)
                 {
                     log.Error(ex);
-				}
-			}
-
-			throw new Exception (string.Format ("Failed to load remote meta from {0}", ipPorts));
-		}
-	}
+                }
+            }
+            throw new Exception(string.Format("Failed to load remote meta from {0}", ipPorts));
+        }
+    }
 }
 

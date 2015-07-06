@@ -14,137 +14,160 @@ using Arch.CMessaging.Client.Newtonsoft.Json;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Remote
 {
-	[Named (ServiceType = typeof(IMetaProxy), ServiceName = RemoteMetaProxy.ID)]
-	public class RemoteMetaProxy : IMetaProxy
-	{
-		private static readonly ILog log = LogManager.GetLogger (typeof(RemoteMetaProxy));
+    [Named(ServiceType = typeof(IMetaProxy), ServiceName = RemoteMetaProxy.ID)]
+    public class RemoteMetaProxy : IMetaProxy
+    {
+        private static readonly ILog log = LogManager.GetLogger(typeof(RemoteMetaProxy));
 
-		public const String ID = "remote";
+        public const String ID = "remote";
 
-		[Inject]
-		private IMetaServerLocator m_metaServerLocator;
+        [Inject]
+        private IMetaServerLocator m_metaServerLocator;
 
-		[Inject]
-		private CoreConfig m_config;
+        [Inject]
+        private CoreConfig m_config;
 
-		public LeaseAcquireResponse tryAcquireConsumerLease (Tpg tpg, String sessionId)
-		{
-			throw new NotImplementedException ();			
-		}
-
-
-		public LeaseAcquireResponse tryRenewConsumerLease (Tpg tpg, ILease lease, String sessionId)
-		{
-			throw new NotImplementedException ();			
-		}
+        public LeaseAcquireResponse tryAcquireConsumerLease(Tpg tpg, String sessionId)
+        {
+            throw new NotImplementedException();			
+        }
 
 
-		public LeaseAcquireResponse tryRenewBrokerLease (String topic, int partition, ILease lease, String sessionId,
-		                                                 int brokerPort)
-		{
-			throw new NotImplementedException ();			
-
-		}
+        public LeaseAcquireResponse tryRenewConsumerLease(Tpg tpg, ILease lease, String sessionId)
+        {
+            throw new NotImplementedException();			
+        }
 
 
-		public LeaseAcquireResponse tryAcquireBrokerLease (String topic, int partition, String sessionId, int brokerPort)
-		{
-			throw new NotImplementedException ();			
-		}
+        public LeaseAcquireResponse tryRenewBrokerLease(String topic, int partition, ILease lease, String sessionId,
+                                                        int brokerPort)
+        {
+            throw new NotImplementedException();			
+
+        }
 
 
-		public List<SchemaView> listSchemas ()
-		{
-			throw new NotImplementedException ();			
-		}
+        public LeaseAcquireResponse tryAcquireBrokerLease(String topic, int partition, String sessionId, int brokerPort)
+        {
+            throw new NotImplementedException();			
+        }
 
 
-		public List<SubscriptionView> listSubscriptions ()
-		{
-			throw new NotImplementedException ();			
-		}
+        public List<SchemaView> listSchemas()
+        {
+            throw new NotImplementedException();			
+        }
 
-		delegate string httpTo (string ipPort);
 
-		private String post (string path, Dictionary<string, string> requestParams, Object payload)
-		{
-			return pollMetaServer ((ipPort) => {
-				UriBuilder uriBuilder = new UriBuilder ("http://" + ipPort);
-				uriBuilder.Path = path;
+        public List<SubscriptionView> listSubscriptions()
+        {
+            throw new NotImplementedException();			
+        }
 
-				var query = HttpUtility.ParseQueryString (string.Empty);
-				if (requestParams != null) {
-					foreach (KeyValuePair<string, string> pair in requestParams) {
-						query [pair.Key] = pair.Value;
-					}
-				}
-				uriBuilder.Query = query.ToString ();
+        delegate string httpTo(string ipPort);
 
-				HttpWebRequest req = (HttpWebRequest)WebRequest.Create (uriBuilder.ToString ());
-				req.Method = "POST";
-				req.Timeout = m_config.MetaServerConnectTimeoutInMills + m_config.MetaServerReadTimeoutInMills;
+        private String post(string path, Dictionary<string, string> requestParams, Object payload)
+        {
+            return pollMetaServer((ipPort) =>
+                {
+                    UriBuilder uriBuilder = new UriBuilder("http://" + ipPort);
+                    uriBuilder.Path = path;
 
-				if (payload != null) {
-					req.ContentType = "application/json";
+                    var query = HttpUtility.ParseQueryString(string.Empty);
+                    if (requestParams != null)
+                    {
+                        foreach (KeyValuePair<string, string> pair in requestParams)
+                        {
+                            query[pair.Key] = pair.Value;
+                        }
+                    }
+                    uriBuilder.Query = query.ToString();
 
-					byte[] payloadJson = Encoding.UTF8.GetBytes (JsonConvert.SerializeObject (payload));
-					req.ContentLength = payloadJson.Length;
-					Stream reqStream = req.GetRequestStream ();
-					reqStream.Write (payloadJson, 0, payloadJson.Length);
-					reqStream.Close ();
-				}
+                    HttpWebRequest req = (HttpWebRequest)WebRequest.Create(uriBuilder.ToString());
+                    req.Method = "POST";
+                    req.Timeout = m_config.MetaServerConnectTimeoutInMills + m_config.MetaServerReadTimeoutInMills;
 
-				HttpWebResponse res = (HttpWebResponse)req.GetResponse ();
+                    if (payload != null)
+                    {
+                        req.ContentType = "application/json";
 
-				HttpStatusCode statusCode = res.StatusCode;
-				if (statusCode == HttpStatusCode.OK) {
-					return new StreamReader (res.GetResponseStream (), Encoding.UTF8).ReadToEnd ();
-				} else {
-					return null;
-				}	
-			});
-		}
+                        byte[] payloadJson = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload));
+                        req.ContentLength = payloadJson.Length;
+                        using (Stream reqStream = req.GetRequestStream())
+                        {
+                            reqStream.Write(payloadJson, 0, payloadJson.Length);
+                        }
+                    }
 
-		private String pollMetaServer (httpTo httpTo)
-		{
-			List<String> metaServerIpPorts = m_metaServerLocator.getMetaServerList ();
+                    using (HttpWebResponse res = (HttpWebResponse)req.GetResponse())
+                    {
 
-			foreach (String ipPort in metaServerIpPorts) {
-				String result = httpTo (ipPort);
-				if (result != null) {
-					return result;
-				} else {
-					continue;
-				}
-			}
+                        HttpStatusCode statusCode = res.StatusCode;
+                        if (statusCode == HttpStatusCode.OK)
+                        {
+                            using (var stream = new StreamReader(res.GetResponseStream(), Encoding.UTF8))
+                            {
+                                return stream.ReadToEnd();
+                            }
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                });
+        }
 
-			return null;
+        private String pollMetaServer(httpTo httpTo)
+        {
+            List<String> metaServerIpPorts = m_metaServerLocator.getMetaServerList();
 
-		}
+            foreach (String ipPort in metaServerIpPorts)
+            {
+                String result = httpTo(ipPort);
+                if (result != null)
+                {
+                    return result;
+                }
+                else
+                {
+                    continue;
+                }
+            }
 
-		public int registerSchema (String schema, String subject)
-		{
-			Dictionary<String, String> p = new Dictionary<string, string> ();
-			p.Add ("schema", schema);
-			p.Add ("subject", subject);
-			String response = post ("/schema/register", null, p);
-			if (response != null) {
-				try {
-					return Convert.ToInt32 (response);
-				} catch (Exception e) {
-					log.Warn (string.Format ("Can not parse response, schema: {0}, subject: {1}\nResponse: {2}", schema, subject, response), e);
-				}
-			} else {
-				log.Warn ("No response while posting meta server[registerSchema]");
-			}
-			return -1;
-		}
+            return null;
 
-		public String getSchemaString (int schemaId)
-		{
-			throw new NotImplementedException ();
-		}
+        }
 
-	}
+        public int registerSchema(String schema, String subject)
+        {
+            Dictionary<String, String> p = new Dictionary<string, string>();
+            p.Add("schema", schema);
+            p.Add("subject", subject);
+            String response = post("/schema/register", null, p);
+            if (response != null)
+            {
+                try
+                {
+                    return Convert.ToInt32(response);
+                }
+                catch (Exception e)
+                {
+                    log.Warn(string.Format("Can not parse response, schema: {0}, subject: {1}\nResponse: {2}", schema, subject, response), e);
+                }
+            }
+            else
+            {
+                log.Warn("No response while posting meta server[registerSchema]");
+            }
+            return -1;
+        }
+
+        public String getSchemaString(int schemaId)
+        {
+            throw new NotImplementedException();
+        }
+
+    }
 }
 

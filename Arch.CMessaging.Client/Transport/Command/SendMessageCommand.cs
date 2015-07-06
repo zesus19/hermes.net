@@ -72,12 +72,6 @@ namespace Arch.CMessaging.Client.Transport.Command
             }
         }
 
-        public void OnTimeout()
-        {
-            Exception ex = new TimeoutException("Send timeout");
-            foreach (var entry in futures) entry.Value.SetException(ex);
-        }
-
         protected override void Parse0(IoBuffer buf)
         {
             Buf = buf;

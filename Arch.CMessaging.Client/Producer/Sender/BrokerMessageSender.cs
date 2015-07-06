@@ -336,8 +336,7 @@ namespace Arch.CMessaging.Client.Producer.Sender
 					command.ExpireTime = sender.ClockService.Now () + sender.Config.SendMessageReadResultTimeoutMillis;
 					var future = sender.SendMessageAcceptanceMonitor.Monitor (command.Header.CorrelationId);
 					sender.SendMessageResultMonitor.Monitor (command);
-					var timeout = Convert.ToInt32 (sender.ClientEnv
-                        .GetGlobalConfig ().GetProperty ("producer.sender.send.timeout", sender.Config.DefaultBrokerSenderSendTimeoutMillis));
+					int timeout = sender.Config.DefaultBrokerSenderSendTimeoutMillis;
 					sender.EndpointClient.WriteCommand (endpoint, command, timeout);
 					try {
 						brokerAccepted = future.Get (timeout);
