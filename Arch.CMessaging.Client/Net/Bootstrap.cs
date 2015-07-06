@@ -69,7 +69,9 @@ namespace Arch.CMessaging.Client.Net
                         break;
                     case "CONNECT_TIMEOUT_MILLIS": connector.ConnectTimeoutInMillis = Convert.ToInt64(option.Value);
                         break;
-                    default:
+                    case "BOTH_IDLE_TIME": connector.SessionConfig.BothIdleTime = Convert.ToInt32(option.Value);
+                        break;
+                    default: 
                         break;
                 }
             }

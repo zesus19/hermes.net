@@ -31,10 +31,6 @@ namespace Arch.CMessaging.Client.Core.Utils
         public static T Lookup<T>()
         {
             return container.Lookup<T>();
-
-            //T obj = default(T);
-            //if (typeof(T) == typeof(IMessageCodec)) obj = (T)(object)new DefaultMessageCodec();
-            //return obj;
         }
 
         public static T Lookup<T>(string name)

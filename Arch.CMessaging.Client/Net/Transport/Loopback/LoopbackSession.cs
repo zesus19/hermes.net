@@ -10,7 +10,7 @@ namespace Arch.CMessaging.Client.Net.Transport.Loopback
     class LoopbackSession : AbstractIoSession
     {
         public static readonly ITransportMetadata Metadata
-            = new DefaultTransportMetadata("mina", "loopback", false, false, typeof(LoopbackEndPoint));
+            = new DefaultTransportMetadata("hermes-transport", "loopback", false, false, typeof(LoopbackEndPoint));
 
         private readonly LoopbackEndPoint _localEP;
         private readonly LoopbackEndPoint _remoteEP;

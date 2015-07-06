@@ -9,5 +9,6 @@ namespace Arch.CMessaging.Client.Core.Exceptions
     {
         private const long serialVersionUID = 1L;
         public MessageSendException(string message) : base(message) { }
+        public MessageSendException(string message, Exception ex) : base(message, ex) { }
     }
 }

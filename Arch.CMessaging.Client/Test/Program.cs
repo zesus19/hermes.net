@@ -83,10 +83,20 @@ namespace Test
 		{
 			ComponentsConfigurator.DefineComponents ();
 			var p = Arch.CMessaging.Client.Producer.Producer.GetInstance ();
-			var future = p.Message ("order_new", "", "hello c#").Send ();
-            var result = future.Get();
-            Console.WriteLine("aaa");
-			Console.ReadLine ();
+            while (true)
+            {
+                try
+                {
+                    var future = p.Message("cmessage_fws", "", "hello c#").Send();
+                    var result = future.Get(2000);
+                    Console.WriteLine("aaa");
+                    Thread.Sleep(1000);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
 		}
 
 		public static void test2 ()
