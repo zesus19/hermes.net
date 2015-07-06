@@ -11,7 +11,7 @@ namespace Arch.CMessaging.Client.Net.Core.Session
     public class DummySession : AbstractIoSession
     {
         private static readonly ITransportMetadata Metadata
-            = new DefaultTransportMetadata("mina", "dummy", false, false, typeof(IPEndPoint));
+            = new DefaultTransportMetadata("hermes-transport", "dummy", false, false, typeof(IPEndPoint));
 
         private volatile IoHandler _handler = new IoHandlerAdapter();
         private readonly IoProcessor<DummySession> _processor;

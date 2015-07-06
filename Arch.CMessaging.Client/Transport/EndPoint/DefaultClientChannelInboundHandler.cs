@@ -39,9 +39,12 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
             cmdProcessorManager.Offer(new CommandProcessorContext(command, session));
         }
 
-        public override void ExceptionCaught(IoSession session, Exception cause)
+        public override void SessionIdle(IoSession session, IdleStatus status)
         {
-            base.ExceptionCaught(session, cause);
+            if (status == IdleStatus.BothIdle)
+            {
+                endpointClient.RemoveSession(endpoint, endpointSession);
+            }
         }
     }
 }

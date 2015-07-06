@@ -120,7 +120,7 @@ namespace Arch.CMessaging.Client.Producer.Sender
 			}
 
 			return task.Submit (message);
-		}
+		} 
 
 		public void Initialize ()
 		{

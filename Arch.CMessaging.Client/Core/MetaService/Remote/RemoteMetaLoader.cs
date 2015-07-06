@@ -73,12 +73,11 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
                     }
 
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // ignore
+                    log.Error(ex);
                 }
             }
-
             throw new Exception(string.Format("Failed to load remote meta from {0}", ipPorts));
         }
     }

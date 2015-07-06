@@ -129,6 +129,7 @@
     <Compile Include="Core\Utils\CollectionExtension.cs" />
     <Compile Include="Core\Utils\ComponentLocator.cs" />
     <Compile Include="Core\Utils\HermesPrimitiveCodec.cs" />
+    <Compile Include="Core\Utils\Local.cs" />
     <Compile Include="Core\Utils\Pair.cs" />
     <Compile Include="Core\Utils\Properties.cs" />
     <Compile Include="Core\Utils\StringExtension.cs" />
@@ -580,6 +581,7 @@
     <Compile Include="Transport\EndPoint\EndpointSession.cs" />
     <Compile Include="Transport\EndPoint\IEndpointClient.cs" />
     <Compile Include="Transport\EndPoint\IEndpointManager.cs" />
+    <Compile Include="Transport\ExceptionHandler.cs" />
     <Compile Include="Transport\Header.cs" />
     <Compile Include="Transport\LengthFieldPrepender.cs" />
     <Compile Include="Transport\Magic.cs" />

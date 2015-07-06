@@ -79,23 +79,24 @@ namespace Test
 			}
 		}
 
-        public static void Send ()
-        {
-            ComponentsConfigurator.DefineComponents ();
-            var p = Arch.CMessaging.Client.Producer.Producer.GetInstance ();
-            var future = p.Message ("order_new", "", "hello c#").Send ();
-            var result = future.Get();
-            Console.WriteLine("aaa");
-            Console.ReadLine ();
-        }
-
-        public class A<T>
-        {
-        }
-
 		public static void Main (string[] args)
 		{
-            Send();
+			ComponentsConfigurator.DefineComponents ();
+			var p = Arch.CMessaging.Client.Producer.Producer.GetInstance ();
+            while (true)
+            {
+                try
+                {
+                    var future = p.Message("cmessage_fws", "", "hello c#").Send();
+                    var result = future.Get(2000);
+                    Console.WriteLine("aaa");
+                    Thread.Sleep(1000);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
 		}
 
 		public static void test2 ()

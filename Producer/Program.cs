@@ -27,17 +27,13 @@ namespace Producer
         {
             try
             {
-                var bag = new ConcurrentBag<int>();
-                bag.Add(1);
-                bag.Add(1);
 
-                ComponentsConfigurator.DefineComponents();
-                var p = Arch.CMessaging.Client.Producer.Producer.GetInstance();
-                Console.WriteLine(p == null);
-
-                return; 
-
-
+                //ComponentsConfigurator.DefineComponents();
+                //var p2 = Arch.CMessaging.Client.Producer.Producer.GetInstance();
+                //var future = p2.Message("order_new", "", "hello c#").Send();
+                //var result = future.Get();
+                //Console.WriteLine("aaa");
+                //Console.ReadLine();
 
 
                 var future = new Bootstrap()
@@ -57,22 +53,22 @@ namespace Producer
                     .Connect(args[0], 4376);
                 
 
-                future.Await();
-                var session = future.Session;
+                //future.Await();
+                //var session = future.Session;
 
-                var message = new ProducerMessage("cmessage_fws", 1233213423L) { Partition = 0, Key = "key", IsPriority = true, BornTime = DateTime.Now.CurrentTimeMillis() };
-                message.PropertiesHolder.DurableProperties.Add("SYS.RootMessageId", "hermes-c0a8cc01-398166-30001");
-                message.PropertiesHolder.DurableProperties.Add("SYS.ServerMessageId", "hermes-c0a8cc01-398166-30000");
-                message.PropertiesHolder.DurableProperties.Add("SYS.CurrentMessageId", "hermes-c0a8cc01-398166-30001");
-                var command = new SendMessageCommand("cmessage_fws", 0);
-                command.AddMessage(message, new SettableFuture<SendResult>());
+                //var message = new ProducerMessage("cmessage_fws", 1233213423L) { Partition = 0, Key = "key", IsPriority = true, BornTime = DateTime.Now.CurrentTimeMillis() };
+                //message.PropertiesHolder.DurableProperties.Add("SYS.RootMessageId", "hermes-c0a8cc01-398166-30001");
+                //message.PropertiesHolder.DurableProperties.Add("SYS.ServerMessageId", "hermes-c0a8cc01-398166-30000");
+                //message.PropertiesHolder.DurableProperties.Add("SYS.CurrentMessageId", "hermes-c0a8cc01-398166-30001");
+                //var command = new SendMessageCommand("cmessage_fws", 0);
+                //command.AddMessage(message, new SettableFuture<SendResult>());
 
-                var writeFuture1 = session.Write(command);
-                writeFuture1.Await();
-                System.Threading.Thread.Sleep(1000);
-                var writeFuture2 = session.Write(command);
-                writeFuture2.Complete += writeFuture2_Complete;
-                Console.ReadLine();
+                //var writeFuture1 = session.Write(command);
+                //writeFuture1.Await();
+                //System.Threading.Thread.Sleep(1000);
+                //var writeFuture2 = session.Write(command);
+                //writeFuture2.Complete += writeFuture2_Complete;
+                //Console.ReadLine();
 
             }
             catch (Exception ex)
