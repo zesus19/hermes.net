@@ -11,5 +11,6 @@ namespace Arch.CMessaging.Client.Core.Collections
     {
         bool Produce(TItem item);
         event EventHandler<ConsumeEventArgs> OnConsume;
+        void Shutdown();
     }
 }

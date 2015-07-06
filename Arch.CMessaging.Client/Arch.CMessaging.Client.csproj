@@ -711,6 +711,11 @@
     <Compile Include="Core\Utils\CollectionUtil.cs" />
     <Compile Include="Core\Utils\DNSUtil.cs" />
     <Compile Include="Consumer\Build\BuildConstants.cs" />
+    <Compile Include="Core\Message\BrokerConsumerMessage.cs" />
+    <Compile Include="Core\Message\PropertiesHolderAware.cs" />
+    <Compile Include="Core\Message\BaseConsumerMessageAware.cs" />
+    <Compile Include="Transport\Command\AckMessageCommand.cs" />
+    <Compile Include="Core\Bo\Tpp.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

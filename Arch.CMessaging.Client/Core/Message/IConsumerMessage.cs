@@ -4,32 +4,32 @@ using System.Collections.Generic;
 namespace Arch.CMessaging.Client.Core.Message
 {
 
-	public enum MessageStatus
-	{
-		SUCCESS,
-		FAIL,
-		NOT_SET
-	}
+    public class MessageStatus
+    {
+        public const string SUCCESS = "success";
+        public const string FAIL = "fail";
+        public const string NOT_SET = "set_set";
+    }
 
-	public interface IConsumerMessage<T>
-	{
-		void nack ();
+    public interface IConsumerMessage
+    {
+        void nack();
 
-		String getProperty (String name);
+        string GetProperty(string name);
 
-		IEnumerable<String> getPropertyNames ();
+        IEnumerator<string> GetPropertyNames();
 
-		long getBornTime ();
+        long BornTime{ get; }
 
-		String getTopic ();
+        string Topic{ get; }
 
-		String getRefKey ();
+        string RefKey { get; }
 
-		T getBody ();
+        T GetBody<T>();
 
-		MessageStatus getStatus ();
+        string Status{ get; }
 
-		void ack ();
-	}
+        void ack();
+    }
 }
 

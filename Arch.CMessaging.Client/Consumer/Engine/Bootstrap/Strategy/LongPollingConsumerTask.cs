@@ -11,152 +11,162 @@ using Arch.CMessaging.Client.Consumer.Engine.Monitor;
 using Arch.CMessaging.Client.Core.Bo;
 using Freeway.Logging;
 using System.Threading;
+using Arch.CMessaging.Client.Core.Collections;
+using Arch.CMessaging.Client.Core.Utils;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 {
-	public class LongPollingConsumerTask
-	{
-		/*private static readonly ILog log = LogManager.GetLogger(typeof(LongPollingConsumerTask));
+    public class LongPollingConsumerTask
+    {
+        private static readonly ILog log = LogManager.GetLogger(typeof(LongPollingConsumerTask));
 
-		public IConsumerNotifier ConsumerNotifier;
+        public IConsumerNotifier ConsumerNotifier { get; set; }
 
-		public IMessageCodec MessageCodec;
+        public IMessageCodec MessageCodec { get; set; }
 
-		public IEndpointClient EndpointManager;
+        public IEndpointClient EndpointManager { get; set; }
 
-		public IEndpointClient EndpointClient;
+        public IEndpointClient EndpointClient { get; set; }
 
-		public ILeaseManager<ConsumerLeaseKey> LeaseManager;
+        public ILeaseManager<ConsumerLeaseKey> LeaseManager { get; set; }
 
-		public ISystemClockService SystemClockService;
+        public ISystemClockService SystemClockService;
 
-		public ConsumerConfig Config;
+        public ConsumerConfig Config{ get; set; }
 
-		private ExecutorService m_pullMessageTaskExecutorService;
+        private ProducerConsumer<Action> m_pullMessageTaskExecutorService;
 
-		private ScheduledExecutorService m_renewLeaseTaskExecutorService;
+        private ProducerConsumer<Action> m_renewLeaseTaskExecutorService;
 
-		public IPullMessageResultMonitor PullMessageResultMonitor;
+        public IPullMessageResultMonitor PullMessageResultMonitor { get; set; }
 
-		private BlockingQueue<IConsumerMessage<Object>> m_msgs;
+        private BlockingQueue<IConsumerMessage> m_msgs;
 
-		private int m_cacheSize;
+        private int cacheSize;
 
-		private int m_localCachePrefetchThreshold;
+        private int localCachePrefetchThreshold;
 
-		private ConsumerContext Context;
+        private ConsumerContext Context;
 
-		private int PartitionId;
+        private int PartitionId;
 
-		private volatile bool PullTaskRunning = false;
+        private volatile bool PullTaskRunning = false;
 
-		private AtomicReference<ILease> m_lease = new AtomicReference<>(null);
+        private ThreadSafe.AtomicReference<ILease> m_lease = new ThreadSafe.AtomicReference<ILease>(null);
 
-		private volatile bool Closed = false;
+        private volatile bool Closed = false;
 
-		public LongPollingConsumerTask(ConsumerContext context, int partitionId, int cacheSize, int prefetchThreshold,
-			ISystemClockService systemClockService) {
-			Context = context;
-			PartitionId = partitionId;
-			CacheSize = cacheSize;
-			LocalCachePrefetchThreshold = prefetchThreshold;
-			m_msgs = new LinkedBlockingQueue<ConsumerMessage<Object>>(m_cacheSize);
-			SystemClockService = systemClockService;
+        /*
+        public LongPollingConsumerTask(ConsumerContext context, int partitionId, int cacheSize, int prefetchThreshold,
+                                       ISystemClockService systemClockService)
+        {
+            Context = context;
+            PartitionId = partitionId;
+            this.cacheSize = cacheSize;
+            this.localCachePrefetchThreshold = prefetchThreshold;
+            m_msgs = new BlockingQueue<IConsumerMessage>(cacheSize);
+            SystemClockService = systemClockService;
 
-			m_pullMessageTaskExecutorService = Executors.newSingleThreadExecutor(HermesThreadFactory.create(String.format(
-				"LongPollingPullMessageTask-%s-%s-%s", m_context.getTopic().getName(), m_partitionId,
-				m_context.getGroupId()), false));
+            m_pullMessageTaskExecutorService = new ProducerConsumer<Action>();
 
-			m_renewLeaseTaskExecutorService = Executors.newSingleThreadScheduledExecutor(HermesThreadFactory.create(String
-				.format("LongPollingRenewLeaseTask-%s-%s-%s", m_context.getTopic().getName(), m_partitionId,
-					m_context.getGroupId()), false));
-		}
+            m_renewLeaseTaskExecutorService = new ProducerConsumer<Action>();
+        }
 
-		private bool isClosed() {
-			return Closed;
-		}
+        private bool isClosed()
+        {
+            return Closed;
+        }
 
-		public override void run() {
-			log.Info("Consumer started(topic={}, partition={}, groupId={}, sessionId={})", Context.Topic.Name,
-				PartitionId, Context.GroupId, Context.SessionId);
-			ConsumerLeaseKey key = new ConsumerLeaseKey(new Tpg(Context.Topic.Name, PartitionId,
-				Context.GroupId), Context.SessionId);
-			while (!isClosed() && !Thread.currentThread().isInterrupted()) {
-				try {
-					acquireLease(key);
+        public void run()
+        {
+            log.Info("Consumer started(topic={}, partition={}, groupId={}, sessionId={})", Context.Topic.Name,
+                PartitionId, Context.GroupId, Context.SessionId);
+            ConsumerLeaseKey key = new ConsumerLeaseKey(new Tpg(Context.Topic.Name, PartitionId,
+                                           Context.GroupId), Context.SessionId);
+            while (!isClosed())
+            {
+                try
+                {
+                    acquireLease(key);
 
-					if (!isClosed() && m_lease.get() != null && !m_lease.get().isExpired()) {
-						long correlationId = CorrelationIdGenerator.generateCorrelationId();
-						log.info(
-							"Consumer continue consuming(topic={}, partition={}, groupId={}, correlationId={}, sessionId={}), since lease acquired",
-							m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(), correlationId,
-							m_context.getSessionId());
+                    if (!isClosed() && m_lease.ReadFullFence() != null && !m_lease.ReadFullFence().IsExpired())
+                    {
+                        long correlationId = CorrelationIdGenerator.generateCorrelationId();
+                        log.Info(string.Format(
+                                "Consumer continue consuming(topic={0}, partition={1}, groupId={2}, correlationId={3}, sessionId={4}), since lease acquired",
+                                Context.Topic.Name, PartitionId, Context.GroupId, correlationId,
+                                Context.SessionId));
 
-						startConsumingMessages(key, correlationId);
+                        startConsumingMessages(key, correlationId);
 
-						log.info(
-							"Consumer pause consuming(topic={}, partition={}, groupId={}, correlationId={}, sessionId={}), since lease expired",
-							m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(), correlationId,
-							m_context.getSessionId());
-					}
-				} catch (Exception e) {
-					log.error("Exception occurred in consumer's run method(topic={}, partition={}, groupId={}, sessionId={})",
-						m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(), m_context.getSessionId(), e);
-				}
-			}
+                        log.Info(string.Format(
+                                "Consumer pause consuming(topic={0}, partition={1}, groupId={2}, correlationId={3}, sessionId={4}), since lease expired",
+                                Context.Topic.Name, PartitionId, Context.GroupId, correlationId,
+                                Context.SessionId));
+                    }
+                }
+                catch (Exception e)
+                {
+                    log.Error(string.Format("Exception occurred in consumer's run method(topic={0}, partition={1}, groupId={2}, sessionId={3})",
+                            Context.Topic.Name, PartitionId, Context.GroupId, Context.SessionId), e);
+                }
+            }
 
-			m_pullMessageTaskExecutorService.shutdown();
-			m_renewLeaseTaskExecutorService.shutdown();
-			log.info("Consumer stopped(topic={}, partition={}, groupId={}, sessionId={})", m_context.getTopic().getName(),
-				m_partitionId, m_context.getGroupId(), m_context.getSessionId());
-		}
+            m_pullMessageTaskExecutorService.Shutdown();
+            m_renewLeaseTaskExecutorService.Shutdown();
+            log.Info(string.Format("Consumer stopped(topic={0}, partition={1}, groupId={2}, sessionId={3})", Context.Topic.Name,
+                    PartitionId, Context.GroupId, Context.SessionId));
+        }
 
-		private void startConsumingMessages(ConsumerLeaseKey key, long correlationId) {
-			ConsumerNotifier.register(correlationId, Context);
+        private void startConsumingMessages(ConsumerLeaseKey key, long correlationId)
+        {
+            ConsumerNotifier.Register(correlationId, Context);
 
-			while (!isClosed() && !Thread.currentThread().isInterrupted() && !m_lease.get().isExpired()) {
+            while (!isClosed() && !m_lease.ReadFullFence().IsExpired())
+            {
 
-				try {
-					// if leaseRemainingTime < stopConsumerTimeMillsBeforLeaseExpired, stop
-					if (m_lease.get().getRemainingTime() <= m_config.getStopConsumerTimeMillsBeforLeaseExpired()) {
-						if (log.isDebugEnabled()) {
-							log.debug(
-								"Consumer pre-pause(topic={}, partition={}, groupId={}, correlationId={}, sessionId={}), since lease will be expired soon",
-								m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(), correlationId,
-								m_context.getSessionId());
-						}
-						break;
-					}
+                try
+                {
+                    // if leaseRemainingTime < stopConsumerTimeMillsBeforLeaseExpired, stop
+                    if (m_lease.ReadFullFence().GetRemainingTime() <= Config.StopConsumerTimeMillsBeforLeaseExpired)
+                    {
+                        break;
+                    }
 
-					if (m_msgs.size() <= m_localCachePrefetchThreshold) {
-						schedulePullMessagesTask(correlationId);
-					}
+                    if (m_msgs.Count <= localCachePrefetchThreshold)
+                    {
+                        schedulePullMessagesTask(correlationId);
+                    }
 
-					if (!m_msgs.isEmpty()) {
-						consumeMessages(correlationId, m_cacheSize);
-					} else {
-						TimeUnit.MILLISECONDS.sleep(m_config.getNoMessageWaitIntervalMillis());
-					}
+                    if (m_msgs.Count != 0)
+                    {
+                        consumeMessages(correlationId, cacheSize);
+                    }
+                    else
+                    {
+                        Thread.Sleep(Config.NoMessageWaitIntervalMillis);
+                    }
 
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				} catch (Exception e) {
-					log.error("Exception occurred while consuming message(topic={}, partition={}, groupId={}, sessionId={})",
-						m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(), m_context.getSessionId(), e);
-				}
-			}
+                }
+                catch (Exception e)
+                {
+                    log.Error(string.Format("Exception occurred while consuming message(topic={0}, partition={1}, groupId={2}, sessionId={3})",
+                            Context.Topic.Name, PartitionId, Context.GroupId, Context.SessionId), e);
+                }
+            }
 
-			// consume all remaining messages
-			if (!m_msgs.isEmpty()) {
-				consumeMessages(correlationId, 0);
-			}
+            // consume all remaining messages
+            if (m_msgs.Count != 0)
+            {
+                consumeMessages(correlationId, 0);
+            }
 
-			m_consumerNotifier.deregister(correlationId);
-			m_lease.set(null);
-		}
+            m_consumerNotifier.Reregister(correlationId);
+            m_lease.WriteFullFence(null);
+        }
 
 		private void scheduleRenewLeaseTask(ConsumerLeaseKey key, long delay) {
-			m_renewLeaseTaskExecutorService.schedule(new Runnable() {
+            m_renewLeaseTaskExecutorService.schedule(delegate {
 
 				public void run() {
 					if (isClosed()) {
@@ -173,8 +183,8 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 									lease.getRemainingTime() - m_config.getRenewLeaseTimeMillisBeforeExpired());
 								if (log.isDebugEnabled()) {
 									log.debug("Consumer renew lease success(topic={}, partition={}, groupId={}, sessionId={})",
-										m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(),
-										m_context.getSessionId());
+										Context.Topic.Name, PartitionId, Context.GroupId,
+										Context.SessionId);
 								}
 							} else {
 								if (response != null && response.getNextTryTime() > 0) {
@@ -186,8 +196,8 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 								if (log.isDebugEnabled()) {
 									log.debug(
 										"Unable to renew consumer lease(topic={}, partition={}, groupId={}, sessionId={}), ignore it",
-										m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(),
-										m_context.getSessionId());
+										Context.Topic.Name, PartitionId, Context.GroupId,
+										Context.SessionId);
 								}
 							}
 						}
@@ -226,8 +236,8 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 						if (log.isDebugEnabled()) {
 							log.debug(
 								"Acquire consumer lease success(topic={}, partition={}, groupId={}, sessionId={}, leaseId={}, expireTime={})",
-								m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(),
-								m_context.getSessionId(), response.getLease().getId(), new Date(response.getLease()
+								Context.Topic.Name, PartitionId, Context.GroupId,
+								Context.SessionId, response.getLease().getId(), new Date(response.getLease()
 									.getExpireTime()));
 						}
 						return;
@@ -241,12 +251,12 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 						if (log.isDebugEnabled()) {
 							log.debug(
 								"Unable to acquire consumer lease(topic={}, partition={}, groupId={}, sessionId={}), ignore it",
-								m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(), m_context.getSessionId());
+								Context.Topic.Name, PartitionId, Context.GroupId, Context.SessionId);
 						}
 					}
 				} catch (Exception e) {
 					log.error("Exception occurred while acquiring lease(topic={}, partition={}, groupId={}, sessionId={})",
-						m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(), m_context.getSessionId(), e);
+						Context.Topic.Name, PartitionId, Context.GroupId, Context.SessionId, e);
 				}
 			}
 		}
@@ -274,7 +284,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 				int partition = batch.getPartition();
 
 				for (int j = 0; j < msgMetas.size(); j++) {
-					BaseConsumerMessage baseMsg = m_messageCodec.decode(batch.getTopic(), batchData, bodyClazz);
+					BaseConsumerMessage baseMsg = m_messageCodec.decode(batch.Topic, batchData, bodyClazz);
 					BrokerConsumerMessage brokerMsg = new BrokerConsumerMessage(baseMsg);
 					MessageMeta messageMeta = msgMetas.get(j);
 					brokerMsg.setPartition(partition);
@@ -310,11 +320,11 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 						return;
 					}
 
-					Endpoint endpoint = m_endpointManager.getEndpoint(m_context.getTopic().getName(), m_partitionId);
+					Endpoint endpoint = m_endpointManager.getEndpoint(Context.Topic.Name, PartitionId);
 
 					if (endpoint == null) {
 						log.warn("No endpoint found for topic {} partition {}, will retry later",
-							m_context.getTopic().getName(), m_partitionId);
+							Context.Topic.Name, PartitionId);
 						TimeUnit.MILLISECONDS.sleep(m_config.getNoEndpointWaitIntervalMillis());
 						return;
 					}
@@ -326,8 +336,8 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 						long timeout = lease.getRemainingTime();
 
 						if (timeout > 0) {
-							PullMessageCommand cmd = new PullMessageCommand(m_context.getTopic().getName(), m_partitionId,
-								m_context.getGroupId(), m_cacheSize - m_msgs.size(), m_systemClockService.now() + timeout
+							PullMessageCommand cmd = new PullMessageCommand(Context.Topic.Name, PartitionId,
+								Context.GroupId, m_cacheSize - m_msgs.size(), m_systemClockService.now() + timeout
 								- 500L);
 
 							cmd.getHeader().setCorrelationId(m_correlationId);
@@ -354,8 +364,8 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 										m_msgs.addAll(msgs);
 									} else {
 										log.warn("Can not find consumerContext(topic={}, partition={}, groupId={}, sessionId={})",
-											m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(),
-											m_context.getSessionId());
+											Context.Topic.Name, PartitionId, Context.GroupId,
+											Context.SessionId);
 									}
 								}
 							} finally {
@@ -369,7 +379,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 					// ignore
 				} catch (Exception e) {
 					log.warn("Exception occurred while pulling message(topic={}, partition={}, groupId={}, sessionId={}).",
-						m_context.getTopic().getName(), m_partitionId, m_context.getGroupId(), m_context.getSessionId(), e);
+						Context.Topic.Name, PartitionId, Context.GroupId, Context.SessionId, e);
 				} finally {
 					m_pullTaskRunning.set(false);
 				}
@@ -380,6 +390,6 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 		public void close() {
 			m_closed.set(true);
 		}*/
-	}
+    }
 }
 

@@ -10,7 +10,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
 
 		void Deregister (long correlationId);
 
-		void MessageReceived (long correlationId, List<IConsumerMessage<Object>> msgs);
+		void MessageReceived (long correlationId, List<IConsumerMessage> msgs);
 
 		ConsumerContext Find (long correlationId);
 	}

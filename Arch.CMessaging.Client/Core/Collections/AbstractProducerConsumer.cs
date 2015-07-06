@@ -68,6 +68,10 @@ namespace Arch.CMessaging.Client.Core.Collections
         }
 
         public event EventHandler<ConsumeEventArgs> OnConsume;
+        public void Shutdown ()
+        {
+            // TODO shut down
+        }
         protected abstract TQueue BlockingQueue { get; }
         protected abstract IConsumingItem TakeConsumingItem();
     }

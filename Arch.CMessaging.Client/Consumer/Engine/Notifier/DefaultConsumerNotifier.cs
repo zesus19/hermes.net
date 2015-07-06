@@ -8,101 +8,94 @@ using Arch.CMessaging.Client.Core.Env;
 using Arch.CMessaging.Client.Consumer.Engine;
 using System.Collections.Concurrent;
 using Arch.CMessaging.Client.Core.Message;
+using Arch.CMessaging.Client.Core.Utils;
+using Arch.CMessaging.Client.Core.Collections;
+using Arch.CMessaging.Client.Core.Ioc;
+using Arch.CMessaging.Client.Consumer.Build;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
 {
-	public class DefaultConsumerNotifier : IConsumerNotifier
-	{
-		/*private static readonly ILog log = LogManager.GetLogger(typeof(DefaultConsumerNotifier));
+    public class DefaultConsumerNotifier : IConsumerNotifier
+    {
+        private static readonly ILog log = LogManager.GetLogger(typeof(DefaultConsumerNotifier));
 
-		//private ConcurrentMap<Long, Pair<ConsumerContext, ExecutorService>> m_consumerContexs = new ConcurrentHashMap<>();
-		private ConcurrentDictionary<long, Pair<ConsumerContext, IExecutor>> m_consumerContexs;
+        private ConcurrentDictionary<long, Pair<ConsumerContext, ProducerConsumer<Action>>> m_consumerContexs;
 
-		// @Inject(BuildConstants.CONSUMER)
-		private IPipeline<Void> m_pipeline;
+        [Inject(BuildConstants.CONSUMER)]
+        private IPipeline<object> m_pipeline;
 
-		private ConsumerConfig m_config;
+        [Inject]
+        private ConsumerConfig m_config;
 
-		private ISystemClockService m_systemClockService;
+        [Inject]
+        private ISystemClockService m_systemClockService;
 
-		private IClientEnvironment m_clientEnv;
-		*/
+        [Inject]
+        private IClientEnvironment m_clientEnv;
 
-		public void Register(long correlationId, ConsumerContext context) {
-			/*
-			try {
-				if (log.isDebugEnabled()) {
-					log.Debug("Registered(correlationId={}, topic={}, groupId={}, sessionId={})", correlationId, context
-						.Topic.Name, context.GroupId, context.SessionId);
-				}
+        public void Register(long correlationId, ConsumerContext context)
+        {
+            try
+            {
+                int threadCount = Convert.ToInt32(m_clientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
+                                          "consumer.notifier.threadcount", m_config.DefaultNotifierThreadCount));
+                ProducerConsumer<Action> threadPool = new ProducerConsumer<Action>(int.MaxValue, threadCount);
 
-				int threadCount = Integer.valueOf(m_clientEnv.getConsumerConfig(context.getTopic().getName()).getProperty(
-					"consumer.notifier.threadcount", m_config.getDefaultNotifierThreadCount()));
+                var pair = new Pair<ConsumerContext, ProducerConsumer<Action>>(context, threadPool);
+                m_consumerContexs.TryAdd(correlationId, pair);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Register consumer notifier failed", e);
+            }
+        }
 
-				m_consumerContexs.putIfAbsent(
-					correlationId,
-					new Pair<>(context, Executors.newFixedThreadPool(
-						threadCount,
-						HermesThreadFactory.create(
-							String.format("ConsumerNotifier-%s-%s-%s", context.getTopic().getName(),
-								context.getGroupId(), correlationId), false))));
-			} catch (Exception e) {
-				throw new RuntimeException("Register consumer notifier failed", e);
-			}
-			*/
-		}
+        public void Deregister(long correlationId)
+        {
+            Pair<ConsumerContext, ProducerConsumer<Action>> pair = null;
+            m_consumerContexs.TryRemove(correlationId, out pair);
+            ConsumerContext context = pair.Key;
+            pair.Value.Shutdown();
+            return;
+        }
 
-		public void Deregister(long correlationId) {
-			/*
-			KeyValuePair<ConsumerContext, ExecutorService> pair = m_consumerContexs.remove(correlationId);
-			ConsumerContext context = pair.getKey();
-			if (log.isDebugEnabled()) {
-				log.Debug("Deregistered(correlationId={}, topic={}, groupId={}, sessionId={})", correlationId, context
-					.getTopic().getName(), context.getGroupId(), context.getSessionId());
-			}
-			pair.getValue().shutdown();
-			return;
-			*/
-		}
+        public void MessageReceived(long correlationId, List<IConsumerMessage> msgs)
+        {
+            Pair<ConsumerContext, ProducerConsumer<Action>> pair = m_consumerContexs[correlationId];
+            ConsumerContext context = pair.Key;
+            ProducerConsumer<Action> executorService = pair.Value;
 
-		public void MessageReceived(long correlationId, List<IConsumerMessage<Object>> msgs) {
-			/*
-			KeyValuePair<ConsumerContext, ExecutorService> pair = m_consumerContexs.get(correlationId);
-			ConsumerContext context = pair.getKey();
-			ExecutorService executorService = pair.getValue();
+            executorService.Produce(delegate
+                {
+                    try
+                    {
+                        foreach (IConsumerMessage msg in msgs)
+                        {
+                            if (msg is BrokerConsumerMessage)
+                            {
+                                BrokerConsumerMessage bmsg = (BrokerConsumerMessage)msg;
+                                bmsg.CorrelationId = correlationId;
+                                bmsg.GroupId = context.GroupId;
+                            }
+                        }
 
-			executorService.submit(new Runnable() {
+                        m_pipeline.Put(new Pair<ConsumerContext, List<IConsumerMessage>>(context, msgs));
+                    }
+                    catch (Exception e)
+                    {
+                        log.Error(
+                            string.Format("Exception occurred while calling messageReceived(correlationId={0}, topic={1}, groupId={2}, sessionId={3})",
+                                correlationId, context.Topic.Name, context.GroupId, context.SessionId), e);
+                    }
+                });
+        }
 
-				public override void run() {
-					try {
-						foreach (ConsumerMessage<Object> msg in msgs) {
-							if (msg instanceof BrokerConsumerMessage) {
-								BrokerConsumerMessage bmsg = (BrokerConsumerMessage) msg;
-								bmsg.setCorrelationId(correlationId);
-								bmsg.setGroupId(context.getGroupId());
-							}
-						}
-
-						m_pipeline.put(new Pair<ConsumerContext, List<ConsumerMessage<Object>>>(context, msgs));
-					} catch (Exception e) {
-						log.error(
-
-							"Exception occurred while calling messageReceived(correlationId={}, topic={}, groupId={}, sessionId={})",
-							correlationId, context.getTopic().getName(), context.getGroupId(), context.getSessionId(), e);
-					}
-				}
-			});
-			*/
-
-		}
-
-		public ConsumerContext Find(long correlationId) {
-			return null;
-			/*
-			Pair<ConsumerContext, ExecutorService> pair = m_consumerContexs.get(correlationId);
-			return pair == null ? null : pair.getKey();
-			*/
-		}
-	}
+        public ConsumerContext Find(long correlationId)
+        {
+            Pair<ConsumerContext, ProducerConsumer<Action>> pair = null;
+            m_consumerContexs.TryGetValue(correlationId, out pair);
+            return pair == null ? null : pair.Key;
+        }
+    }
 }
 

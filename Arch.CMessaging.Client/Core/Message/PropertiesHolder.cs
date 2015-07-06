@@ -12,10 +12,10 @@ namespace Arch.CMessaging.Client.Core.Message
         private const string APP = "APP.";
         private Dictionary<string, string> durableProperties;
         private Dictionary<string, string> volatileProperties;
-        private HashSet<string> rawDurableAppPropertyNames;
+        public HashSet<string> RawDurableAppPropertyNames { get; }
         public PropertiesHolder()
         {
-            this.rawDurableAppPropertyNames = new HashSet<string>();
+            RawDurableAppPropertyNames = new HashSet<string>();
             durableProperties = new Dictionary<string, string>();
             volatileProperties = new Dictionary<string, string>();
         }
@@ -32,8 +32,8 @@ namespace Arch.CMessaging.Client.Core.Message
                         if (mergedKey.StartsWith(APP)) 
                         {
                             var sub = mergedKey.Substring(APP.Length);
-                            if (!rawDurableAppPropertyNames.Contains(sub))
-                                rawDurableAppPropertyNames.Add(sub);
+                            if (!RawDurableAppPropertyNames.Contains(sub))
+                                RawDurableAppPropertyNames.Add(sub);
                         }
                     }
                 }
@@ -56,8 +56,8 @@ namespace Arch.CMessaging.Client.Core.Message
 
         public void AddDurableAppProperty(string name, string value)
         {
-            if (!rawDurableAppPropertyNames.Contains(name))
-                rawDurableAppPropertyNames.Add(name);
+            if (!RawDurableAppPropertyNames.Contains(name))
+                RawDurableAppPropertyNames.Add(name);
             DurableProperties[APP + name] = value;
         }
 

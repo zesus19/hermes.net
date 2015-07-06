@@ -38,7 +38,7 @@ namespace Arch.CMessaging.Client.Core.Message.Codec
 			throw new NotImplementedException ();
 		}
 
-		public BaseConsumerMessage Decode (string topic, IoBuffer buf, Type bodyType)
+        public BaseConsumerMessage Decode (string topic, IoBuffer buf, Type bodyType)
 		{
 			throw new NotImplementedException ();
 		}

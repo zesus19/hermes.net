@@ -419,6 +419,11 @@ namespace Arch.CMessaging.Client.Core.Utils
             {
                 return Interlocked.Exchange(ref _value, newValue);
             }
+
+            public bool CompareAndSet(T comparand, T newValue)
+            {
+                return Interlocked.CompareExchange(ref _value, newValue, comparand) == comparand;
+            } 
         }
     }
 }

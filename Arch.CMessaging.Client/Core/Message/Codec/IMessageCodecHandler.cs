@@ -11,7 +11,7 @@ namespace Arch.CMessaging.Client.Core.Message.Codec
     {
         void Encode(ProducerMessage message, IoBuffer buf);
 	    PartialDecodedMessage DecodePartial(IoBuffer buf);
-	    BaseConsumerMessage Decode(string topic, IoBuffer buf, Type bodyType);
+        BaseConsumerMessage Decode(string topic, IoBuffer buf, Type bodyType);
 	    void Encode(PartialDecodedMessage msg, IoBuffer buf);
 	    byte[] Encode(ProducerMessage message, byte version);
     }

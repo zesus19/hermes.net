@@ -6,7 +6,7 @@ namespace Arch.CMessaging.Client.Consumer.Api
 {
 	public interface IMessageListener<T>
 	{
-		void onMessage (List<IConsumerMessage<T>> messages);
+		void onMessage (List<IConsumerMessage> messages);
 	}
 }
 
