@@ -30,5 +30,7 @@ namespace Arch.CMessaging.Client.Core.MetaService
         List<SubscriptionView> ListSubscriptions();
         List<SchemaView> ListSchemas();
         void Refresh();
+        bool ContainsEndpoint(Endpoint endpoint);
+        bool ContainsConsumerGroup(string topicName, string groupId);
     }
 }
