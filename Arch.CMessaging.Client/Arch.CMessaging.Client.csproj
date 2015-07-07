@@ -718,6 +718,21 @@
     <Compile Include="Core\Message\BaseConsumerMessageAware.cs" />
     <Compile Include="Transport\Command\AckMessageCommand.cs" />
     <Compile Include="Core\Bo\Tpp.cs" />
+    <Compile Include="Consumer\Api\Consumer.cs" />
+    <Compile Include="Consumer\DefaultConsumer.cs" />
+    <Compile Include="Consumer\Engine\Subscriber.cs" />
+    <Compile Include="Consumer\Engine\IEngine.cs" />
+    <Compile Include="Consumer\Api\BaseMessageListener.cs" />
+    <Compile Include="Consumer\Engine\DefaultEngine.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\IConsumerBootstrapManager.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\DefaultConsumerBootstrapManager.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\IConsumerBootstrapRegistry.cs" />
+    <Compile Include="Consumer\Engine\Bootstrap\DefaultConsumerBootstrapRegistry.cs" />
+    <Compile Include="Consumer\Engine\Monitor\DefaultPullMessageResultMonitor.cs" />
+    <Compile Include="Consumer\Engine\Pipeline\ConsumerPipeline.cs" />
+    <Compile Include="Consumer\Engine\Pipeline\ConsumerValveRegistry.cs" />
+    <Compile Include="Consumer\Engine\Pipeline\DefaultConsumerPipelineSink.cs" />
+    <Compile Include="Consumer\Engine\Transport\Command\Processor\PullMessageResultCommandProcessor.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -744,5 +759,9 @@
   <ItemGroup />
   <ItemGroup>
     <Folder Include="Consumer\Build\" />
+    <Folder Include="Consumer\Engine\Pipeline\" />
+    <Folder Include="Consumer\Engine\Transport\" />
+    <Folder Include="Consumer\Engine\Transport\Command\" />
+    <Folder Include="Consumer\Engine\Transport\Command\Processor\" />
   </ItemGroup>
 </Project>
