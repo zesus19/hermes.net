@@ -4,7 +4,7 @@ namespace Arch.CMessaging.Client.Core.Message
 {
     public interface PropertiesHolderAware
     {
-        PropertiesHolder PropertiesHolder { get; }
+        PropertiesHolder PropertiesHolder { get; private set; }
     }
 }
 

@@ -9,7 +9,7 @@ namespace Arch.CMessaging.Client.Core.Message
 {
     public class BrokerConsumerMessage : IConsumerMessage, PropertiesHolderAware, BaseConsumerMessageAware
     {
-        public BaseConsumerMessage BaseConsumerMessage{ get; }
+        public BaseConsumerMessage BaseConsumerMessage{ get; private set; }
 
         public long MsgSeq{ get; set; }
 

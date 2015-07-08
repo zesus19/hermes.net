@@ -150,13 +150,13 @@ namespace Arch.CMessaging.Client.Transport.Command
 
         public class AckContext
         {
-            public long MsgSeq{ get; }
+            public long MsgSeq{ get; private set; }
 
-            public int RemainingRetries{ get; }
+            public int RemainingRetries{ get; private set; }
 
-            public long OnMessageStartTimeMillis{ get; }
+            public long OnMessageStartTimeMillis{ get; private set; }
 
-            public long OnMessageEndTimeMillis{ get; }
+            public long OnMessageEndTimeMillis{ get; private set; }
 
             public AckContext(long msgSeq, int remainingRetries, long onMessageStartTimeMillis, long onMessageEndTimeMillis)
             {
