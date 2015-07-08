@@ -75,6 +75,7 @@ namespace Arch.CMessaging.Client.Core.Env
 		private Properties readConfigFile (String configPath, Properties defaults)
 		{
 
+            //TODO uncomment
             //if (GLOBAL_DEFAULT_FILE.Equals (configPath)) {
             //    var globalProperties = new Properties ();
             //    NameValueCollection config = ConfigurationManager.GetSection ("hermes/global") as NameValueCollection;
@@ -100,6 +101,7 @@ namespace Arch.CMessaging.Client.Core.Env
 
 			Env? resultEnv = Hermes.getEnv ();
 
+            //TODO uncomment
             //NameValueCollection config = ConfigurationManager.GetSection ("hermes/global") as NameValueCollection;
             //if (config != null && config ["env"] != null) {
             //    Env newEnv = (Env)Enum.Parse (typeof(Env), config ["env"].ToUpper ());

@@ -7,6 +7,7 @@ using Arch.CMessaging.Client.Consumer.Build;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Pipeline
 {
+    [Named(ServiceType = typeof(IPipeline<object>), ServiceName = BuildConstants.CONSUMER)]
     public class ConsumerPipeline : IPipeline<object>
     {
         [Inject(BuildConstants.CONSUMER)]

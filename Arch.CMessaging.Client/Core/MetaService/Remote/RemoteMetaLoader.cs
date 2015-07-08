@@ -52,7 +52,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
                     HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
                     req.Timeout = m_config.MetaServerConnectTimeoutInMills + m_config.MetaServerReadTimeoutInMills;
 
-                    using (HttpWebResponse res = (HttpWebResponse)req.GetResponse())
+                    using (HttpWebResponse res = (HttpWebResponse)req.BetterGetResponse())
                     {
                         HttpStatusCode statusCode = res.StatusCode;
                         if (statusCode == HttpStatusCode.OK)

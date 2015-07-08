@@ -6,7 +6,6 @@ using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap
 {
-    [Named(ServiceType = typeof(IConsumerBootstrap))]
     public abstract class BaseConsumerBootstrap : IConsumerBootstrap
     {
         [Inject]

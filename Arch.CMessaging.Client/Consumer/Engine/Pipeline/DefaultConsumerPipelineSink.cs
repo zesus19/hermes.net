@@ -6,9 +6,11 @@ using Arch.CMessaging.Client.Core.Utils;
 using System.Collections.Generic;
 using Arch.CMessaging.Client.Core.Message;
 using Arch.CMessaging.Client.Core.Ioc;
+using Arch.CMessaging.Client.Consumer.Build;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Pipeline
 {
+    [Named(ServiceType = typeof(IPipelineSink), ServiceName = BuildConstants.CONSUMER)]
     public class DefaultConsumerPipelineSink : IPipelineSink
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultConsumerPipelineSink));

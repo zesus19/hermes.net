@@ -4,6 +4,7 @@ using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Consumer
 {
+    [Named(ServiceType = typeof(Consumer))]
     public class DefaultConsumer : Consumer
     {
         [Inject]

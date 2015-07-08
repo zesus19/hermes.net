@@ -12,7 +12,8 @@ using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 {
-    public class BrokerLongPollingConsumptionStrategy// : IBrokerConsumptionStrategy
+    [Named(ServiceType = typeof(IBrokerConsumptionStrategy))]
+    public class BrokerLongPollingConsumptionStrategy : IBrokerConsumptionStrategy
     {
         [Inject]
         private ILeaseManager<ConsumerLeaseKey> m_leaseManager;
@@ -41,9 +42,10 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
         [Inject]
         private IClientEnvironment m_clientEnv;
 
-        /*
         public ISubscribeHandle Start(ConsumerContext context, int partitionId)
         {
+            return null;
+            /*
             try
             {
                 int localCachSize = Convert.ToInt32(m_clientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
@@ -80,8 +82,10 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                 throw new Exception(string.Format("Start Consumer failed(topic={0}, partition={1}, groupId={2})", context
 					.Topic.Name, partitionId, context.GroupId), e);
             }
+            */
         }
 
+        /*
         private class BrokerLongPollingSubscribeHandler : ISubscribeHandle
         {
 

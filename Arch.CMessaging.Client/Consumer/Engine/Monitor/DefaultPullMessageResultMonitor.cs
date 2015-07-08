@@ -7,6 +7,7 @@ using Arch.CMessaging.Client.Transport.Command;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
 {
+    [Named(ServiceType = typeof(IPullMessageResultMonitor))]
     public class DefaultPullMessageResultMonitor : IPullMessageResultMonitor, IInitializable
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultPullMessageResultMonitor));

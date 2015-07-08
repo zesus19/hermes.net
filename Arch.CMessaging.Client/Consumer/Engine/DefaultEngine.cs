@@ -8,6 +8,7 @@ using Arch.CMessaging.Client.MetaEntity.Entity;
 
 namespace Arch.CMessaging.Client.Consumer.Engine
 {
+    [Named(ServiceType = typeof(IEngine))]
     public class DefaultEngine : IEngine
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultEngine));
