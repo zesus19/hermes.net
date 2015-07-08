@@ -411,7 +411,7 @@ namespace Arch.CMessaging.Client.Net.Core.Buffer
         }
         public override IoBuffer Slice()
         {
-            _recapacityAllowed = false;
+            //_recapacityAllowed = false;
             return Slice0();
         }
 

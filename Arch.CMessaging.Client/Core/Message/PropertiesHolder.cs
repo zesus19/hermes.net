@@ -12,7 +12,7 @@ namespace Arch.CMessaging.Client.Core.Message
         private const string APP = "APP.";
         private Dictionary<string, string> durableProperties;
         private Dictionary<string, string> volatileProperties;
-        public HashSet<string> RawDurableAppPropertyNames { get; }
+        public HashSet<string> RawDurableAppPropertyNames { get; private set;}
         public PropertiesHolder()
         {
             RawDurableAppPropertyNames = new HashSet<string>();

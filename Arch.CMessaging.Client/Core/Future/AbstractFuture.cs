@@ -116,11 +116,14 @@ namespace Arch.CMessaging.Client.Core.Future
             {
                 callbacks = callbackList.ToArray();
             }
-            var producer = this.executor.ReadFullFence();
-            if (producer != null)
+            if (executor != null)
             {
-                foreach (var callback in callbacks)
-                    producer.Produce(new FutureCallbackItem<T> { Item = val, Callback = callback });
+                var producer = this.executor.ReadFullFence();
+                if (producer != null)
+                {
+                    foreach (var callback in callbacks)
+                        producer.Produce(new FutureCallbackItem<T> { Item = val, Callback = callback });
+                }
             }
         }
     }

@@ -19,6 +19,9 @@ using Arch.CMessaging.Client.Core.Collections;
 using Arch.CMessaging.Client.Core.Future;
 using Arch.CMessaging.Client.Core.Result;
 using Arch.CMessaging.Client.Producer.Build;
+using System.IO;
+using System.Runtime.ExceptionServices;
+using System.Threading;
 namespace Producer
 {
     class Program
@@ -27,49 +30,41 @@ namespace Producer
         {
             try
             {
+                int counter = 0;
+                ComponentsConfigurator.DefineComponents();
+                var p = Arch.CMessaging.Client.Producer.Producer.GetInstance();
+                AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
 
-                //ComponentsConfigurator.DefineComponents();
-                //var p2 = Arch.CMessaging.Client.Producer.Producer.GetInstance();
-                //var future = p2.Message("order_new", "", "hello c#").Send();
-                //var result = future.Get();
-                //Console.WriteLine("aaa");
-                //Console.ReadLine();
-
-
-                var future = new Bootstrap()
-                    .Option(SessionOption.SO_KEEPALIVE, true)
-                    .Option(SessionOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                    .Option(SessionOption.TCP_NODELAY, true)
-                    .Option(SessionOption.SO_SNDBUF, 4096)
-                    .Option(SessionOption.SO_RCVBUF, 4096)
-                    .Handler(chain =>
+                new Task(() =>
+                {
+                    while (true)
                     {
-                        chain.AddLast(
-                            new MagicNumberPrepender(),
-                            new LengthFieldPrepender(4),
-                            new ProtocolCodecFilter(new CommandCodecFactory()));
-                    })
-                    .Handler(new DefaultClientChannelInboundHandler(null, null, null, null, null))
-                    .Connect(args[0], 4376);
-                
+                        Console.WriteLine(counter);
+                        Thread.Sleep(500);
+                    }
+                }).Start();
 
-                //future.Await();
-                //var session = future.Session;
-
-                //var message = new ProducerMessage("cmessage_fws", 1233213423L) { Partition = 0, Key = "key", IsPriority = true, BornTime = DateTime.Now.CurrentTimeMillis() };
-                //message.PropertiesHolder.DurableProperties.Add("SYS.RootMessageId", "hermes-c0a8cc01-398166-30001");
-                //message.PropertiesHolder.DurableProperties.Add("SYS.ServerMessageId", "hermes-c0a8cc01-398166-30000");
-                //message.PropertiesHolder.DurableProperties.Add("SYS.CurrentMessageId", "hermes-c0a8cc01-398166-30001");
-                //var command = new SendMessageCommand("cmessage_fws", 0);
-                //command.AddMessage(message, new SettableFuture<SendResult>());
-
-                //var writeFuture1 = session.Write(command);
-                //writeFuture1.Await();
-                //System.Threading.Thread.Sleep(1000);
-                //var writeFuture2 = session.Write(command);
-                //writeFuture2.Complete += writeFuture2_Complete;
-                //Console.ReadLine();
-
+                new ConcurrentRunner(1, 1).Run((_) =>
+                    {
+                        for (int i = 0; i < 10000;i++ )
+                        {
+                            try
+                            {
+                                var refKey = i.ToString();
+                                var future = p.Message("cmessage_fws", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
+                                //var future = p.Message("order_new", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
+                                //var result = future.Get(8000);
+                                Interlocked.Increment(ref counter);
+                                //Thread.Sleep(1000);
+                                //Console.WriteLine("aaa");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                            }
+                        }
+                    });
+                Console.ReadLine();
             }
             catch (Exception ex)
             {
@@ -78,9 +73,16 @@ namespace Producer
             }
         }
 
-        static void writeFuture2_Complete(object sender, Arch.CMessaging.Client.Net.Core.Future.IoFutureEventArgs e)
+        static void CurrentDomain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e)
         {
-            
+            //lock (typeof(Program))
+            //{
+            //    using (var writer = File.AppendText(@"c:\1.txt"))
+            //    {
+            //        writer.WriteLine(e.Exception.ToString());
+            //    }
+            //}
+
         }
     }
 }
