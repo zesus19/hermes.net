@@ -733,6 +733,7 @@
     <Compile Include="Consumer\Engine\Pipeline\ConsumerValveRegistry.cs" />
     <Compile Include="Consumer\Engine\Pipeline\DefaultConsumerPipelineSink.cs" />
     <Compile Include="Consumer\Engine\Transport\Command\Processor\PullMessageResultCommandProcessor.cs" />
+    <Compile Include="Core\Utils\WebRequestExtension.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -8,8 +8,9 @@ using Arch.CMessaging.Client.Core.Config;
 using Freeway.Logging;
 using System.IO;
 using System.Text;
-using Arch.CMessaging.Client.Core.Ioc;
 using System.Web;
+using Arch.CMessaging.Client.Core.Ioc;
+using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Newtonsoft.Json;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Remote
@@ -99,7 +100,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
                         }
                     }
 
-                    using (HttpWebResponse res = (HttpWebResponse)req.GetResponse())
+                    using (HttpWebResponse res = (HttpWebResponse)req.BetterGetResponse())
                     {
 
                         HttpStatusCode statusCode = res.StatusCode;

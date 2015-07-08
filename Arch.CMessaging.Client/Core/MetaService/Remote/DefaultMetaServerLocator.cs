@@ -19,13 +19,14 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 	{
 		private static readonly ILog log = LogManager.GetLogger (typeof(DefaultMetaServerLocator));
 
-		private const int DEFAULT_MASTER_METASERVER_PORT = 1248;
+		private const int DEFAULT_MASTER_METASERVER_PORT = 80;
 
 		[Inject]
 		private IClientEnvironment m_clientEnv;
 
 		[Inject]
 		private CoreConfig m_coreConfig;
+
 
 		private ThreadSafe.AtomicReference<List<string>> m_metaServerList = new ThreadSafe.AtomicReference<List<string>> (new List<string> ());
 
@@ -97,7 +98,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 			HttpWebRequest req = (HttpWebRequest)WebRequest.Create (url);
 			req.Timeout = m_coreConfig.MetaServerConnectTimeoutInMills + m_coreConfig.MetaServerReadTimeoutInMills;
 
-            using (var res = (HttpWebResponse)req.GetResponse())
+            using (var res = (HttpWebResponse)req.BetterGetResponse())
             {
                 HttpStatusCode statusCode = res.StatusCode;
                 if (statusCode == HttpStatusCode.OK)
@@ -128,7 +129,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
 			switch (env) {
 			case Arch.CMessaging.Client.Core.Env.Env.LOCAL:
-				return "127.0.0.1";
+                return "127.0.0.1";
 			case Arch.CMessaging.Client.Core.Env.Env.DEV:
 				return "10.3.8.63";
 			case Arch.CMessaging.Client.Core.Env.Env.LPT:
