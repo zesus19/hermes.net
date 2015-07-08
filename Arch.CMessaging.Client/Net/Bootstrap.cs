@@ -43,6 +43,30 @@ namespace Arch.CMessaging.Client.Net
             return this;
         }
 
+        public Bootstrap OnSessionDestroyed(Action<IoSession> action)
+        {   
+            connector.SessionDestroyed += (o, e) => { if (action != null) action(e.Session); };
+            return this;
+        }
+
+        public Bootstrap OnSessionClosed(Action<IoSession> action)
+        {
+            connector.SessionClosed += (o, e) => { if (action != null) action(e.Session); };
+            return this;
+        }
+
+        public Bootstrap OnSessionCreated(Action<IoSession> action)
+        {
+            connector.SessionCreated += (o, e) => { if (action != null) action(e.Session); };
+            return this;
+        }
+
+        public Bootstrap OnSessionOpened(Action<IoSession> action)
+        {
+            connector.SessionOpened += (o, e) => { if (action != null) action(e.Session); };
+            return this;
+        }
+
         public DefaultConnectFuture Connect(string ip, int port)
         {
             IPAddress addr = null;
@@ -75,7 +99,6 @@ namespace Arch.CMessaging.Client.Net
                         break;
                 }
             }
-
             return connector.Connect(endpoint) as DefaultConnectFuture;
         }
     }

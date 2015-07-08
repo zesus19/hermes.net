@@ -18,6 +18,7 @@ using System.Collections;
 using Arch.CMessaging.Client.Newtonsoft.Json.Linq;
 using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Producer.Build;
+using System.Runtime.ExceptionServices;
 
 namespace Test
 {
@@ -83,14 +84,22 @@ namespace Test
 		{
 			ComponentsConfigurator.DefineComponents ();
 			var p = Arch.CMessaging.Client.Producer.Producer.GetInstance ();
+            AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
+
+
+
+            int i = 0;
             while (true)
             {
                 try
                 {
-                    var future = p.Message("cmessage_fws", "", "hello c#").Send();
-                    var result = future.Get(2000);
-                    Console.WriteLine("aaa");
+                    i++;
+                    var refKey = i.ToString();
+                    var future = p.Message("cmessage_fws", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
+                    //var future = p.Message("order_new", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
+                    var result = future.Get(8000);
                     Thread.Sleep(1000);
+                    Console.WriteLine("aaa");
                 }
                 catch (Exception ex)
                 {
@@ -98,6 +107,18 @@ namespace Test
                 }
             }
 		}
+
+        static void CurrentDomain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e)
+        {
+            lock (typeof(MainClass))
+            {
+                using (var writer = File.AppendText(@"c:\1.txt"))
+                {
+                    writer.WriteLine(e.Exception.ToString());
+                }
+            }
+
+        }
 
 		public static void test2 ()
 		{

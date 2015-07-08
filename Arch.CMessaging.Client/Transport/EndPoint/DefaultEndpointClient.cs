@@ -18,6 +18,7 @@ using Arch.CMessaging.Client.Net.Filter.Codec;
 using System.Net;
 using System.Threading;
 using Arch.CMessaging.Client.Core.Ioc;
+using System.Diagnostics;
 
 namespace Arch.CMessaging.Client.Transport.EndPoint
 {
@@ -96,14 +97,17 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 
 		private void Connect (Endpoint endpoint, EndpointSession endpointSession)
 		{
+            Debug.WriteLine("producer try connect {0}:{1}", endpoint.Host, endpoint.Port);
 			var future = CreateBootstrap (endpoint, endpointSession)
                 .Connect (new IPEndPoint (IPAddress.Parse (endpoint.Host), endpoint.Port));
 			future.Complete += (s, e) => {
 				var connectFuture = e.Future as DefaultConnectFuture;
 				if (!endpointSession.IsClosed) {
 					if (!connectFuture.Connected) {
+                        Log.Error(string.Format("producer try connect failed at {0}:{1}", endpoint.Host, endpoint.Port));
 						endpointSession.SetSessionFuture (null);
 						System.Threading.Thread.Sleep (config.EndpointSessionAutoReconnectDelay * 1000);
+                        Debug.WriteLine("producer try connect failed at {0}:{1}", endpoint.Host, endpoint.Port);
 						Connect (endpoint, endpointSession);
 					} else
 						endpointSession.SetSessionFuture (connectFuture);
@@ -150,6 +154,7 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
                     .Option(SessionOption.SO_SNDBUF, config.SendBufferSize)
                     .Option(SessionOption.SO_RCVBUF, config.ReceiveBufferSize)
                     .Option(SessionOption.BOTH_IDLE_TIME, config.EndpointSessionMaxIdleTime)
+                    .OnSessionDestroyed((session) => this.RemoveSession(endpoint, endpointSession))
                     .Handler(chain =>
                     {
                         chain.AddLast(
@@ -168,7 +173,7 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
             {
                 foreach (var session in sessions.Values)
                 {
-                    if (!session.IsClosed)
+                    if (!session.IsClosed) 
                         session.Flush();
                 }
             }
