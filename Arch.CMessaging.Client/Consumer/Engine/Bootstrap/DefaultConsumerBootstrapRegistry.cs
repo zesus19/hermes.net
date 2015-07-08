@@ -6,6 +6,7 @@ using Arch.CMessaging.Client.Core.Utils;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap
 {
+    [Named(ServiceType = typeof(IConsumerBootstrapRegistry))]
     public class DefaultConsumerBootstrapRegistry : IConsumerBootstrapRegistry, IInitializable
     {
         private ConcurrentDictionary<string, IConsumerBootstrap> m_bootstraps = new ConcurrentDictionary<string, IConsumerBootstrap>();

@@ -7,6 +7,7 @@ using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Transport.Command.Processor
 {
+    [Named(ServiceType = typeof(ICommandProcessor), ServiceName = "PullMessageResultCommandProcessor")]
     public class PullMessageResultCommandProcessor : ICommandProcessor
     {
         [Inject]

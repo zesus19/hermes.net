@@ -6,6 +6,7 @@ using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 {
+    [Named(ServiceType = typeof(IBrokerConsumptionStrategyRegistry))]
     public class DefaultBrokerConsumptionRegistry : IBrokerConsumptionStrategyRegistry, IInitializable
     {
         private ConcurrentDictionary<ConsumerType, IBrokerConsumptionStrategy> m_strategies = new ConcurrentDictionary<ConsumerType, IBrokerConsumptionStrategy>();

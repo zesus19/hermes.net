@@ -15,6 +15,7 @@ using Arch.CMessaging.Client.Consumer.Build;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
 {
+    [Named(ServiceType = typeof(IConsumerNotifier))]
     public class DefaultConsumerNotifier : IConsumerNotifier
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultConsumerNotifier));
