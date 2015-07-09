@@ -19,7 +19,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultMetaServerLocator));
 
-        private const int DEFAULT_MASTER_METASERVER_PORT = 80;
+        private const int DEFAULT_MASTER_METASERVER_PORT = 1248;
 
         [Inject]
         private IClientEnvironment m_clientEnv;
