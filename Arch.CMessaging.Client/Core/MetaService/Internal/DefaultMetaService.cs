@@ -212,7 +212,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
 
 		
         public LeaseAcquireResponse TryRenewBrokerLease(String topic, int partition, ILease lease, String sessionId,
-                                                   int brokerPort)
+                                                        int brokerPort)
         {
             return m_manager.getMetaProxy().tryRenewBrokerLease(topic, partition, lease, sessionId, brokerPort);
         }
@@ -231,7 +231,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
 
             int interval = (int)m_config.MetaCacheRefreshIntervalMinutes * 60 * 1000;
             metaRefresher = new MetaRefresher(this, interval);
-            timer = new Timer(metaRefresher.Refresh, null, interval, interval);
+            timer = new Timer(metaRefresher.Refresh, null, interval, Timeout.Infinite);
         }
 
 		
@@ -324,6 +324,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
             {
                 try
                 {
+                    metaService.timer.Change(Timeout.Infinite, Timeout.Infinite);
                     metaService.Refresh();
                 }
                 catch (Exception e)
@@ -332,8 +333,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
                 }
                 finally
                 {
-                    metaService.timer.Dispose();
-                    metaService.timer = new Timer(this.Refresh, null, interval, interval);
+                    metaService.timer.Change(interval, Timeout.Infinite);
                 }
             }
         }
