@@ -19,6 +19,7 @@ using System.Net;
 using System.Threading;
 using Arch.CMessaging.Client.Core.Ioc;
 using System.Diagnostics;
+using Arch.CMessaging.Client.Core.Schedule;
 
 namespace Arch.CMessaging.Client.Transport.EndPoint
 {
@@ -33,6 +34,7 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 		private ISystemClockService systemClockService;
 
 		private Timer timer;
+        private ISchedulePolicy schedulePolicy;
 		private object syncRoot = new object ();
 		private ConcurrentDictionary<Endpoint, EndpointSession> sessions;
 		private static readonly ILog log = LogManager.GetLogger (typeof(DefaultEndpointClient));
@@ -64,7 +66,11 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 
 		public void Initialize ()
 		{
-			timer = new Timer (EndpointSessionFlush, null, config.EndpointSessionWriterCheckInterval, Timeout.Infinite);
+            int checkBase = config.EndpointSessionWriterCheckIntervalBase;
+            int checkMax = config.EndpointSessionWriterCheckIntervalMax;
+            schedulePolicy = new ExponentialSchedulePolicy(checkBase, checkMax);
+
+            timer = new Timer (EndpointSessionFlush, null, checkBase, Timeout.Infinite);
 		}
 
 		private EndpointSession GetSession (Endpoint endpoint)
@@ -166,15 +172,16 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
                     .Handler(new DefaultClientChannelInboundHandler(commandProcessorManager, endpoint, endpointSession, this, config));
 		}
 
-		private void EndpointSessionFlush (object state)
-		{
-			timer.Change (Timeout.Infinite, Timeout.Infinite);
+        private void EndpointSessionFlush(object state)
+        {
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+            bool flushed = false;
             try
             {
                 foreach (var session in sessions.Values)
                 {
-                    if (!session.IsClosed) 
-                        session.Flush();
+                    if (!session.IsClosed)
+                        flushed = flushed || session.Flush();
                 }
             }
             catch (Exception ex)
@@ -183,8 +190,12 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
             }
             finally
             {
-                timer.Change(config.EndpointSessionWriterCheckInterval, Timeout.Infinite);
+                if (flushed)
+                {
+                    schedulePolicy.Succeess();
+                }
+                timer.Change(schedulePolicy.Fail(false), Timeout.Infinite);
             }
-		}
+        }
 	}
 }
