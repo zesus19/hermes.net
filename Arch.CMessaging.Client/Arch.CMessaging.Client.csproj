@@ -135,6 +135,7 @@
     <Compile Include="Core\Service\DefaultSystemClockService.cs" />
     <Compile Include="Core\Service\ISystemClockService.cs" />
     <Compile Include="Core\Service\RunningStatusStatisticsService.cs" />
+    <Compile Include="Core\Utils\BufferExtension.cs" />
     <Compile Include="Core\Utils\ChecksumUtil.cs" />
     <Compile Include="Core\Utils\CollectionExtension.cs" />
     <Compile Include="Core\Utils\ComponentLocator.cs" />
@@ -770,12 +771,5 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup>
-    <Folder Include="Consumer\Build\" />
-    <Folder Include="Consumer\Engine\Pipeline\" />
-    <Folder Include="Consumer\Engine\Transport\" />
-    <Folder Include="Consumer\Engine\Transport\Command\" />
-    <Folder Include="Consumer\Engine\Transport\Command\Processor\" />
-    <Folder Include="Core\Schedule\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

@@ -257,7 +257,7 @@ namespace Arch.CMessaging.Client.Producer.Sender
 			private BrokerMessageSender sender;
 			private ConcurrentDictionary<Pair<string, int>, ThreadSafe.Boolean> runnings;
 			private ConcurrentDictionary<Pair<string, int>, TaskQueue> taskQueues;
-			private const int MAX_TASK_EXEC_CAPACITY = 1000;
+			private const int MAX_TASK_EXEC_CAPACITY = int.MaxValue;
 
 			public EndpointSender (
 				ConcurrentDictionary<Pair<string, int>, TaskQueue> taskQueues, int checkInterval, BrokerMessageSender sender)

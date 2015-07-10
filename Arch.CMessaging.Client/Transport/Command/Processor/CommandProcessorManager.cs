@@ -19,7 +19,7 @@ namespace Arch.CMessaging.Client.Transport.Command.Processor
 		[Inject]
 		private ICommandProcessorRegistry registry;
 
-		private const int MAX_CAPACITY = 10000;
+		private const int MAX_CAPACITY = int.MaxValue;
 		private ProducerConsumer<CommandProcessorContext> producer;
 
 		public void Initialize ()

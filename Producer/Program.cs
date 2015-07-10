@@ -26,15 +26,41 @@ namespace Producer
 {
     class Program
     {
-        static int ffff = 0;
         static void Main(string[] args)
         {
             try
             {
-                int counter = 0;
+                var buffer = IoBuffer.Allocate(100);
+                buffer.Put(1);
+                buffer.Put(2);
+                buffer.Put(3);
+                buffer.Put(4);
+                buffer.Put(5);
+                buffer.Put(6);
+                buffer.Put(7);
+                buffer.Put(8);
+                buffer.Put(9);
+                buffer.Put(10);
+
+                buffer.Flip();
+                var b = buffer.Get();
+                b = buffer.Get();
+                b = buffer.Get();
+
+                var cc = buffer.GetRemainingArray();
+
+                var d = buffer.GetSlice(3);
+                var c = d.Get();
+                c = d.Get();
+                c = d.Get();
+
+
+                
+
+
+                long counter = 0;
                 ComponentsConfigurator.DefineComponents();
                 var p = Arch.CMessaging.Client.Producer.Producer.GetInstance();
-                AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
 
                 new Task(() =>
                 {
@@ -47,17 +73,17 @@ namespace Producer
 
                 new ConcurrentRunner(1, 1).Run((_) =>
                     {
-                        for (int i = 0; i < int.MaxValue;i++ )
+                        for (var i = 0L; i < long.MaxValue;i++ )
                         {
                             try
                             {
                                 var refKey = i.ToString();
                                 //var future = p.Message("cmessage_fws", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
                                 var future = p.Message("order_new", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
-                                var result = future.Get(8000);
+                                future.Get();
+                                Console.WriteLine("aaa");
                                 Interlocked.Increment(ref counter);
-                                //Thread.Sleep(1000);
-                                //Console.WriteLine("aaa");
+                                if (i % 100000 == 0) Thread.Sleep(5000);
                             }
                             catch (Exception ex)
                             {
@@ -74,26 +100,6 @@ namespace Producer
             }
         }
 
-        static void producer_OnConsume(object sender, ConsumeEventArgs e)
-        {
-            var items = e.ConsumingItem as ChunkedConsumingItem<int>;
-            foreach (var c in items.Chunk)
-            {
-                Interlocked.Increment(ref ffff);
-            }
-        }
-
-        static void CurrentDomain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e)
-        {
-            //lock (typeof(Program))
-            //{
-            //    using (var writer = File.AppendText(@"c:\1.txt"))
-            //    {
-            //        writer.WriteLine(e.Exception.ToString());
-            //    }
-            //}
-
-        }
     }
 }
 
