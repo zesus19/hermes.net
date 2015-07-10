@@ -21,6 +21,8 @@ using Arch.CMessaging.Client.Transport.EndPoint;
 using Arch.CMessaging.Client.Core.Message.Partition;
 using Arch.CMessaging.Client.Core.MetaService;
 using Arch.CMessaging.Client.Producer.Monitor;
+using Arch.CMessaging.Client.Core.Schedule;
+using Arch.CMessaging.Client.Core.Exceptions;
 
 namespace Arch.CMessaging.Client.Producer.Sender
 {
@@ -28,7 +30,9 @@ namespace Arch.CMessaging.Client.Producer.Sender
 	[Named (ServiceType = typeof(IMessageSender), ServiceName = Endpoint.BROKER)]
 	public class BrokerMessageSender : IMessageSender, IInitializable // : AbstractMessageSender
 	{
-		public Timer endpointSenderScheduler{ get; set; }
+		public Timer endpointSenderScheduler{ get; private set; }
+
+        public ISchedulePolicy SchedulePolicy { get; private set;}
 
 		private static readonly ILog log = LogManager.GetLogger (typeof(BrokerMessageSender));
 
@@ -124,11 +128,16 @@ namespace Arch.CMessaging.Client.Producer.Sender
 
 		public void Initialize ()
 		{
-			var interval = Convert.ToInt32 (clientEnv.GetGlobalConfig ().GetProperty (
-				               "producer.networkio.interval", config.DefaultBrokerSenderNetworkIoCheckIntervalMillis));
+            int checkIntervalBase = Convert.ToInt32(clientEnv.GetGlobalConfig().GetProperty(
+                "producer.networkio.interval.base", config.DefaultBrokerSenderNetworkIoCheckIntervalBaseMillis));
+            int checkIntervalMax = Convert.ToInt32(clientEnv.GetGlobalConfig().GetProperty(
+                "producer.networkio.interval.max", config.DefaultBrokerSenderNetworkIoCheckIntervalMaxMillis));
+
+            SchedulePolicy = new ExponentialSchedulePolicy(checkIntervalBase, checkIntervalMax);
+
 			endpointSenderScheduler = new Timer (
-				new EndpointSender (taskQueues, interval, this).Run, 
-				this, interval, Timeout.Infinite);
+                new EndpointSender (taskQueues, checkIntervalBase, this).Run, 
+                this, checkIntervalBase, Timeout.Infinite);
 			this.callbackExecutor = new ProducerConsumer<FutureCallbackItem<SendResult>> (int.MaxValue,
 				Convert.ToInt32 (clientEnv.GetGlobalConfig ().GetProperty ("producer.callback.threadcount", config.DefaultProducerCallbackThreadCount)));
 			this.callbackExecutor.OnConsume += callbackExecutor_OnConsume;
@@ -167,25 +176,34 @@ namespace Arch.CMessaging.Client.Producer.Sender
 				this.cmd = new ThreadSafe.AtomicReference<SendMessageCommand> (null);
 			}
 
-			public void Pop ()
+            public void Push (SendMessageCommand command)
 			{
-				cmd.WriteFullFence (null);
+				cmd.WriteFullFence (command);
 			}
 
-			public SendMessageCommand Peek (int size)
+			public SendMessageCommand Pop (int size)
 			{
 				if (cmd.ReadFullFence () == null)
-					cmd.WriteFullFence (CreateSendMessageCommand (size));
-				return cmd.ReadFullFence ();
+					return CreateSendMessageCommand (size);
+                return cmd.AtomicExchange(null);
 			}
 
 			public IFuture<SendResult> Submit (ProducerMessage message)
 			{
 				var future = SettableFuture<SendResult>.Create ();
-				queue.Offer (new ProducerWorkerContext (message, future));
+
 				if (message.Callback != null) {
 					Futures<SendResult>.AddCallback (future, new ProducerMessageCallback (message), sender.callbackExecutor);
 				}
+
+                if (!queue.Offer(new ProducerWorkerContext(message, future)))
+                {
+                    string warning = "Producer task queue is full, will drop this message.";
+                    log.Warn(warning);
+                    MessageSendException throwable = new MessageSendException(warning);
+                    future.SetException(throwable);
+                }
+
 				return future;
 			}
 
@@ -263,12 +281,13 @@ namespace Arch.CMessaging.Client.Producer.Sender
 			{
 				BrokerMessageSender sender = state as BrokerMessageSender;
 				var endpointSenderScheduler = sender.endpointSenderScheduler;
-				try {
-
+                bool hasTask = false;
+                try {
 					endpointSenderScheduler.Change (Timeout.Infinite, Timeout.Infinite);
 					foreach (var kvp in taskQueues) {
 						var queue = kvp.Value;
 						if (queue.HasTask ()) {
+                            hasTask = true;
                             ThreadSafe.Boolean running;
                             if (!runnings.TryGetValue(kvp.Key, out running))
                             {
@@ -285,7 +304,11 @@ namespace Arch.CMessaging.Client.Producer.Sender
 				} catch (Exception ex) {
 					sender.Log.Error (ex);
 				} finally {
-					endpointSenderScheduler.Change (checkInterval, Timeout.Infinite);
+                    if (hasTask)
+                    {
+                        sender.SchedulePolicy.Succeess();
+                    }
+                    endpointSenderScheduler.Change (sender.SchedulePolicy.Fail(false), Timeout.Infinite);
 				}
 			}
 		}
@@ -318,9 +341,16 @@ namespace Arch.CMessaging.Client.Producer.Sender
 					var batchSize = Convert.ToInt32 (
 						                sender.ClientEnv.GetGlobalConfig ().GetProperty (
 							                "producer.sender.batchsize", sender.Config.DefaultBrokerSenderBatchSize));
-					var command = taskQueue.Peek (batchSize);
-					if (command != null && SendMessagesToBroker (command))
-						taskQueue.Pop ();
+					
+                    var command = taskQueue.Pop (batchSize);
+
+                    if (command != null)
+                    {
+                        if(!SendMessagesToBroker (command))
+                        {
+						    taskQueue.Push (command);
+                        }
+                    }
 				} catch (Exception ex) {
 					sender.Log.Error (ex);
 				} finally {

@@ -28,7 +28,9 @@ namespace Arch.CMessaging.Client.Core.Config
 
 		public int EndpointSessionSendBufferSize { get { return 1000; } }
 
-		public int EndpointSessionWriterCheckInterval { get { return 20; } }
+        public int EndpointSessionWriterCheckIntervalBase { get { return 5; } }
+
+		public int EndpointSessionWriterCheckIntervalMax { get { return 50; } }
 
 		public int EndpointSessionWriteRetryDealyInMills { get { return 20; } }
 

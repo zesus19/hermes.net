@@ -744,6 +744,8 @@
     <Compile Include="Consumer\Engine\Pipeline\DefaultConsumerPipelineSink.cs" />
     <Compile Include="Consumer\Engine\Transport\Command\Processor\PullMessageResultCommandProcessor.cs" />
     <Compile Include="Core\Utils\WebRequestExtension.cs" />
+    <Compile Include="Core\Schedule\ISchedulePolicy.cs" />
+    <Compile Include="Core\Schedule\ExponentialSchedulePolicy.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -768,5 +770,12 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Consumer\Build\" />
+    <Folder Include="Consumer\Engine\Pipeline\" />
+    <Folder Include="Consumer\Engine\Transport\" />
+    <Folder Include="Consumer\Engine\Transport\Command\" />
+    <Folder Include="Consumer\Engine\Transport\Command\Processor\" />
+    <Folder Include="Core\Schedule\" />
+  </ItemGroup>
 </Project>

@@ -47,7 +47,7 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
             }
         }
 
-        public void Flush()
+        public bool Flush()
         {
             if (!IsClosed)
             {
@@ -65,11 +65,13 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
                             {
                                 opQueue.Take();
                                 DoFlush(session, flushingOp.ReadFullFence());
+                                return true;
                             }
                         }
                     }
                 }
             }
+            return false;
         }
 
         public bool HasUnflushOps { get { return opQueue.Count != 0 || flushingOp.ReadFullFence() != null; } }

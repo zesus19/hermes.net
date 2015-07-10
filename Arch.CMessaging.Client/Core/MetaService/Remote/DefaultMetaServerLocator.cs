@@ -177,7 +177,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
             int interval = (int)m_coreConfig.MetaServerIpFetchInterval * 1000;
             metaServerIpFetcher = new MetaServerIpFetcher(this, interval);
-            timer = new Timer(metaServerIpFetcher.Fetch, null, interval, interval);
+            timer = new Timer(metaServerIpFetcher.Fetch, null, interval, Timeout.Infinite);
         }
 
         public class MetaServerIpFetcher
@@ -193,6 +193,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
             public void Fetch(object param)
             {
+                metaServerLocator.timer.Change(Timeout.Infinite, Timeout.Infinite);
                 try
                 {
                     metaServerLocator.updateMetaServerList();
@@ -203,8 +204,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
                 }
                 finally
                 {
-                    metaServerLocator.timer.Dispose();
-                    metaServerLocator.timer = new Timer(this.Fetch, null, interval, interval);
+                    metaServerLocator.timer.Change(interval, Timeout.Infinite);
                 }
             }
 

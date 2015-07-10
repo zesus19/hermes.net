@@ -13,13 +13,15 @@ namespace Arch.CMessaging.Client.Producer.Config
 	{
 		public string DefaultBrokerSenderNetworkIoThreadCount { get { return "10"; } }
 
-		public string DefaultBrokerSenderNetworkIoCheckIntervalMillis { get { return "50"; } }
+        public string DefaultBrokerSenderNetworkIoCheckIntervalBaseMillis { get { return "5"; } }
 
-		public string DefaultBrokerSenderBatchSize { get { return "300"; } }
+		public string DefaultBrokerSenderNetworkIoCheckIntervalMaxMillis { get { return "50"; } }
 
-		public int DefaultBrokerSenderSendTimeoutMillis { get { return 200; } }
+		public string DefaultBrokerSenderBatchSize { get { return "10000"; } }
 
-		public string DefaultBrokerSenderTaskQueueSize { get { return "10000"; } }
+		public int DefaultBrokerSenderSendTimeoutMillis { get { return 2000; } }
+
+		public string DefaultBrokerSenderTaskQueueSize { get { return "500000"; } }
 
 		public string DefaultProducerCallbackThreadCount { get { return "3"; } }
 
