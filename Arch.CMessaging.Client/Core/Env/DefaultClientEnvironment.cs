@@ -76,17 +76,20 @@ namespace Arch.CMessaging.Client.Core.Env
 		{
 
             //TODO uncomment
-            //if (GLOBAL_DEFAULT_FILE.Equals (configPath)) {
-            //    var globalProperties = new Properties ();
-            //    NameValueCollection config = ConfigurationManager.GetSection ("hermes/global") as NameValueCollection;
-            //    if (config != null) {
-            //        foreach (string k in config) {
-            //            globalProperties.SetProperty (k, config [k]);
-            //        }
-            //    }
+            if (GLOBAL_DEFAULT_FILE.Equals(configPath))
+            {
+                var globalProperties = new Properties();
+                NameValueCollection config = ConfigurationManager.GetSection("hermes/global") as NameValueCollection;
+                if (config != null)
+                {
+                    foreach (string k in config)
+                    {
+                        globalProperties.SetProperty(k, config[k]);
+                    }
+                }
 
-            //    return globalProperties;
-            //}
+                return globalProperties;
+            }
 
 			// TODO support read config file
 			return new Properties ();
@@ -102,19 +105,24 @@ namespace Arch.CMessaging.Client.Core.Env
 			Env? resultEnv = Hermes.getEnv ();
 
             //TODO uncomment
-            //NameValueCollection config = ConfigurationManager.GetSection ("hermes/global") as NameValueCollection;
-            //if (config != null && config ["env"] != null) {
-            //    Env newEnv = (Env)Enum.Parse (typeof(Env), config ["env"].ToUpper ());
-            //    if (resultEnv != null && newEnv != resultEnv) {
-            //        throw new Exception (string.Format ("Inconsist Hermes env {0} {1}", resultEnv, newEnv));
-            //    } else {
-            //        resultEnv = newEnv;
-            //    }
-            //}
+            NameValueCollection config = ConfigurationManager.GetSection("hermes/global") as NameValueCollection;
+            if (config != null && config["env"] != null)
+            {
+                Env newEnv = (Env)Enum.Parse(typeof(Env), config["env"].ToUpper());
+                if (resultEnv != null && newEnv != resultEnv)
+                {
+                    throw new Exception(string.Format("Inconsist Hermes env {0} {1}", resultEnv, newEnv));
+                }
+                else
+                {
+                    resultEnv = newEnv;
+                }
+            }
 
-            //if (resultEnv == null) {
-            //    throw new Exception ("Hermes env is not set");
-            //}
+            if (resultEnv == null)
+            {
+                throw new Exception("Hermes env is not set");
+            }
 
 			m_env = Env.LOCAL;
 		}

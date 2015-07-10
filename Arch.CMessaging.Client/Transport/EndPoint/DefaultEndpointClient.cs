@@ -19,6 +19,7 @@ using System.Net;
 using System.Threading;
 using Arch.CMessaging.Client.Core.Ioc;
 using System.Diagnostics;
+using Arch.CMessaging.Client.Core.MetaService;
 
 namespace Arch.CMessaging.Client.Transport.EndPoint
 {
@@ -31,6 +32,8 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 		private CommandProcessorManager commandProcessorManager;
 		[Inject]
 		private ISystemClockService systemClockService;
+        [Inject]
+        private IMetaService metaService;
 
 		private Timer timer;
 		private object syncRoot = new object ();
@@ -105,10 +108,13 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 				if (!endpointSession.IsClosed) {
 					if (!connectFuture.Connected) {
                         Log.Error(string.Format("producer try connect failed at {0}:{1}", endpoint.Host, endpoint.Port));
-						endpointSession.SetSessionFuture (null);
-						System.Threading.Thread.Sleep (config.EndpointSessionAutoReconnectDelay * 1000);
-                        Debug.WriteLine("producer try connect failed at {0}:{1}", endpoint.Host, endpoint.Port);
-						Connect (endpoint, endpointSession);
+                        if (metaService.ContainsEndpoint(endpoint))
+                        {
+                            endpointSession.SetSessionFuture(null);
+                            System.Threading.Thread.Sleep(config.EndpointSessionAutoReconnectDelay * 1000);
+                            Debug.WriteLine("producer try connect failed at {0}:{1}", endpoint.Host, endpoint.Port);
+                            Connect(endpoint, endpointSession);
+                        }
 					} else
 						endpointSession.SetSessionFuture (connectFuture);
 				} else {

@@ -19,6 +19,7 @@ using Arch.CMessaging.Client.Newtonsoft.Json.Linq;
 using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Producer.Build;
 using System.Runtime.ExceptionServices;
+using Arch.CMessaging.Client.Core.Collections;
 
 namespace Test
 {
@@ -57,6 +58,10 @@ namespace Test
 
         public MainClass ()
         {
+            
+
+
+
             task = new Task (this);
             t = new Timer (task.go, null, 1000, 1000);
         }
@@ -86,8 +91,6 @@ namespace Test
             var p = Arch.CMessaging.Client.Producer.Producer.GetInstance ();
             AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
 
-
-
             int i = 0;
             while (true)
             {
@@ -95,8 +98,8 @@ namespace Test
                 {
                     i++;
                     var refKey = i.ToString();
-                    var future = p.Message("cmessage_fws", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
-                    //var future = p.Message("order_new", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
+                    //var future = p.Message("cmessage_fws", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
+                    var future = p.Message("order_new", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
                     var result = future.Get(8000);
                     Thread.Sleep(1000);
                     Console.WriteLine("aaa");
@@ -107,6 +110,8 @@ namespace Test
                 }
             }
         }
+
+        
 
         static void CurrentDomain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e)
         {

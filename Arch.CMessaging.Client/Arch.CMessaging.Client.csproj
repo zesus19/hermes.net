@@ -33,6 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
@@ -44,7 +45,6 @@
     <Reference Include="Framework.Logging.V2.API">
       <HintPath>..\Framework.Logging.V2.API.dll</HintPath>
     </Reference>
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
@@ -60,8 +60,18 @@
     <Compile Include="Core\Collections\IBlockingQueue.cs" />
     <Compile Include="Core\Collections\IChunkedBlockingQueue.cs" />
     <Compile Include="Core\Collections\IConsumingItem.cs" />
+    <Compile Include="Core\Collections\IIndexedBlockingQueue.cs" />
     <Compile Include="Core\Collections\IProducerConsumer.cs" />
+    <Compile Include="Core\Collections\LRUMap.cs" />
     <Compile Include="Core\Collections\ProducerConsumer.cs" />
+    <Compile Include="Core\Collections\RedBlack.cs" />
+    <Compile Include="Core\Collections\RedBlackEnumerator.cs" />
+    <Compile Include="Core\Collections\RedBlackException.cs" />
+    <Compile Include="Core\Collections\RedBlackNode.cs" />
+    <Compile Include="Core\Collections\SequentialNode.cs" />
+    <Compile Include="Core\Collections\SortedAndIndexedBlockingQueue.cs" />
+    <Compile Include="Core\Collections\TimeoutNotifyProducerConsumer.cs" />
+    <Compile Include="Core\Collections\TimeoutNotifyQueue.cs" />
     <Compile Include="Core\Config\CoreConfig.cs" />
     <Compile Include="Core\Env\DefaultClientEnvironment.cs" />
     <Compile Include="Core\Env\IClientEnvironment.cs" />
@@ -758,11 +768,5 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup>
-    <Folder Include="Consumer\Build\" />
-    <Folder Include="Consumer\Engine\Pipeline\" />
-    <Folder Include="Consumer\Engine\Transport\" />
-    <Folder Include="Consumer\Engine\Transport\Command\" />
-    <Folder Include="Consumer\Engine\Transport\Command\Processor\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>
