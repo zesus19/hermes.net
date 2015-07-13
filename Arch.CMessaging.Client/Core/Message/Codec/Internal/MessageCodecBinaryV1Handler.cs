@@ -23,12 +23,51 @@ namespace Arch.CMessaging.Client.Core.Message.Codec.Internal
 
         public PartialDecodedMessage DecodePartial(IoBuffer buf)
         {
-            throw new NotImplementedException();
+            HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+
+            // skip whole length
+            codec.ReadInt();
+            // skip header length
+            int headerLen = codec.ReadInt();
+            // skip body length
+            int bodyLen = codec.ReadInt();
+            verifyChecksum(buf, headerLen + bodyLen);
+            PartialDecodedMessage msg = new PartialDecodedMessage();
+            msg.Key = codec.ReadString();
+            msg.BornTime = codec.ReadLong();
+            msg.RemainingRetries = codec.ReadInt();
+            msg.BodyCodecType = codec.ReadString();
+
+            int len = codec.ReadInt();
+            msg.DurableProperties = buf.GetSlice(len);
+
+            len = codec.ReadInt();
+            msg.VolatileProperties = buf.GetSlice(len);
+
+            msg.Body = buf.GetSlice(bodyLen);
+
+            // skip crc
+            codec.ReadLong();
+
+            return msg;
         }
 
         public BaseConsumerMessage Decode(string topic, IoBuffer buf, Type bodyType)
         {
-            throw new NotImplementedException();
+            BaseConsumerMessage msg = new BaseConsumerMessage();
+
+            PartialDecodedMessage decodedMessage = DecodePartial(buf);
+            msg.Topic = topic;
+            msg.RefKey = decodedMessage.Key;
+            msg.BornTime = decodedMessage.BornTime;
+            msg.RemainingRetries = decodedMessage.RemainingRetries;
+            Dictionary<string, string> durableProperties = readProperties(decodedMessage.DurableProperties);
+            Dictionary<string, string> volatileProperties = readProperties(decodedMessage.VolatileProperties);
+            msg.PropertiesHolder = new PropertiesHolder(durableProperties, volatileProperties);
+            IPayloadCodec bodyCodec = PayloadCodecFactory.GetCodecByType(decodedMessage.BodyCodecType);
+            msg.Body = bodyCodec.Decode(decodedMessage.readBody(), bodyType);
+
+            return msg;
         }
 
         public void Encode(PartialDecodedMessage msg, IoBuffer buf)
@@ -94,7 +133,7 @@ namespace Arch.CMessaging.Client.Core.Message.Codec.Internal
             codec.WriteInt(headerLen);
 
             // refill body length
-		    codec.WriteInt(bodyLen);
+            codec.WriteInt(bodyLen);
 
             buf.Position = indexEnd;
         }
@@ -110,6 +149,17 @@ namespace Arch.CMessaging.Client.Core.Message.Codec.Internal
             buf.Position = writeIndexBeforeLength;
             codec.WriteInt(mapLength);
             buf.Position = writeIndexEnd;
+        }
+
+        private Dictionary<string, string> readProperties(IoBuffer buf)
+        {
+            HermesPrimitiveCodec codec = new HermesPrimitiveCodec(buf);
+            return codec.ReadStringStringMap();
+        }
+
+        private void verifyChecksum(IoBuffer buf, int len)
+        {
+            // TODO 
         }
     }
 }

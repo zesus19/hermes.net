@@ -21,8 +21,14 @@ namespace Arch.CMessaging.Client.Transport.Command
         private ThreadSafe.Integer msgCounter;
         private ConcurrentDictionary<int, IList<ProducerMessage>> messages;
         private Dictionary<int, SettableFuture<SendResult>> futures;
+        private bool m_accepted = false;
+        private long m_acceptedTime = -1L;
+        private readonly object synLock = new object();
 
-        public SendMessageCommand() : this(null, 0) { }
+        public SendMessageCommand()
+            : this(null, 0)
+        {
+        }
 
         public SendMessageCommand(string topic, int partition)
             : base(CommandType.MessageSend)
@@ -36,14 +42,29 @@ namespace Arch.CMessaging.Client.Transport.Command
         }
 
         public string Topic { get; private set; }
+
         public int Partition { get; private set; }
-        public long ExpireTime 
-        {
-            get { return expireTime.ReadFullFence(); }
-            set { expireTime.WriteFullFence(value); }
-        }
+
         public int MessageCount { get { return msgCounter.ReadFullFence(); } }
+
         public IEnumerable<IList<ProducerMessage>> ProducerMessages { get { return messages.Values; } }
+
+        public void Accepted(long acceptedTime)
+        {
+            lock (synLock)
+            {
+                m_acceptedTime = acceptedTime;
+                m_accepted = true;
+            }
+        }
+
+        public bool isExpired(long now, long timeoutMillis)
+        {
+            lock (synLock)
+            {
+                return m_accepted && (now - m_acceptedTime > timeoutMillis);
+            }
+        }
 
         public void AddMessage(ProducerMessage message, SettableFuture<SendResult> future)
         {
@@ -67,8 +88,10 @@ namespace Arch.CMessaging.Client.Transport.Command
         {
             foreach (var entry in futures)
             {
-                if (result.IsSuccess(entry.Key)) entry.Value.Set(new SendResult());
-                else entry.Value.SetException(new MessageSendException("Send failed"));
+                if (result.IsSuccess(entry.Key))
+                    entry.Value.Set(new SendResult());
+                else
+                    entry.Value.SetException(new MessageSendException("Send failed"));
             }
         }
 
@@ -107,7 +130,8 @@ namespace Arch.CMessaging.Client.Transport.Command
             codec.WriteInt(list.Count);
 
             //seqNos
-            foreach (var message in list) codec.WriteInt(message.SequenceNo);
+            foreach (var message in list)
+                codec.WriteInt(message.SequenceNo);
 
             // placeholder for payload len
             var indexBeforeLen = buf.Position;
@@ -115,7 +139,8 @@ namespace Arch.CMessaging.Client.Transport.Command
 
             var indexBeforePayload = buf.Position;
             //payload
-            foreach (var message in list) msgCodec.Encode(message, buf);
+            foreach (var message in list)
+                msgCodec.Encode(message, buf);
             var indexAfterPayload = buf.Position;
             var payloadLen = indexAfterPayload - indexBeforePayload;
 
@@ -157,13 +182,34 @@ namespace Arch.CMessaging.Client.Transport.Command
                 || Partition != message.Partition)
             {
                 throw new ArgumentException(string.Format("Illegal message[topic={0}, partition={1}] try to add to SendMessageCommand[topic={0}, partition={1}]",
-                    message.Topic, message.Partition, Topic, Partition));
+                        message.Topic, message.Partition, Topic, Partition));
             }
         }
 
-        private class MessageBatchWithRawData
+        public ICollection<IList<ProducerMessage>> GetProducerMessages()
         {
- 
+            return messages.Values;
         }
+
+        public List<Pair<ProducerMessage, SettableFuture<SendResult>>> GetProducerMessageFuturePairs()
+        {
+            List<Pair<ProducerMessage, SettableFuture<SendResult>>> pairs = new List<Pair<ProducerMessage, SettableFuture<SendResult>>>();
+            ICollection<IList<ProducerMessage>> msgsList = GetProducerMessages();
+            foreach (IList<ProducerMessage> msgs in msgsList)
+            {
+                foreach (ProducerMessage msg in msgs)
+                {
+                    SettableFuture<SendResult> future;
+                    futures.TryGetValue(msg.SequenceNo, out future);
+                    if (future != null)
+                    {
+                        pairs.Add(new Pair<ProducerMessage, SettableFuture<SendResult>>(msg, future));
+                    }
+                }
+            }
+
+            return pairs;
+        }
+
     }
 }

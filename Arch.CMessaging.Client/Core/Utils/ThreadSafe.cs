@@ -350,6 +350,14 @@ namespace Arch.CMessaging.Client.Core.Utils
             {
                 return value ? True : False;
             }
+
+            public bool CompareAndSet(bool comparand, bool newValue)
+            {
+                var newValueInt = ToInt(newValue);
+                var comparandInt = ToInt(comparand);
+
+                return Interlocked.CompareExchange(ref _value, newValueInt, comparandInt) == comparandInt;
+            }
         }
 
         public class AtomicReference<T>

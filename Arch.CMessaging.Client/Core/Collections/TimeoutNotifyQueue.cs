@@ -57,7 +57,7 @@ namespace Arch.CMessaging.Client.Core.Collections
             {
                 this.waitHandle = waitHandle;
                 this.waitingTimeout = false;
-                this.timeoutDueTicks = DateTime.Now.Ticks + TimeSpan.TicksPerSecond * timeout;
+                this.timeoutDueTicks = DateTime.Now.Ticks + TimeSpan.TicksPerMillisecond * timeout;
             }
 
             public override IComparable SortedKey

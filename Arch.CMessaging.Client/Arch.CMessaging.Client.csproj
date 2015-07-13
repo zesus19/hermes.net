@@ -747,6 +747,9 @@
     <Compile Include="Core\Utils\WebRequestExtension.cs" />
     <Compile Include="Core\Schedule\ISchedulePolicy.cs" />
     <Compile Include="Core\Schedule\ExponentialSchedulePolicy.cs" />
+    <Compile Include="Core\Utils\BlockingQueueExtension.cs" />
+    <Compile Include="Transport\Command\CorrelationIdGenerator.cs" />
+    <Compile Include="Core\Utils\JSON.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

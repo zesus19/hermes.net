@@ -20,7 +20,19 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(RemoteMetaProxy));
 
-        public const String ID = "remote";
+        private  const string HOST = "host";
+
+        private  const string BROKER_PORT = "brokerPort";
+
+        private  const string LEASE_ID = "leaseId";
+
+        private  const string SESSION_ID = "sessionId";
+
+        private  const string TOPIC = "topic";
+
+        private  const string PARTITION = "partition";
+
+        public const string ID = "remote";
 
         [Inject]
         private IMetaServerLocator m_metaServerLocator;
@@ -30,7 +42,25 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
         public LeaseAcquireResponse tryAcquireConsumerLease(Tpg tpg, String sessionId)
         {
-            throw new NotImplementedException();			
+            Dictionary<string, string> httppParams = new Dictionary<string, string>();
+            httppParams.Add(SESSION_ID, sessionId);
+            httppParams.Add(HOST, Local.IPV4);
+            String response = post("/lease/consumer/acquire", httppParams, tpg);
+            if (response != null)
+            {
+                LeaseAcquireResponse res = null;
+                try{
+                 res = JSON.DeserializeObject<LeaseAcquireResponse>(response);
+                }catch(Exception e){
+                    Console.WriteLine(response);
+                    Console.WriteLine(e);
+                }
+                return res;
+            }
+            else
+            {
+                return null;
+            }
         }
 
 

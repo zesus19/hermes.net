@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Arch.CMessaging.Client.Newtonsoft.Json;
 
 namespace Arch.CMessaging.Client.Core.Bo
 {
@@ -14,8 +15,12 @@ namespace Arch.CMessaging.Client.Core.Bo
             this.Partition = partition;
             this.GroupID = groupID;
         }
+
+        [JsonProperty(PropertyName = "partition")]
         public int Partition { get; set; }
+        [JsonProperty(PropertyName = "topic")]
         public string Topic { get; set; }
+        [JsonProperty(PropertyName = "groupId")]
         public string GroupID { get; set; }
 
         public bool Equals(Tpg tpg)

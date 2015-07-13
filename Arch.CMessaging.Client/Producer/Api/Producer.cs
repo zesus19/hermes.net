@@ -5,6 +5,7 @@ using System.Text;
 using Arch.CMessaging.Client.Core.Future;
 using Arch.CMessaging.Client.Core.Result;
 using Arch.CMessaging.Client.Core.Utils;
+using Arch.CMessaging.Client.Producer.Build;
 
 namespace Arch.CMessaging.Client.Producer
 {
@@ -22,7 +23,7 @@ namespace Arch.CMessaging.Client.Producer
     {
         public static Producer GetInstance() 
         {
-
+            ComponentsConfigurator.DefineComponents();
 			return ComponentLocator.Lookup<Producer>();
         }
         public abstract IMessageHolder Message(string topic, string partitionKey, object body);

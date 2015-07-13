@@ -36,14 +36,14 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Config
             get { return "30"; }
         }
 
-        public long NoMessageWaitIntervalMillis
+        public int NoMessageWaitIntervalMillis
         {
-            get { return 50L; }
+            get { return 50; }
         }
 
-        public long NoEndpointWaitIntervalMillis
+        public int NoEndpointWaitIntervalMillis
         {
-            get { return 500L; }
+            get { return 500; }
         }
 
         public String DefaultNotifierThreadCount

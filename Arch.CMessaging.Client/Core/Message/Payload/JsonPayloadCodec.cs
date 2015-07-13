@@ -5,9 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Arch.CMessaging.Client.MetaEntity.Entity;
 using Arch.CMessaging.Client.Newtonsoft.Json;
+using Arch.CMessaging.Client.Core.Utils;
+using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Core.Message.Payload
 {
+    [Named(ServiceType = typeof(IPayloadCodec), ServiceName = Arch.CMessaging.Client.MetaEntity.Entity.Codec.JSON)]
     public class JsonPayloadCodec : IPayloadCodec
     {
         #region IPayloadCodec Members
@@ -19,9 +22,9 @@ namespace Arch.CMessaging.Client.Core.Message.Payload
             return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(obj));
         }
 
-        public T Decode<T>(byte[] raw)
+        public object Decode(byte[] raw, Type type)
         {
-            throw new NotImplementedException();
+            return JSON.DeserializeObject(raw, type);
         }
 
         #endregion

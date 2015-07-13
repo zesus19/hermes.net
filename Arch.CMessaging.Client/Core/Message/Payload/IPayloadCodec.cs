@@ -9,7 +9,9 @@ namespace Arch.CMessaging.Client.Core.Message.Payload
     public interface IPayloadCodec
     {
         string Type { get; }
+
         byte[] Encode(string topic, object obj);
-	    T Decode<T>(byte[] raw);
+
+        object Decode(byte[] raw, Type type);
     }
 }

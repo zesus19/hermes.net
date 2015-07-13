@@ -20,7 +20,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultConsumerNotifier));
 
-        private ConcurrentDictionary<long, Pair<ConsumerContext, ProducerConsumer<Action>>> m_consumerContexs;
+        private ConcurrentDictionary<long, Pair<ConsumerContext, ProducerConsumer<Action>>> m_consumerContexs = new ConcurrentDictionary<long, Pair<ConsumerContext, ProducerConsumer<Action>>>();
 
         [Inject(BuildConstants.CONSUMER)]
         private IPipeline<object> m_pipeline;
@@ -41,6 +41,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
                 int threadCount = Convert.ToInt32(m_clientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
                                           "consumer.notifier.threadcount", m_config.DefaultNotifierThreadCount));
                 ProducerConsumer<Action> threadPool = new ProducerConsumer<Action>(int.MaxValue, threadCount);
+                threadPool.OnConsume += DispatchMessages;
 
                 var pair = new Pair<ConsumerContext, ProducerConsumer<Action>>(context, threadPool);
                 m_consumerContexs.TryAdd(correlationId, pair);
@@ -58,6 +59,12 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
             ConsumerContext context = pair.Key;
             pair.Value.Shutdown();
             return;
+        }
+
+        public void DispatchMessages(object sender, ConsumeEventArgs args)
+        {
+            SingleConsumingItem<Action> item = (SingleConsumingItem<Action>)args.ConsumingItem;
+            item.Item.Invoke();
         }
 
         public void MessageReceived(long correlationId, List<IConsumerMessage> msgs)

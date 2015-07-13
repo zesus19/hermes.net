@@ -11,5 +11,7 @@ namespace Arch.CMessaging.Client.Producer.Sender
     public interface IMessageSender
     {
         IFuture<SendResult> Send(ProducerMessage message);
+
+        void Resend(ProducerMessage msg, SettableFuture<SendResult> future);
     }
 }

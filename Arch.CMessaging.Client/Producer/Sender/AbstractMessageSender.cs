@@ -50,6 +50,7 @@ namespace Arch.CMessaging.Client.Producer.Sender
         #endregion
 
         protected abstract IFuture<SendResult> DoSend(ProducerMessage message);
+        public  abstract void Resend(ProducerMessage msg, SettableFuture<SendResult> future);
         protected void PreSend(ProducerMessage message) 
         {
             var partitionNo = partitioningAlgo.ComputePartitionNo(

@@ -23,7 +23,7 @@ namespace Arch.CMessaging.Client.Core.Message
 
         public long CorrelationId{ get; set; }
 
-        public IoSession m_channel{ get; set; }
+        public IoSession Channel{ get; set; }
 
         public BrokerConsumerMessage(BaseConsumerMessage baseMsg)
         {
@@ -38,7 +38,7 @@ namespace Arch.CMessaging.Client.Core.Message
                 cmd.Header.CorrelationId = CorrelationId;
                 Tpp tpp = new Tpp(BaseConsumerMessage.Topic, Partition, Priority);
                 cmd.addNackMsg(tpp, GroupId, Resend, MsgSeq, BaseConsumerMessage.RemainingRetries, BaseConsumerMessage.OnMessageStartTimeMills, BaseConsumerMessage.OnMessageEndTimeMills);
-                m_channel.Write(cmd);
+                Channel.Write(cmd);
             }
         }
 
@@ -87,7 +87,7 @@ namespace Arch.CMessaging.Client.Core.Message
                 cmd.Header.CorrelationId = CorrelationId;
                 Tpp tpp = new Tpp(BaseConsumerMessage.Topic, Partition, Priority);
                 cmd.addAckMsg(tpp, GroupId, Resend, MsgSeq, BaseConsumerMessage.RemainingRetries, BaseConsumerMessage.OnMessageStartTimeMills, BaseConsumerMessage.OnMessageEndTimeMills);
-                m_channel.Write(cmd);
+                Channel.Write(cmd);
             }
         }
 
@@ -112,7 +112,7 @@ namespace Arch.CMessaging.Client.Core.Message
         {
             return "BrokerConsumerMessage{" + "m_baseMsg=" + BaseConsumerMessage + ", m_msgSeq=" + MsgSeq + ", m_partition="
             + Partition + ", m_priority=" + Priority + ", m_resend=" + Resend + ", m_groupId='" + GroupId
-            + '\'' + ", m_correlationId=" + CorrelationId + ", m_channel=" + m_channel + '}';
+            + '\'' + ", m_correlationId=" + CorrelationId + ", m_channel=" + Channel + '}';
         }
     }
 }
