@@ -19,7 +19,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultMetaServerLocator));
 
-        private const int DEFAULT_MASTER_METASERVER_PORT = 1248;
+        private const int DEFAULT_MASTER_METASERVER_PORT = 80;
 
         [Inject]
         private IClientEnvironment m_clientEnv;
@@ -140,7 +140,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
             switch (env)
             {
                 case Arch.CMessaging.Client.Core.Env.Env.LOCAL:
-                    return "127.0.0.1";
+                    return "meta.hermes.local";
                 case Arch.CMessaging.Client.Core.Env.Env.DEV:
                     return "10.3.8.63";
                 case Arch.CMessaging.Client.Core.Env.Env.LPT:
