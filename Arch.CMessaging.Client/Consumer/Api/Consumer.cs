@@ -1,6 +1,7 @@
 ﻿using System;
 using Arch.CMessaging.Client.Core.Ioc;
 using Arch.CMessaging.Client.Core.Utils;
+using Arch.CMessaging.Client.Producer.Build;
 
 namespace Arch.CMessaging.Client.Consumer
 {
@@ -8,6 +9,7 @@ namespace Arch.CMessaging.Client.Consumer
     {
         public static Consumer GetInstance()
         {
+            ComponentsConfigurator.DefineComponents();
             return ComponentLocator.Lookup<Consumer>();
         }
 

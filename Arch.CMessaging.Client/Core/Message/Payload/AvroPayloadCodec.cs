@@ -1,21 +1,23 @@
 ﻿using System;
 using Avro.Specific;
+using Arch.CMessaging.Client.Core.Ioc;
 
 namespace Arch.CMessaging.Client.Core.Message.Payload
 {
-	public class AvroPayloadCodec : IPayloadCodec
-	{
-		public string Type { get { return Arch.CMessaging.Client.MetaEntity.Entity.Codec.AVRO; } }
+    [Named(ServiceType = typeof(IPayloadCodec), ServiceName = Arch.CMessaging.Client.MetaEntity.Entity.Codec.AVRO)]
+    public class AvroPayloadCodec : IPayloadCodec
+    {
+        public string Type { get { return Arch.CMessaging.Client.MetaEntity.Entity.Codec.AVRO; } }
 
-		public byte[] Encode(string topic, object obj)
-		{
-			return null;
-		}
+        public byte[] Encode(string topic, object obj)
+        {
+            return null;
+        }
 
-		public T Decode<T>(byte[] raw)
-		{
-			throw new NotImplementedException();
-		}
-	}
+        public object Decode(byte[] raw, Type type)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
 

@@ -10,16 +10,6 @@ namespace Arch.CMessaging.Client.Transport.Command
     {
         private static long serialVersionUID = 8392887545356755515L;
 
-        private String m_groupId;
-
-        private String m_topic;
-
-        private int m_partition;
-
-        private int m_size;
-
-        private long m_expireTime;
-
         private SettableFuture<PullMessageResultCommand> m_future;
 
         public PullMessageCommand()
@@ -30,11 +20,11 @@ namespace Arch.CMessaging.Client.Transport.Command
         public PullMessageCommand(String topic, int partition, String groupId, int size, long expireTime)
             : base(CommandType.MessagePull)
         {
-            m_topic = topic;
-            m_partition = partition;
-            m_groupId = groupId;
-            m_size = size;
-            m_expireTime = expireTime;
+            Topic = topic;
+            Partition = partition;
+            GroupId = groupId;
+            Size = size;
+            ExpireTime = expireTime;
         }
 
         public string GroupId { get; private set; }

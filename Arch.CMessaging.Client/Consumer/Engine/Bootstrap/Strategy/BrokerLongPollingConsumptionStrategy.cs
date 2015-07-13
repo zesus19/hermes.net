@@ -9,6 +9,7 @@ using Arch.CMessaging.Client.Core.Service;
 using Arch.CMessaging.Client.Consumer.Engine.Monitor;
 using Arch.CMessaging.Client.Core.Env;
 using Arch.CMessaging.Client.Core.Ioc;
+using Arch.CMessaging.Client.Core.Collections;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 {
@@ -44,8 +45,6 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 
         public ISubscribeHandle Start(ConsumerContext context, int partitionId)
         {
-            return null;
-            /*
             try
             {
                 int localCachSize = Convert.ToInt32(m_clientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
@@ -70,11 +69,11 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                 consumerTask.SystemClockService = m_systemClockService;
                 consumerTask.Config = m_config;
                 consumerTask.PullMessageResultMonitor = m_pullMessageResultMonitor;
+
+                ProducerConsumer<LongPollingConsumerTask> fakeThread = new ProducerConsumer<LongPollingConsumerTask>(int.MaxValue);
+                fakeThread.OnConsume += startConsumerTaskLoop;
+                fakeThread.Produce(consumerTask);
                 
-                Thread thread = HermesThreadFactory.create(
-                                    String.format("LongPollingExecutorThread-%s-%s-%s", context.Topic.Name, partitionId,
-                                        context.GroupId), false).newThread(consumerTask);
-                thread.start();
                 return new BrokerLongPollingSubscribeHandler(consumerTask);
             }
             catch (Exception e)
@@ -82,10 +81,14 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                 throw new Exception(string.Format("Start Consumer failed(topic={0}, partition={1}, groupId={2})", context
 					.Topic.Name, partitionId, context.GroupId), e);
             }
-            */
         }
 
-        /*
+        void startConsumerTaskLoop(object sender, ConsumeEventArgs e)
+        {
+            LongPollingConsumerTask task = (e.ConsumingItem as SingleConsumingItem<LongPollingConsumerTask>).Item;
+            task.run();
+        }
+
         private class BrokerLongPollingSubscribeHandler : ISubscribeHandle
         {
 
@@ -96,13 +99,12 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                 m_consumerTask = consumerTask;
             }
 
-            public override void close()
+            public void Close()
             {
-                m_consumerTask.close();
+                m_consumerTask.Close();
             }
 
         }
-        */
     }
 }
 

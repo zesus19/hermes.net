@@ -4,36 +4,51 @@ using System.Linq;
 using System.Text;
 using Arch.CMessaging.Client.Core.Service;
 using Arch.CMessaging.Client.Core.Utils;
+using Arch.CMessaging.Client.Newtonsoft.Json;
 
 namespace Arch.CMessaging.Client.Core.Lease
 {
     public class DefaultLease : ILease
     {
         private ThreadSafe.Long expireTime;
-        public DefaultLease() { }
+
+        public DefaultLease()
+            : this(0, 0)
+        {
+        }
+
         public DefaultLease(long id, long expireTime)
         {
             this.ID = id;
             this.expireTime = new ThreadSafe.Long(expireTime);
         }
 
+        [JsonProperty(PropertyName = "id")]
         public long ID { get; set; }
-        public long ExpireTime 
+
+        [JsonProperty(PropertyName = "expireTime")]
+        public long ExpireTime
         {
             get { return expireTime.ReadFullFence(); }
             set { expireTime.WriteFullFence(value); }
         }
 
         #region ILease Members
-        public bool IsExpired
+
+        [JsonProperty(PropertyName = "expired")]
+        public bool Expired
         {
-            get { return GetRemainingTime() <= 0; }
+            get { return RemainingTime <= 0; }
         }
 
-        public long GetRemainingTime()
+        [JsonProperty(PropertyName = "remainingTime")]
+        public long RemainingTime
         {
-            var systemClockService = ComponentLocator.Lookup<ISystemClockService>();
-            return ExpireTime - systemClockService.Now();
+            get
+            {
+                var systemClockService = ComponentLocator.Lookup<ISystemClockService>();
+                return ExpireTime - systemClockService.Now();
+            }
         }
 
         #endregion
@@ -45,7 +60,8 @@ namespace Arch.CMessaging.Client.Core.Lease
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(null, obj))
+                return false;
             return obj is DefaultLease && Equals((DefaultLease)obj);
         }
 

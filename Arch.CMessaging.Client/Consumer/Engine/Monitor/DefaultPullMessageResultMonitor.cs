@@ -35,10 +35,18 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
             if (result != null)
             {
                 PullMessageCommand pullMessageCommand = null;
+                try
+                {
                 lock (theLock)
                 {
                     m_cmds.TryRemove(result.Header.CorrelationId, out pullMessageCommand);
                 }
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
                 if (pullMessageCommand != null)
                 {
                     try

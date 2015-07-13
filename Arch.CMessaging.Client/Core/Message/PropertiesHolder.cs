@@ -12,14 +12,24 @@ namespace Arch.CMessaging.Client.Core.Message
         private const string APP = "APP.";
         private Dictionary<string, string> durableProperties;
         private Dictionary<string, string> volatileProperties;
-        public HashSet<string> RawDurableAppPropertyNames { get; private set;}
+
+        public HashSet<string> RawDurableAppPropertyNames { get; private set; }
+
         public PropertiesHolder()
         {
             RawDurableAppPropertyNames = new HashSet<string>();
             durableProperties = new Dictionary<string, string>();
             volatileProperties = new Dictionary<string, string>();
         }
-        public Dictionary<string, string> DurableProperties 
+
+        public PropertiesHolder(Dictionary<string, string> durableProperties, Dictionary<string, string> volatileProperties)
+            : this()
+        {
+            DurableProperties = durableProperties;
+            VolatileProperties = volatileProperties;
+        }
+
+        public Dictionary<string, string> DurableProperties
         {
             get { return durableProperties; }
             set
@@ -27,9 +37,9 @@ namespace Arch.CMessaging.Client.Core.Message
                 if (value != null)
                 {
                     durableProperties = value;
-                    foreach(var mergedKey in durableProperties.Keys)
+                    foreach (var mergedKey in durableProperties.Keys)
                     {
-                        if (mergedKey.StartsWith(APP)) 
+                        if (mergedKey.StartsWith(APP))
                         {
                             var sub = mergedKey.Substring(APP.Length);
                             if (!RawDurableAppPropertyNames.Contains(sub))
@@ -45,7 +55,8 @@ namespace Arch.CMessaging.Client.Core.Message
             get { return volatileProperties; }
             set
             {
-                if (value != null) volatileProperties = value;
+                if (value != null)
+                    volatileProperties = value;
             }
         }
 

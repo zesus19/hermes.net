@@ -40,7 +40,9 @@ namespace Arch.CMessaging.Client.Core.Message.Codec
 
         public BaseConsumerMessage Decode (string topic, IoBuffer buf, Type bodyType)
 		{
-			throw new NotImplementedException ();
+            Magic.ReadAndCheckMagic(buf);
+            MessageCodecVersion version = GetVersion(buf);
+            return version.Handler.Decode(topic, buf, bodyType);
 		}
 
 		#endregion
