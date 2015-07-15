@@ -3,9 +3,9 @@ using Arch.CMessaging.Client.MetaEntity.Entity;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Internal
 {
-	public interface IMetaLoader
-	{
-		Meta load();
-	}
+    public interface IMetaLoader
+    {
+        Meta Load();
+    }
 }
 

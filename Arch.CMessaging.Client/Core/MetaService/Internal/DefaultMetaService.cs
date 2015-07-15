@@ -17,10 +17,10 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultMetaService));
 
         [Inject]
-        private IMetaManager m_manager;
+        private IMetaManager manager;
 
         [Inject]
-        private CoreConfig m_config;
+        private CoreConfig config;
 
         private volatile Meta MetaCache = null;
 
@@ -164,7 +164,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
 
         public void Refresh()
         {
-            RefreshMeta(m_manager.loadMeta());
+            RefreshMeta(manager.LoadMeta());
         }
 
         private void RefreshMeta(Meta meta)
@@ -188,7 +188,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
                 throw new Exception(String.Format("Consumer group {0} for topic {1} not found", groupId, topicName));
             }
 
-            if (consumerGroup.AckTimeoutSeconds == null)
+            if (consumerGroup.AckTimeoutSeconds == 0)
             {
                 return topic.AckTimeoutSeconds;
             }
@@ -201,35 +201,35 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
 		
         public LeaseAcquireResponse TryAcquireConsumerLease(Tpg tpg, String sessionId)
         {
-            return m_manager.getMetaProxy().tryAcquireConsumerLease(tpg, sessionId);
+            return manager.GetMetaProxy().TryAcquireConsumerLease(tpg, sessionId);
         }
 
 		
         public LeaseAcquireResponse TryRenewConsumerLease(Tpg tpg, ILease lease, String sessionId)
         {
-            return m_manager.getMetaProxy().tryRenewConsumerLease(tpg, lease, sessionId);
+            return manager.GetMetaProxy().TryRenewConsumerLease(tpg, lease, sessionId);
         }
 
 		
         public LeaseAcquireResponse TryRenewBrokerLease(String topic, int partition, ILease lease, String sessionId,
                                                         int brokerPort)
         {
-            return m_manager.getMetaProxy().tryRenewBrokerLease(topic, partition, lease, sessionId, brokerPort);
+            return manager.GetMetaProxy().TryRenewBrokerLease(topic, partition, lease, sessionId, brokerPort);
         }
 
 		
         public LeaseAcquireResponse TryAcquireBrokerLease(String topic, int partition, String sessionId, int brokerPort)
         {
-            return m_manager.getMetaProxy().tryAcquireBrokerLease(topic, partition, sessionId, brokerPort);
+            return manager.GetMetaProxy().TryAcquireBrokerLease(topic, partition, sessionId, brokerPort);
         }
 
         public void Initialize()
         {
 
-            RefreshMeta(m_manager.loadMeta());
+            RefreshMeta(manager.LoadMeta());
 
 
-            int interval = (int)m_config.MetaCacheRefreshIntervalMinutes * 60 * 1000;
+            int interval = (int)config.MetaCacheRefreshIntervalMinutes * 60 * 1000;
             metaRefresher = new MetaRefresher(this, interval);
             timer = new Timer(metaRefresher.Refresh, null, interval, Timeout.Infinite);
         }
@@ -238,7 +238,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
         public String FindAvroSchemaRegistryUrl()
         {
             Codec avroCodec = MetaCache.FindCodec(Codec.AVRO);
-            return avroCodec.Properties[m_config.AvroSchemaRetryUrlKey].Value;
+            return avroCodec.Properties[config.AvroSchemaRetryUrlKey].Value;
         }
 
 		
@@ -269,19 +269,19 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
                 retryPolicyValue = topic.ConsumerRetryPolicy;
             }
 
-            return RetryPolicyFactory.create(retryPolicyValue);
+            return RetryPolicyFactory.Create(retryPolicyValue);
         }
 
 		
         public List<SubscriptionView> ListSubscriptions()
         {
-            return m_manager.getMetaProxy().listSubscriptions();
+            return manager.GetMetaProxy().ListSubscriptions();
         }
 
 		
         public List<SchemaView> ListSchemas()
         {
-            return m_manager.getMetaProxy().listSchemas();
+            return manager.GetMetaProxy().ListSchemas();
         }
 
 		

@@ -2,9 +2,9 @@
 
 namespace Arch.CMessaging.Client.Core.Lease
 {
-	public interface ISessionIdAware
-	{
-		String GetSessionId ();
-	}
+    public interface ISessionIdAware
+    {
+        String GetSessionId();
+    }
 }
 

@@ -15,6 +15,8 @@ using Arch.CMessaging.Client.Core.Future;
 using Arch.CMessaging.Client.Core.Result;
 using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Producer.Sender;
+using Com.Dianping.Cat;
+using Com.Dianping.Cat.Message;
 
 namespace Arch.CMessaging.Client.Producer.Monitor
 {
@@ -78,7 +80,25 @@ namespace Arch.CMessaging.Client.Producer.Monitor
 
         private void Tracking(SendMessageCommand sendMessageCommand, bool success)
         {
-            //todo
+            foreach (List<ProducerMessage> msgs in sendMessageCommand.ProducerMessages)
+            {
+                foreach (ProducerMessage msg in msgs)
+                {
+                    ITransaction t = Cat.NewTransaction("Message.Produce.Acked", msg.Topic);
+                    IMessageTree tree = Cat.GetThreadLocalMessageTree();
+
+                    String msgId = msg.GetDurableSysProperty(CatConstants.SERVER_MESSAGE_ID);
+                    String parentMsgId = msg.GetDurableSysProperty(CatConstants.CURRENT_MESSAGE_ID);
+                    String rootMsgId = msg.GetDurableSysProperty(CatConstants.ROOT_MESSAGE_ID);
+
+                    tree.MessageId = msgId;
+                    tree.ParentMessageId = parentMsgId;
+                    tree.RootMessageId = rootMsgId;
+
+                    t.Status = success ? CatConstants.SUCCESS : "Timeout";
+                    t.Complete();
+                }
+            }
         }
 
         #region IInitializable Members

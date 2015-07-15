@@ -16,7 +16,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Pipeline
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultConsumerPipelineSink));
 
         [Inject]
-        private ISystemClockService m_systemClockService;
+        private ISystemClockService systemClockService;
 
         public object Handle(IPipelineContext ctx, Object payload)
         {
@@ -24,7 +24,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Pipeline
 
             IMessageListener consumer = pair.Key.Consumer;
             List<IConsumerMessage> msgs = pair.Value;
-            setOnMessageStartTime(msgs);
+            SetOnMessageStartTime(msgs);
             try
             {
                 consumer.OnMessage(msgs);
@@ -34,7 +34,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Pipeline
                 log.Error("Uncaught exception occurred while calling MessageListener's onMessage method, will nack all messages which handled by this call.", e);
                 foreach (IConsumerMessage msg in msgs)
                 {
-                    msg.nack();
+                    msg.Nack();
                 }
             }
             finally
@@ -42,21 +42,21 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Pipeline
                 foreach (IConsumerMessage msg in msgs)
                 {
                     // ensure every message is acked or nacked, ack it if not
-                    msg.ack();
+                    msg.Ack();
                 }
             }
 
             return null;
         }
 
-        private void setOnMessageStartTime(List<IConsumerMessage> msgs)
+        private void SetOnMessageStartTime(List<IConsumerMessage> msgs)
         {
             foreach (IConsumerMessage msg in msgs)
             {
                 if (msg is BaseConsumerMessageAware)
                 {
                     BaseConsumerMessage baseMsg = ((BaseConsumerMessageAware)msg).BaseConsumerMessage;
-                    baseMsg.OnMessageStartTimeMills = m_systemClockService.Now();
+                    baseMsg.OnMessageStartTimeMills = systemClockService.Now();
                 }
             }
         }

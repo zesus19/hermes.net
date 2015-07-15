@@ -13,7 +13,7 @@ namespace Arch.CMessaging.Client.Core.Message
 
     public interface IConsumerMessage
     {
-        void nack();
+        void Nack();
 
         string GetProperty(string name);
 
@@ -29,7 +29,7 @@ namespace Arch.CMessaging.Client.Core.Message
 
         string Status{ get; }
 
-        void ack();
+        void Ack();
     }
 }
 

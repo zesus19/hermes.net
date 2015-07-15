@@ -10,6 +10,7 @@ namespace Arch.CMessaging.Client.Core.Message
     public class ProducerMessage
     {
         private object body;
+
         public ProducerMessage(string topic, object body)
         {
             this.Topic = topic;
@@ -18,13 +19,21 @@ namespace Arch.CMessaging.Client.Core.Message
         }
 
         public string Topic { get; set; }
+
         public int Partition { get; set; }
+
         public string PartitionKey { get; set; }
+
         public int SequenceNo { get; set; }
+
         public bool IsPriority { get; set; }
+
         public string Key { get; set; }
+
         public long BornTime { get; set; }
+
         public ICompletionCallback<SendResult> Callback { get; set; }
+
         public PropertiesHolder PropertiesHolder { get; set; }
 
         public T GetBody<T>()

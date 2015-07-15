@@ -9,7 +9,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine
     {
         public abstract ISubscribeHandle Start(List<Subscriber> subscribers);
 
-        public static IEngine getInstance()
+        public static IEngine GetInstance()
         {
             return ComponentLocator.Lookup<IEngine>();
         }

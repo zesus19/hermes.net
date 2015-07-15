@@ -14,10 +14,10 @@ namespace Arch.CMessaging.Client.Consumer.Engine
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultEngine));
 
         [Inject]
-        private IConsumerBootstrapManager m_consumerManager;
+        private IConsumerBootstrapManager consumerManager;
 
         [Inject]
-        private IMetaService m_metaService;
+        private IMetaService metaService;
 
         public override ISubscribeHandle Start(List<Subscriber> subscribers)
         {
@@ -25,7 +25,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine
 
             foreach (Subscriber s in subscribers)
             {
-                List<Topic> topics = m_metaService.ListTopicsByPattern(s.TopicPattern);
+                List<Topic> topics = metaService.ListTopicsByPattern(s.TopicPattern);
 
                 if (topics != null && topics.Count != 0)
                 {
@@ -36,13 +36,13 @@ namespace Arch.CMessaging.Client.Consumer.Engine
                     {
                         ConsumerContext context = new ConsumerContext(topic, s.GroupId, s.Consumer, s.Consumer.MessageType(), s.ConsumerType);
 
-                        if (validate(topic, context))
+                        if (Validate(topic, context))
                         {
                             try
                             {
-                                String endpointType = m_metaService.FindEndpointTypeByTopic(topic.Name);
-                                IConsumerBootstrap consumerBootstrap = m_consumerManager.findConsumerBootStrap(endpointType);
-                                handle.AddSubscribeHandle(consumerBootstrap.start(context));
+                                String endpointType = metaService.FindEndpointTypeByTopic(topic.Name);
+                                IConsumerBootstrap consumerBootstrap = consumerManager.FindConsumerBootStrap(endpointType);
+                                handle.AddSubscribeHandle(consumerBootstrap.Start(context));
 
                             }
                             catch (Exception e)
@@ -62,11 +62,11 @@ namespace Arch.CMessaging.Client.Consumer.Engine
             return handle;
         }
 
-        private bool validate(Topic topic, ConsumerContext context)
+        private bool Validate(Topic topic, ConsumerContext context)
         {
             if (Endpoint.BROKER.Equals(topic.EndpointType))
             {
-                if (!m_metaService.ContainsConsumerGroup(topic.Name, context.GroupId))
+                if (!metaService.ContainsConsumerGroup(topic.Name, context.GroupId))
                 {
                     log.Error(string.Format("Consumer group {0} not found for topic {1}, please add consumer group in Hermes-Portal first.",
                             context.GroupId, topic.Name));
