@@ -4,6 +4,8 @@ using Arch.CMessaging.Client.Core.Service;
 using System.Collections.Concurrent;
 using Arch.CMessaging.Client.Core.Ioc;
 using Arch.CMessaging.Client.Transport.Command;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
 {
@@ -19,13 +21,15 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
 
         private object theLock = new object();
 
+        private Timer timer;
+
         public void monitor(PullMessageCommand cmd)
         {
             if (cmd != null)
             {
                 lock (theLock)
                 {
-                    m_cmds.TryAdd(cmd.Header.CorrelationId, cmd);
+                    m_cmds[cmd.Header.CorrelationId] = cmd;
                 }
             }
         }
@@ -37,12 +41,12 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
                 PullMessageCommand pullMessageCommand = null;
                 try
                 {
-                lock (theLock)
-                {
-                    m_cmds.TryRemove(result.Header.CorrelationId, out pullMessageCommand);
+                    lock (theLock)
+                    {
+                        m_cmds.TryRemove(result.Header.CorrelationId, out pullMessageCommand);
+                    }
                 }
-                }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
@@ -67,47 +71,45 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
 
         public void Initialize()
         {
-            /*
-            Executors.newSingleThreadScheduledExecutor(
-                HermesThreadFactory.create("PullMessageResultMonitor-HouseKeeper", true)).scheduleWithFixedDelay(
-                    new Runnable() {
+            timer = new Timer(HouseKeep, null, 5000, Timeout.Infinite);
+        }
 
-                    @Override
-                    public void run() {
-                        try {
-                            List<PullMessageCommand> timeoutCmds = new LinkedList<>();
+        private void HouseKeep(object dummy)
+        {
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+            try
+            {
+                List<PullMessageCommand> timeoutCmds = new List<PullMessageCommand>();
 
-                            m_lock.lock();
-                            try {
-                                for (Map.Entry<Long, PullMessageCommand> entry : m_cmds.entrySet()) {
-                                    PullMessageCommand cmd = entry.getValue();
-                                    Long correlationId = entry.getKey();
-                                    if (cmd.getExpireTime() + 4000L < m_systemClockService.now()) {
-                                        timeoutCmds.add(m_cmds.remove(correlationId));
-                                    }
-                                }
-
-                            } finally {
-                                m_lock.unlock();
-                            }
-
-                            for (PullMessageCommand timeoutCmd : timeoutCmds) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug(
-                                        "No result received for PullMessageCommand(correlationId={}) until timeout, will cancel waiting automatically",
-                                        timeoutCmd.getHeader().getCorrelationId());
-                                }
-                                timeoutCmd.onTimeout();
-                            }
-                        } catch (Exception e) {
-                            // ignore
-                            if (log.isDebugEnabled()) {
-                                log.debug("Exception occurred while running PullMessageResultMonitor-HouseKeeper", e);
-                            }
+                lock (theLock)
+                {
+                    foreach (KeyValuePair<long, PullMessageCommand> entry in m_cmds)
+                    {
+                        PullMessageCommand cmd = entry.Value;
+                        long correlationId = entry.Key;
+                        if (cmd.ExpireTime + 4000L < m_systemClockService.Now())
+                        {
+                            PullMessageCommand foo;
+                            m_cmds.TryRemove(correlationId, out foo);
+                            timeoutCmds.Add(cmd);
                         }
                     }
-                }, 5, 5, TimeUnit.SECONDS);
-                */
+
+                } 
+
+                foreach (PullMessageCommand timeoutCmd in timeoutCmds)
+                {
+                    timeoutCmd.OnTimeout();
+                }
+            }
+            catch
+            {
+                //ignore
+            }
+            finally
+            {
+                timer.Change(5000, Timeout.Infinite);
+            }
         }
     }
 }

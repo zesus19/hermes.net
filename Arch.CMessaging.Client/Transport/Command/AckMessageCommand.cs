@@ -102,11 +102,11 @@ namespace Arch.CMessaging.Client.Transport.Command
                     int len = codec.ReadInt();
                     if (len == 0)
                     {
-                        msgSeqMap.TryAdd(tppgr, new List<AckContext>());
+                        msgSeqMap[tppgr] = new List<AckContext>();
                     }
                     else
                     {
-                        msgSeqMap.TryAdd(tppgr, new List<AckContext>(len));
+                        msgSeqMap[tppgr] = new List<AckContext>(len);
                     }
 
                     for (int j = 0; j < len; j++)

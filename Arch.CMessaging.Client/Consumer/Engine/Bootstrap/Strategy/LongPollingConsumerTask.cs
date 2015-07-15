@@ -83,8 +83,14 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 
         private void runRenewLeaseTask(object sender, ConsumeEventArgs e)
         {
-            RenewLeaseTask task = (e.ConsumingItem as SingleConsumingItem<RenewLeaseTask>).Item;
-            renewLeaseTaskRun(task);
+            RenewLeaseTask[] tasks = (e.ConsumingItem as ChunkedConsumingItem<RenewLeaseTask>).Chunk;
+            if (tasks != null && tasks.Length > 0)
+            {
+                foreach (var task in tasks)
+                {
+                    renewLeaseTaskRun(task);
+                }
+            }
         }
 
         private void runPullMessageTask(object sender, ConsumeEventArgs e)
@@ -191,8 +197,6 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
         {
             int delay = (int)task.Delay;
             ConsumerLeaseKey key = task.Key;
-            // TODO
-            Thread.Sleep(delay);
 
             if (IsClosed())
             {
@@ -235,29 +239,12 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
         private void acquireLease(ConsumerLeaseKey key)
         {
             long nextTryTime = SystemClockService.Now();
+
             while (!IsClosed())
             {
                 try
                 {
-                    while (true)
-                    {
-                        if (!IsClosed())
-                        {
-                            int timeToNextTry = (int)(nextTryTime - SystemClockService.Now());
-                            if (timeToNextTry >= 0)
-                            {
-                                Thread.Sleep(timeToNextTry);
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            return;
-                        }
-                    }
+                    WaitForNextTryTime(nextTryTime);
 
                     if (IsClosed())
                     {
@@ -289,6 +276,29 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                 {
                     log.Error(string.Format("Exception occurred while acquiring lease(topic={0}, partition={1}, groupId={2}, sessionId={3})",
                             Context.Topic.Name, PartitionId, Context.GroupId, Context.SessionId), e);
+                }
+            }
+        }
+
+        private void WaitForNextTryTime(long nextTryTime)
+        {
+            while (true)
+            {
+                if (!IsClosed())
+                {
+                    int timeToNextTry = (int)(nextTryTime - SystemClockService.Now());
+                    if (timeToNextTry > 0)
+                    {
+                        Thread.Sleep(timeToNextTry);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    return;
                 }
             }
         }
@@ -365,7 +375,6 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                     return;
                 }
 
-                SettableFuture<PullMessageResultCommand> future = SettableFuture<PullMessageResultCommand>.Create();
 
                 ILease lease = m_lease.ReadFullFence();
                 if (lease != null)
@@ -374,52 +383,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 
                     if (timeout > 0)
                     {
-                        PullMessageCommand cmd = new PullMessageCommand(Context.Topic.Name, PartitionId,
-                                                     Context.GroupId, cacheSize - m_msgs.Count, SystemClockService.Now() + timeout
-                                                     - 500L);
-
-                        cmd.Header.CorrelationId = correlationId;
-                        cmd.setFuture(future);
-
-                        PullMessageResultCommand ack = null;
-
-                        try
-                        {
-                            PullMessageResultMonitor.monitor(cmd);
-                            EndpointClient.WriteCommand(endpoint, cmd, timeout);
-
-                            ack = future.Get(timeout);
-
-                            if (ack == null)
-                            {
-                                return;
-                            }
-                            List<TppConsumerMessageBatch> batches = ack.Batches;
-                            if (batches != null && batches.Count != 0)
-                            {
-                                ConsumerContext context = ConsumerNotifier.Find(correlationId);
-                                if (context != null)
-                                {
-                                    Type bodyClazz = context.MessageClazz;
-
-                                    List<IConsumerMessage> msgs = decodeBatches(batches, bodyClazz, ack.Channel);
-                                    m_msgs.AddAll(msgs);
-                                }
-                                else
-                                {
-                                    log.Warn(string.Format("Can not find consumerContext(topic={0}, partition={1}, groupId={2}, sessionId={3})",
-                                            Context.Topic.Name, PartitionId, Context.GroupId,
-                                            Context.SessionId));
-                                }
-                            }
-                        }
-                        finally
-                        {
-                            if (ack != null)
-                            {
-                                ack.Release();
-                            }
-                        }
+                        PullMessages(endpoint, timeout, correlationId);
                     }
                 }
             }
@@ -433,6 +397,62 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                 pullTaskRunning.WriteFullFence(false);
             }
         }
+
+        private void PullMessages(Endpoint endpoint, int timeout, long correlationId)
+        {
+            SettableFuture<PullMessageResultCommand> future = SettableFuture<PullMessageResultCommand>.Create();
+            PullMessageCommand cmd = new PullMessageCommand(Context.Topic.Name, PartitionId,
+                                         Context.GroupId, cacheSize - m_msgs.Count, SystemClockService.Now() + timeout
+                                         - 500L);
+
+            cmd.Header.CorrelationId = correlationId;
+            cmd.setFuture(future);
+
+            PullMessageResultCommand ack = null;
+
+            try
+            {
+                PullMessageResultMonitor.monitor(cmd);
+                EndpointClient.WriteCommand(endpoint, cmd, timeout);
+
+                ack = future.Get(timeout);
+
+                if (ack != null)
+                {
+                    AppendMsgToQueue(ack, correlationId);
+                }
+            }
+            finally
+            {
+                if (ack != null)
+                {
+                    ack.Release();
+                }
+            }
+        }
+
+        private void AppendMsgToQueue(PullMessageResultCommand ack, long correlationId)
+        {
+            List<TppConsumerMessageBatch> batches = ack.Batches;
+            if (batches != null && batches.Count != 0)
+            {
+                ConsumerContext context = ConsumerNotifier.Find(correlationId);
+                if (context != null)
+                {
+                    Type bodyClazz = context.MessageClazz;
+
+                    List<IConsumerMessage> msgs = decodeBatches(batches, bodyClazz, ack.Channel);
+                    m_msgs.AddAll(msgs);
+                }
+                else
+                {
+                    log.Warn(string.Format("Can not find consumerContext(topic={0}, partition={1}, groupId={2}, sessionId={3})",
+                            Context.Topic.Name, PartitionId, Context.GroupId,
+                            Context.SessionId));
+                }
+            }
+        }
+
 
         public void Close()
         {

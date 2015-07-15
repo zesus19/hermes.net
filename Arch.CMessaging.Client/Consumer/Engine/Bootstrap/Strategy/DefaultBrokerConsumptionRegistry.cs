@@ -19,7 +19,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             {
                 ConsumerType consumerType;
                 Enum.TryParse<ConsumerType>(entry.Key, out consumerType);
-                m_strategies.TryAdd(consumerType, entry.Value);
+                m_strategies[consumerType] = entry.Value;
             }
         }
 

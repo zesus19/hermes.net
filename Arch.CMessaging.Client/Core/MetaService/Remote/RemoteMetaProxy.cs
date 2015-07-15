@@ -49,9 +49,12 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
             if (response != null)
             {
                 LeaseAcquireResponse res = null;
-                try{
-                 res = JSON.DeserializeObject<LeaseAcquireResponse>(response);
-                }catch(Exception e){
+                try
+                {
+                    res = JSON.DeserializeObject<LeaseAcquireResponse>(response);
+                }
+                catch (Exception e)
+                {
                     Console.WriteLine(response);
                     Console.WriteLine(e);
                 }
@@ -66,7 +69,19 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
         public LeaseAcquireResponse tryRenewConsumerLease(Tpg tpg, ILease lease, String sessionId)
         {
-            throw new NotImplementedException();			
+            Dictionary<string, string> p = new Dictionary<string, string>();
+            p.Add(LEASE_ID, Convert.ToString(lease.ID));
+            p.Add(SESSION_ID, sessionId);
+            p.Add(HOST, Local.IPV4);
+            String response = post("/lease/consumer/renew", p, tpg);
+            if (response != null)
+            {
+                return JSON.DeserializeObject<LeaseAcquireResponse>(response);
+            }
+            else
+            {
+                return null;
+            }
         }
 
 

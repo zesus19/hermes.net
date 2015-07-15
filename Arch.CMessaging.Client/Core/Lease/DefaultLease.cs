@@ -69,5 +69,10 @@ namespace Arch.CMessaging.Client.Core.Lease
         {
             return this.ID.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return string.Format("[DefaultLease: ID={0}, ExpireTime={1}, Expired={2}, RemainingTime={3}]", ID, ExpireTime, Expired, RemainingTime);
+        }
     }
 }

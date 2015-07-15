@@ -17,7 +17,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap
 
             foreach (KeyValuePair<string, IConsumerBootstrap> entry in bootstraps)
             {
-                m_bootstraps.TryAdd(entry.Key, entry.Value);
+                m_bootstraps[entry.Key] = entry.Value;
             }
         }
 
@@ -28,7 +28,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap
                 throw new Exception(string.Format("ConsumerBootstrap for endpoint type {0} is already registered", endpointType));
             }
 
-            m_bootstraps.TryAdd(endpointType, consumerBootstrap);
+            m_bootstraps[endpointType] = consumerBootstrap;
         }
 
         public IConsumerBootstrap FindConsumerBootstrap(String endpointType)
