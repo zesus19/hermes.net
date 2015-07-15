@@ -124,7 +124,6 @@ namespace Arch.CMessaging.Client.Core.Env
             {
                 throw new Exception("Hermes env is not set");
             }
-            m_env = resultEnv.Value;
 
             env = resultEnv.Value;
         }
