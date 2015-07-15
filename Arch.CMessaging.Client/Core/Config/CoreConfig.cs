@@ -12,7 +12,7 @@ namespace Arch.CMessaging.Client.Core.Config
 	{
 		public int CommandProcessorThreadCount { get { return 10; } }
 
-		public int MetaServerIpFetchInterval { get { return 60; } }
+		public int MetaServerIpFetchInterval { get { return 10; } }
 
 		public int MetaServerConnectTimeoutInMills { get { return 2000; } }
 
@@ -20,7 +20,7 @@ namespace Arch.CMessaging.Client.Core.Config
 
 		public long RunningStatusStatInterval { get { return 30; } }
 
-		public long MetaCacheRefreshIntervalMinutes { get { return 1; } }
+        public long MetaCacheRefreshIntervalSeconds { get { return 20; } }
 
 		public int SendBufferSize { get { return 65535; } }
 

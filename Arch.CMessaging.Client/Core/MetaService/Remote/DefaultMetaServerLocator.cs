@@ -84,7 +84,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
                 List<string> ips = DNSUtil.resolve(domain);
                 if (CollectionUtil.IsNullOrEmpty(ips))
                 {
-                    throw new Exception();
+                    throw new Exception(string.Format("Can not resolve meta server domain name {0}", domain));
                 }
 
                 List<string> ipPorts = new List<string>();
