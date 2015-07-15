@@ -229,7 +229,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
             RefreshMeta(manager.LoadMeta());
 
 
-            int interval = (int)config.MetaCacheRefreshIntervalMinutes * 60 * 1000;
+            int interval = (int)config.MetaCacheRefreshIntervalSeconds * 1000;
             metaRefresher = new MetaRefresher(this, interval);
             timer = new Timer(metaRefresher.Refresh, null, interval, Timeout.Infinite);
         }
