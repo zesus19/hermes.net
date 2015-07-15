@@ -22,16 +22,16 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
         public const String ID = "remote-meta-loader";
 
         [Inject]
-        private IMetaServerLocator m_metaServerLocator;
+        private IMetaServerLocator metaServerLocator;
 
         [Inject]
-        private CoreConfig m_config;
+        private CoreConfig config;
 
-        private ThreadSafe.AtomicReference<Meta> m_metaCache = new ThreadSafe.AtomicReference<Meta>(null);
+        private ThreadSafe.AtomicReference<Meta> metaCache = new ThreadSafe.AtomicReference<Meta>(null);
 
-        public Meta load()
+        public Meta Load()
         {
-            List<string> ipPorts = m_metaServerLocator.getMetaServerList();
+            List<string> ipPorts = metaServerLocator.GetMetaServerList();
             if (ipPorts == null || ipPorts.Count == 0)
             {
                 throw new Exception("No meta server found.");
@@ -44,13 +44,13 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
                 try
                 {
                     string url = string.Format("http://{0}/meta", ipPort);
-                    if (m_metaCache.ReadFullFence() != null)
+                    if (metaCache.ReadFullFence() != null)
                     {
-                        url += "?version=" + m_metaCache.ReadFullFence().Version;
+                        url += "?version=" + metaCache.ReadFullFence().Version;
                     }
 
                     HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-                    req.Timeout = m_config.MetaServerConnectTimeoutInMills + m_config.MetaServerReadTimeoutInMills;
+                    req.Timeout = config.MetaServerConnectTimeoutInMills + config.MetaServerReadTimeoutInMills;
 
                     using (HttpWebResponse res = (HttpWebResponse)req.BetterGetResponse())
                     {
@@ -62,13 +62,13 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
                                 string responseContent = stream.ReadToEnd();
                                 JsonSerializerSettings settings = new JsonSerializerSettings();
                                 settings.NullValueHandling = NullValueHandling.Ignore;
-                                m_metaCache.WriteFullFence(JsonConvert.DeserializeObject<Meta>(responseContent, settings));
-                                return m_metaCache.ReadFullFence();
+                                metaCache.WriteFullFence(JsonConvert.DeserializeObject<Meta>(responseContent, settings));
+                                return metaCache.ReadFullFence();
                             }
                         }
                         else if (statusCode == HttpStatusCode.NotModified)
                         {
-                            return m_metaCache.ReadFullFence();
+                            return metaCache.ReadFullFence();
                         }
                     }
 

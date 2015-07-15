@@ -4,50 +4,58 @@ using System.Text.RegularExpressions;
 
 namespace Arch.CMessaging.Client.Core.Message.Retry
 {
-	public class FrequencySpecifiedRetryPolicy : IRetryPolicy
-	{
-		private static Regex PATTERN_VALID = new Regex ("\\[(\\d+,*)+\\]");
+    public class FrequencySpecifiedRetryPolicy : IRetryPolicy
+    {
+        private static Regex PATTERN_VALID = new Regex("\\[(\\d+,*)+\\]");
 
-		private static Regex PATTERN_GROUP = new Regex ("(\\d+),*");
+        private static Regex PATTERN_GROUP = new Regex("(\\d+),*");
 
-		private String m_policyValue;
+        private String policyValue;
 
-		private int m_retryTimes;
+        private int retryTimes;
 
-		private List<int> m_intervals;
+        private List<int> intervals;
 
-		public FrequencySpecifiedRetryPolicy (String policyValue)
-		{
-			if (policyValue == null) {
-				throw new Exception ("Policy value can not be null");
-			}
+        public FrequencySpecifiedRetryPolicy(String policyValue)
+        {
+            if (policyValue == null)
+            {
+                throw new Exception("Policy value can not be null");
+            }
 
-			m_policyValue = policyValue.Trim ();
-			if (PATTERN_VALID.Match (m_policyValue).Success) {
-				m_intervals = new List<int> ();
-				MatchCollection matches = PATTERN_GROUP.Matches (m_policyValue.Substring (1, m_policyValue.Length - 2));
-				foreach (Match m in matches) {
-					m_intervals.Add (Convert.ToInt32 (m.Groups[1]));
-				}
-				m_retryTimes = m_intervals.Count;
-			} else {
-				throw new Exception (string.Format ("Policy value {0} is invalid", m_policyValue));
-			}
-		}
+            policyValue = policyValue.Trim();
+            if (PATTERN_VALID.Match(policyValue).Success)
+            {
+                intervals = new List<int>();
+                MatchCollection matches = PATTERN_GROUP.Matches(policyValue.Substring(1, policyValue.Length - 2));
+                foreach (Match m in matches)
+                {
+                    intervals.Add(Convert.ToInt32(m.Groups[1]));
+                }
+                retryTimes = intervals.Count;
+            }
+            else
+            {
+                throw new Exception(string.Format("Policy value {0} is invalid", policyValue));
+            }
+        }
 
-		public int GetRetryTimes ()
-		{
-			return m_retryTimes;
-		}
+        public int GetRetryTimes()
+        {
+            return retryTimes;
+        }
 
-		public long NextScheduleTimeMillis (int retryTimes, long currentTimeMillis)
-		{
-			if (retryTimes >= m_retryTimes) {
-				return 0L;
-			} else {
-				return currentTimeMillis + m_intervals [retryTimes] * 1000;
-			}
-		}
-	}
+        public long NextScheduleTimeMillis(int retryTimes, long currentTimeMillis)
+        {
+            if (retryTimes >= this.retryTimes)
+            {
+                return 0L;
+            }
+            else
+            {
+                return currentTimeMillis + intervals[retryTimes] * 1000;
+            }
+        }
+    }
 }
 

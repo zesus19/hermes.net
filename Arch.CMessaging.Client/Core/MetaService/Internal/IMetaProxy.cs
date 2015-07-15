@@ -5,23 +5,23 @@ using Arch.CMessaging.Client.Core.Bo;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Internal
 {
-	public interface IMetaProxy
-	{
-		LeaseAcquireResponse tryAcquireConsumerLease (Tpg tpg, String sessionId);
+    public interface IMetaProxy
+    {
+        LeaseAcquireResponse TryAcquireConsumerLease(Tpg tpg, String sessionId);
 
-		LeaseAcquireResponse tryRenewConsumerLease (Tpg tpg, ILease lease, String sessionId);
+        LeaseAcquireResponse TryRenewConsumerLease(Tpg tpg, ILease lease, String sessionId);
 
-		LeaseAcquireResponse tryRenewBrokerLease (String topic, int partition, ILease lease, String sessionId, int brokerPort);
+        LeaseAcquireResponse TryRenewBrokerLease(String topic, int partition, ILease lease, String sessionId, int brokerPort);
 
-		LeaseAcquireResponse tryAcquireBrokerLease (String topic, int partition, String sessionId, int brokerPort);
+        LeaseAcquireResponse TryAcquireBrokerLease(String topic, int partition, String sessionId, int brokerPort);
 
-		List<SchemaView> listSchemas ();
+        List<SchemaView> ListSchemas();
 
-		List<SubscriptionView> listSubscriptions ();
+        List<SubscriptionView> ListSubscriptions();
 
-		int registerSchema (String schema, String subject);
+        int RegisterSchema(String schema, String subject);
 
-		String getSchemaString (int schemaId);
-	}
+        String GetSchemaString(int schemaId);
+    }
 }
 

@@ -12,11 +12,11 @@ namespace Arch.CMessaging.Client.Consumer.Api
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(BaseMessageListener));
 
-        private string groupId;
+        private string GroupId;
 
         public BaseMessageListener(String groupId)
         {
-            this.groupId = groupId;
+            this.GroupId = groupId;
         }
 
         public void OnMessage(List<IConsumerMessage> msgs)
@@ -44,17 +44,17 @@ namespace Arch.CMessaging.Client.Consumer.Api
                     {
                         t.AddData("topic", topic);
                         t.AddData("key", msg.RefKey);
-                        t.AddData("groupId", groupId);
+                        t.AddData("groupId", GroupId);
                         t.AddData("appId", Cat.Domain);
 
-                        setOnMessageStartTime(msg);
+                        SetOnMessageStartTime(msg);
                         OnMessage(msg);
-                        setOnMessageEndTime(msg);
+                        SetOnMessageEndTime(msg);
                         // by design, if nacked, no effect
-                        msg.ack();
+                        msg.Ack();
 
                         String ip = Local.IPV4;
-                        Cat.LogEvent("Consumer:" + ip, msg.Topic + ":" + groupId, CatConstants.SUCCESS, "key=" + msg.RefKey);
+                        Cat.LogEvent("Consumer:" + ip, msg.Topic + ":" + GroupId, CatConstants.SUCCESS, "key=" + msg.RefKey);
                         Cat.LogEvent("Message:" + topic, "Consumed:" + ip, CatConstants.SUCCESS, "key=" + msg.RefKey);
                         Cat.LogMetricForCount(msg.Topic);
                         t.Status = MessageStatus.SUCCESS.Equals(msg.Status) ? CatConstants.SUCCESS : "FAILED-WILL-RETRY";
@@ -74,7 +74,7 @@ namespace Arch.CMessaging.Client.Consumer.Api
             }
         }
 
-        private void setOnMessageEndTime(IConsumerMessage msg)
+        private void SetOnMessageEndTime(IConsumerMessage msg)
         {
             if (msg is BaseConsumerMessageAware)
             {
@@ -83,7 +83,7 @@ namespace Arch.CMessaging.Client.Consumer.Api
             }
         }
 
-        private void setOnMessageStartTime(IConsumerMessage msg)
+        private void SetOnMessageStartTime(IConsumerMessage msg)
         {
             if (msg is BaseConsumerMessageAware)
             {

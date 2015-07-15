@@ -28,5 +28,10 @@ namespace Arch.CMessaging.Client.Core.Lease
 
         [JsonProperty(PropertyName = "nextTryTime")]
         public long NextTryTime { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("[LeaseAcquireResponse: Acquired={0}, Lease={1}, NextTryTime={2}]", Acquired, Lease, NextTryTime);
+        }
     }
 }

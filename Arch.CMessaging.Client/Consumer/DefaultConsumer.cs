@@ -8,11 +8,11 @@ namespace Arch.CMessaging.Client.Consumer
     public class DefaultConsumer : Consumer
     {
         [Inject]
-        private IEngine m_engine;
+        private IEngine engine;
 
         private IConsumerHolder Start(String topic, String groupId, IMessageListener listener, ConsumerType consumerType)
         {
-            ISubscribeHandle subscribeHandle = m_engine.Start(new System.Collections.Generic.List<Subscriber>{ new Subscriber(topic, groupId, listener, consumerType) });
+            ISubscribeHandle subscribeHandle = engine.Start(new System.Collections.Generic.List<Subscriber>{ new Subscriber(topic, groupId, listener, consumerType) });
 
             return new DefaultConsumerHolder(subscribeHandle);
         }
@@ -25,16 +25,16 @@ namespace Arch.CMessaging.Client.Consumer
         public class DefaultConsumerHolder : IConsumerHolder
         {
 
-            private ISubscribeHandle m_subscribeHandle;
+            private ISubscribeHandle subscribeHandle;
 
             public DefaultConsumerHolder(ISubscribeHandle subscribeHandle)
             {
-                m_subscribeHandle = subscribeHandle;
+                this.subscribeHandle = subscribeHandle;
             }
 
-            public void close()
+            public void Close()
             {
-                m_subscribeHandle.Close();
+                subscribeHandle.Close();
             }
 
         }

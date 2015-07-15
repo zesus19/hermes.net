@@ -40,13 +40,13 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 
         public ConsumerConfig Config{ get; set; }
 
-        private ProducerConsumer<PullMessagesTask> m_pullMessageTaskExecutorService;
+        private ProducerConsumer<PullMessagesTask> pullMessageTaskExecutorService;
 
-        private TimeoutNotifyProducerConsumer<RenewLeaseTask> m_renewLeaseTaskExecutorService;
+        private TimeoutNotifyProducerConsumer<RenewLeaseTask> renewLeaseTaskExecutorService;
 
         public IPullMessageResultMonitor PullMessageResultMonitor { get; set; }
 
-        private BlockingQueue<IConsumerMessage> m_msgs;
+        private BlockingQueue<IConsumerMessage> msgs;
 
         private int cacheSize;
 
@@ -58,7 +58,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 
         private ThreadSafe.Boolean pullTaskRunning = new ThreadSafe.Boolean(false);
 
-        private ThreadSafe.AtomicReference<ILease> m_lease = new ThreadSafe.AtomicReference<ILease>(null);
+        private ThreadSafe.AtomicReference<ILease> leaseRef = new ThreadSafe.AtomicReference<ILease>(null);
 
         private volatile bool closed = false;
 
@@ -71,26 +71,32 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             PartitionId = partitionId;
             this.cacheSize = cacheSize;
             this.localCachePrefetchThreshold = prefetchThreshold;
-            m_msgs = new BlockingQueue<IConsumerMessage>(cacheSize);
+            msgs = new BlockingQueue<IConsumerMessage>(cacheSize);
             SystemClockService = systemClockService;
 
-            m_pullMessageTaskExecutorService = new ProducerConsumer<PullMessagesTask>(int.MaxValue);
-            m_pullMessageTaskExecutorService.OnConsume += runPullMessageTask;
+            pullMessageTaskExecutorService = new ProducerConsumer<PullMessagesTask>(int.MaxValue);
+            pullMessageTaskExecutorService.OnConsume += RunPullMessageTask;
 
-            m_renewLeaseTaskExecutorService = new TimeoutNotifyProducerConsumer<RenewLeaseTask>(int.MaxValue);
-            m_renewLeaseTaskExecutorService.OnConsume += runRenewLeaseTask;
+            renewLeaseTaskExecutorService = new TimeoutNotifyProducerConsumer<RenewLeaseTask>(int.MaxValue);
+            renewLeaseTaskExecutorService.OnConsume += RunRenewLeaseTask;
         }
 
-        private void runRenewLeaseTask(object sender, ConsumeEventArgs e)
+        private void RunRenewLeaseTask(object sender, ConsumeEventArgs e)
         {
-            RenewLeaseTask task = (e.ConsumingItem as SingleConsumingItem<RenewLeaseTask>).Item;
-            renewLeaseTaskRun(task);
+            RenewLeaseTask[] tasks = (e.ConsumingItem as ChunkedConsumingItem<RenewLeaseTask>).Chunk;
+            if (tasks != null && tasks.Length > 0)
+            {
+                foreach (var task in tasks)
+                {
+                    RenewLeaseTaskRun(task);
+                }
+            }
         }
 
-        private void runPullMessageTask(object sender, ConsumeEventArgs e)
+        private void RunPullMessageTask(object sender, ConsumeEventArgs e)
         {
             PullMessagesTask task = (e.ConsumingItem as SingleConsumingItem<PullMessagesTask>).Item;
-            pullMessagesTaskRun(task.CorrelationId);
+            PullMessagesTaskRun(task.CorrelationId);
         }
 
         private bool IsClosed()
@@ -98,7 +104,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             return closed;
         }
 
-        public void run()
+        public void Run()
         {
             log.Info(string.Format("Consumer started(topic={0}, partition={1}, groupId={2}, sessionId={3})", Context.Topic.Name,
                     PartitionId, Context.GroupId, Context.SessionId));
@@ -109,9 +115,9 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                 try
                 {
                     
-                    acquireLease(key);
+                    AcquireLease(key);
 
-                    if (!IsClosed() && m_lease.ReadFullFence() != null && !m_lease.ReadFullFence().Expired)
+                    if (!IsClosed() && leaseRef.ReadFullFence() != null && !leaseRef.ReadFullFence().Expired)
                     {
                         long correlationId = CorrelationIdGenerator.generateCorrelationId();
                         log.Info(string.Format(
@@ -119,7 +125,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                                 Context.Topic.Name, PartitionId, Context.GroupId, correlationId,
                                 Context.SessionId));
 
-                        startConsumingMessages(key, correlationId);
+                        StartConsumingMessages(key, correlationId);
 
                         log.Info(string.Format(
                                 "Consumer pause consuming(topic={0}, partition={1}, groupId={2}, correlationId={3}, sessionId={4}), since lease expired",
@@ -134,35 +140,35 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                 }
             }
 
-            m_pullMessageTaskExecutorService.Shutdown();
-            m_renewLeaseTaskExecutorService.Shutdown();
+            pullMessageTaskExecutorService.Shutdown();
+            renewLeaseTaskExecutorService.Shutdown();
             log.Info(string.Format("Consumer stopped(topic={0}, partition={1}, groupId={2}, sessionId={3})", Context.Topic.Name,
                     PartitionId, Context.GroupId, Context.SessionId));
         }
 
-        private void startConsumingMessages(ConsumerLeaseKey key, long correlationId)
+        private void StartConsumingMessages(ConsumerLeaseKey key, long correlationId)
         {
             ConsumerNotifier.Register(correlationId, Context);
 
-            while (!IsClosed() && !m_lease.ReadFullFence().Expired)
+            while (!IsClosed() && !leaseRef.ReadFullFence().Expired)
             {
 
                 try
                 {
                     // if leaseRemainingTime < stopConsumerTimeMillsBeforLeaseExpired, stop
-                    if (m_lease.ReadFullFence().RemainingTime <= Config.StopConsumerTimeMillsBeforLeaseExpired)
+                    if (leaseRef.ReadFullFence().RemainingTime <= Config.StopConsumerTimeMillsBeforLeaseExpired)
                     {
                         break;
                     }
 
-                    if (m_msgs.Count <= localCachePrefetchThreshold)
+                    if (msgs.Count <= localCachePrefetchThreshold)
                     {
-                        schedulePullMessagesTask(correlationId);
+                        SchedulePullMessagesTask(correlationId);
                     }
 
-                    if (m_msgs.Count != 0)
+                    if (msgs.Count != 0)
                     {
-                        consumeMessages(correlationId, cacheSize);
+                        ConsumeMessages(correlationId, cacheSize);
                     }
                     else
                     {
@@ -178,99 +184,80 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             }
 
             // consume all remaining messages
-            if (m_msgs.Count != 0)
+            if (msgs.Count != 0)
             {
-                consumeMessages(correlationId, 0);
+                ConsumeMessages(correlationId, 0);
             }
 
             ConsumerNotifier.Deregister(correlationId);
-            m_lease.WriteFullFence(null);
+            leaseRef.WriteFullFence(null);
         }
 
-        private void renewLeaseTaskRun(RenewLeaseTask task)
+        private void RenewLeaseTaskRun(RenewLeaseTask task)
         {
             int delay = (int)task.Delay;
             ConsumerLeaseKey key = task.Key;
-            // TODO
-            Thread.Sleep(delay);
 
             if (IsClosed())
             {
                 return;
             }
 
-            ILease lease = m_lease.ReadFullFence();
+            ILease lease = leaseRef.ReadFullFence();
             if (lease != null)
             {
                 if (lease.RemainingTime > 0)
                 {
-                    LeaseAcquireResponse response = LeaseManager.tryRenewLease(key, lease);
+                    LeaseAcquireResponse response = LeaseManager.TryRenewLease(key, lease);
                     if (response != null && response.Acquired)
                     {
                         lease.ExpireTime = response.Lease.ExpireTime;
-                        scheduleRenewLeaseTask(key,
+                        ScheduleRenewLeaseTask(key,
                             lease.RemainingTime - Config.RenewLeaseTimeMillisBeforeExpired);
                     }
                     else
                     {
                         if (response != null && response.NextTryTime > 0)
                         {
-                            scheduleRenewLeaseTask(key, response.NextTryTime - SystemClockService.Now());
+                            ScheduleRenewLeaseTask(key, response.NextTryTime - SystemClockService.Now());
                         }
                         else
                         {
-                            scheduleRenewLeaseTask(key, Config.DefaultLeaseRenewDelayMillis);
+                            ScheduleRenewLeaseTask(key, Config.DefaultLeaseRenewDelayMillis);
                         }
                     }
                 }
             }
         }
 
-        private void scheduleRenewLeaseTask(ConsumerLeaseKey key, long delay)
+        private void ScheduleRenewLeaseTask(ConsumerLeaseKey key, long delay)
         {
             int sKey = scheduleKey.AtomicAddAndGet(1);
-            m_renewLeaseTaskExecutorService.Produce(sKey, new RenewLeaseTask(key, delay), (int)delay);
+            renewLeaseTaskExecutorService.Produce(sKey, new RenewLeaseTask(key, delay), (int)delay);
         }
 
-        private void acquireLease(ConsumerLeaseKey key)
+        private void AcquireLease(ConsumerLeaseKey key)
         {
             long nextTryTime = SystemClockService.Now();
+
             while (!IsClosed())
             {
                 try
                 {
-                    while (true)
-                    {
-                        if (!IsClosed())
-                        {
-                            int timeToNextTry = (int)(nextTryTime - SystemClockService.Now());
-                            if (timeToNextTry >= 0)
-                            {
-                                Thread.Sleep(timeToNextTry);
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            return;
-                        }
-                    }
+                    WaitForNextTryTime(nextTryTime);
 
                     if (IsClosed())
                     {
                         return;
                     }
 
-                    LeaseAcquireResponse response = LeaseManager.tryAcquireLease(key);
+                    LeaseAcquireResponse response = LeaseManager.TryAcquireLease(key);
 
                     if (response != null && response.Acquired && !response.Lease.Expired)
                     {
-                        m_lease.WriteFullFence(response.Lease);
-                        scheduleRenewLeaseTask(key,
-                            m_lease.ReadFullFence().RemainingTime - Config.RenewLeaseTimeMillisBeforeExpired);
+                        leaseRef.WriteFullFence(response.Lease);
+                        ScheduleRenewLeaseTask(key,
+                            leaseRef.ReadFullFence().RemainingTime - Config.RenewLeaseTimeMillisBeforeExpired);
                         return;
                     }
                     else
@@ -293,23 +280,46 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             }
         }
 
-        private void consumeMessages(long correlationId, int maxItems)
+        private void WaitForNextTryTime(long nextTryTime)
         {
-            List<IConsumerMessage> msgs = new List<IConsumerMessage>(maxItems <= 0 ? 100 : maxItems);
+            while (true)
+            {
+                if (!IsClosed())
+                {
+                    int timeToNextTry = (int)(nextTryTime - SystemClockService.Now());
+                    if (timeToNextTry > 0)
+                    {
+                        Thread.Sleep(timeToNextTry);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+        }
+
+        private void ConsumeMessages(long correlationId, int maxItems)
+        {
+            List<IConsumerMessage> msgsToConsume = new List<IConsumerMessage>(maxItems <= 0 ? 100 : maxItems);
 
             if (maxItems <= 0)
             {
-                m_msgs.DrainTo(msgs);
+                msgs.DrainTo(msgsToConsume);
             }
             else
             {
-                m_msgs.DrainTo(msgs, maxItems);
+                msgs.DrainTo(msgsToConsume, maxItems);
             }
 
-            ConsumerNotifier.MessageReceived(correlationId, msgs);
+            ConsumerNotifier.MessageReceived(correlationId, msgsToConsume);
         }
 
-        private List<IConsumerMessage> decodeBatches(List<TppConsumerMessageBatch> batches, Type bodyClazz,
+        private List<IConsumerMessage> DecodeBatches(List<TppConsumerMessageBatch> batches, Type bodyClazz,
                                                      IoSession channel)
         {
             List<IConsumerMessage> msgs = new List<IConsumerMessage>();
@@ -338,19 +348,19 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             return msgs;
         }
 
-        private void schedulePullMessagesTask(long correlationId)
+        private void SchedulePullMessagesTask(long correlationId)
         {
             if (!IsClosed() && pullTaskRunning.CompareAndSet(false, true))
             {
-                m_pullMessageTaskExecutorService.Produce(new PullMessagesTask(correlationId));
+                pullMessageTaskExecutorService.Produce(new PullMessagesTask(correlationId));
             }
         }
 
-        private void pullMessagesTaskRun(long correlationId)
+        private void PullMessagesTaskRun(long correlationId)
         {
             try
             {
-                if (IsClosed() || m_msgs.Count > localCachePrefetchThreshold)
+                if (IsClosed() || msgs.Count > localCachePrefetchThreshold)
                 {
                     return;
                 }
@@ -365,61 +375,15 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                     return;
                 }
 
-                SettableFuture<PullMessageResultCommand> future = SettableFuture<PullMessageResultCommand>.Create();
 
-                ILease lease = m_lease.ReadFullFence();
+                ILease lease = leaseRef.ReadFullFence();
                 if (lease != null)
                 {
                     int timeout = (int)lease.RemainingTime;
 
                     if (timeout > 0)
                     {
-                        PullMessageCommand cmd = new PullMessageCommand(Context.Topic.Name, PartitionId,
-                                                     Context.GroupId, cacheSize - m_msgs.Count, SystemClockService.Now() + timeout
-                                                     - 500L);
-
-                        cmd.Header.CorrelationId = correlationId;
-                        cmd.setFuture(future);
-
-                        PullMessageResultCommand ack = null;
-
-                        try
-                        {
-                            PullMessageResultMonitor.monitor(cmd);
-                            EndpointClient.WriteCommand(endpoint, cmd, timeout);
-
-                            ack = future.Get(timeout);
-
-                            if (ack == null)
-                            {
-                                return;
-                            }
-                            List<TppConsumerMessageBatch> batches = ack.Batches;
-                            if (batches != null && batches.Count != 0)
-                            {
-                                ConsumerContext context = ConsumerNotifier.Find(correlationId);
-                                if (context != null)
-                                {
-                                    Type bodyClazz = context.MessageClazz;
-
-                                    List<IConsumerMessage> msgs = decodeBatches(batches, bodyClazz, ack.Channel);
-                                    m_msgs.AddAll(msgs);
-                                }
-                                else
-                                {
-                                    log.Warn(string.Format("Can not find consumerContext(topic={0}, partition={1}, groupId={2}, sessionId={3})",
-                                            Context.Topic.Name, PartitionId, Context.GroupId,
-                                            Context.SessionId));
-                                }
-                            }
-                        }
-                        finally
-                        {
-                            if (ack != null)
-                            {
-                                ack.Release();
-                            }
-                        }
+                        PullMessages(endpoint, timeout, correlationId);
                     }
                 }
             }
@@ -433,6 +397,62 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                 pullTaskRunning.WriteFullFence(false);
             }
         }
+
+        private void PullMessages(Endpoint endpoint, int timeout, long correlationId)
+        {
+            SettableFuture<PullMessageResultCommand> future = SettableFuture<PullMessageResultCommand>.Create();
+            PullMessageCommand cmd = new PullMessageCommand(Context.Topic.Name, PartitionId,
+                                         Context.GroupId, cacheSize - msgs.Count, SystemClockService.Now() + timeout
+                                         - 500L);
+
+            cmd.Header.CorrelationId = correlationId;
+            cmd.setFuture(future);
+
+            PullMessageResultCommand ack = null;
+
+            try
+            {
+                PullMessageResultMonitor.Monitor(cmd);
+                EndpointClient.WriteCommand(endpoint, cmd, timeout);
+
+                ack = future.Get(timeout);
+
+                if (ack != null)
+                {
+                    AppendMsgToQueue(ack, correlationId);
+                }
+            }
+            finally
+            {
+                if (ack != null)
+                {
+                    ack.Release();
+                }
+            }
+        }
+
+        private void AppendMsgToQueue(PullMessageResultCommand ack, long correlationId)
+        {
+            List<TppConsumerMessageBatch> batches = ack.Batches;
+            if (batches != null && batches.Count != 0)
+            {
+                ConsumerContext context = ConsumerNotifier.Find(correlationId);
+                if (context != null)
+                {
+                    Type bodyClazz = context.MessageClazz;
+
+                    List<IConsumerMessage> decodedMsgs = DecodeBatches(batches, bodyClazz, ack.Channel);
+                    msgs.AddAll(decodedMsgs);
+                }
+                else
+                {
+                    log.Warn(string.Format("Can not find consumerContext(topic={0}, partition={1}, groupId={2}, sessionId={3})",
+                            Context.Topic.Name, PartitionId, Context.GroupId,
+                            Context.SessionId));
+                }
+            }
+        }
+
 
         public void Close()
         {

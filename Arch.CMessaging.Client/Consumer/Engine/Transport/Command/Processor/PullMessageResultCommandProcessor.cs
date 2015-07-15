@@ -11,7 +11,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Transport.Command.Processor
     public class PullMessageResultCommandProcessor : ICommandProcessor
     {
         [Inject]
-        private IPullMessageResultMonitor m_messageResultMonitor;
+        private IPullMessageResultMonitor messageResultMonitor;
 
         public List<CommandType> CommandTypes()
         {
@@ -22,7 +22,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Transport.Command.Processor
         {
             PullMessageResultCommand cmd = (PullMessageResultCommand)ctx.Command;
             cmd.Channel = ctx.Session;
-            m_messageResultMonitor.resultReceived(cmd);
+            messageResultMonitor.ResultReceived(cmd);
         }
     }
 }

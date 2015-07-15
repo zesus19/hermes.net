@@ -7,61 +7,70 @@ using Arch.CMessaging.Client.Core.MetaService.Remote;
 
 namespace Arch.CMessaging.Client.Core.MetaService.Internal
 {
-	[Named (ServiceType = typeof(IMetaManager))]
-	public class DefaultMetaManager : IMetaManager, IInitializable
-	{
-		private static readonly ILog log = LogManager.GetLogger (typeof(DefaultMetaManager));
+    [Named(ServiceType = typeof(IMetaManager))]
+    public class DefaultMetaManager : IMetaManager, IInitializable
+    {
+        private static readonly ILog log = LogManager.GetLogger(typeof(DefaultMetaManager));
 
-		[Inject (LocalMetaLoader.ID)]
-		private IMetaLoader m_localMeta;
+        [Inject(LocalMetaLoader.ID)]
+        private IMetaLoader localMeta;
 
-		[Inject (RemoteMetaLoader.ID)]
-		private IMetaLoader m_remoteMeta;
+        [Inject(RemoteMetaLoader.ID)]
+        private IMetaLoader remoteMeta;
 
-		[Inject]
-		private IClientEnvironment m_env;
+        [Inject]
+        private IClientEnvironment m_env;
 
-		[Inject (LocalMetaProxy.ID)]
-		private IMetaProxy m_localMetaProxy;
+        [Inject(LocalMetaProxy.ID)]
+        private IMetaProxy localMetaProxy;
 
-		[Inject (RemoteMetaProxy.ID)]
-		private IMetaProxy m_remoteMetaProxy;
+        [Inject(RemoteMetaProxy.ID)]
+        private IMetaProxy remoteMetaProxy;
 
-		private bool m_localMode = false;
+        private bool localMode = false;
 
-		public IMetaProxy getMetaProxy ()
-		{
-			if (isLocalMode ()) {
-				return m_localMetaProxy;
-			} else {
-				return m_remoteMetaProxy;
-			}
-		}
+        public IMetaProxy GetMetaProxy()
+        {
+            if (IsLocalMode())
+            {
+                return localMetaProxy;
+            }
+            else
+            {
+                return remoteMetaProxy;
+            }
+        }
 
-		public Meta loadMeta ()
-		{
-			if (isLocalMode ()) {
-				return m_localMeta.load ();
-			} else {
-				return m_remoteMeta.load ();
-			}
-		}
+        public Meta LoadMeta()
+        {
+            if (IsLocalMode())
+            {
+                return localMeta.Load();
+            }
+            else
+            {
+                return remoteMeta.Load();
+            }
+        }
 
-		private bool isLocalMode ()
-		{
-			return m_localMode;
-		}
+        private bool IsLocalMode()
+        {
+            return localMode;
+        }
 
-		public void Initialize ()
-		{
-			m_localMode = m_env.IsLocalMode ();
+        public void Initialize()
+        {
+            localMode = m_env.IsLocalMode();
 
-			if (m_localMode) {
-				log.Info ("Meta manager started with local mode");
-			} else {
-				log.Info ("Meta manager started with remote mode");
-			}
-		}
-	}
+            if (localMode)
+            {
+                log.Info("Meta manager started with local mode");
+            }
+            else
+            {
+                log.Info("Meta manager started with remote mode");
+            }
+        }
+    }
 }
 

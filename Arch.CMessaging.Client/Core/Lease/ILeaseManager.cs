@@ -2,10 +2,10 @@
 
 namespace Arch.CMessaging.Client.Core.Lease
 {
-	public interface ILeaseManager<T> where T : ISessionIdAware
-	{
-		LeaseAcquireResponse tryAcquireLease (T key);
+    public interface ILeaseManager<T> where T : ISessionIdAware
+    {
+        LeaseAcquireResponse TryAcquireLease(T key);
 
-		LeaseAcquireResponse tryRenewLease (T key, ILease lease);
-	}
+        LeaseAcquireResponse TryRenewLease(T key, ILease lease);
+    }
 }

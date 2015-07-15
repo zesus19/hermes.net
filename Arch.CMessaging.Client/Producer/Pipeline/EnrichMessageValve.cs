@@ -5,9 +5,7 @@ using System.Text;
 using Arch.CMessaging.Client.Core.Pipeline.spi;
 using Arch.CMessaging.Client.Core.Pipeline;
 using Arch.CMessaging.Client.Core.Ioc;
-using Arch.CMessaging.Client.Core.Pipeline.spi;
 using Freeway.Logging;
-using Arch.CMessaging.Client.Core.Pipeline;
 using Arch.CMessaging.Client.Core.Message;
 using Arch.CMessaging.Client.Core.Utils;
 
