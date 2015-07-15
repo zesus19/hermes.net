@@ -18,7 +18,7 @@ namespace Arch.CMessaging.Client.Consumer
 
     public interface IConsumerHolder
     {
-        void close();
+        void Close();
     }
 }
 

@@ -20,22 +20,22 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap
         [Inject]
         protected IConsumerNotifier ConsumerNotifier;
 
-        public ISubscribeHandle start(ConsumerContext context)
+        public ISubscribeHandle Start(ConsumerContext context)
         {
-            return doStart(context);
+            return DoStart(context);
         }
 
-        public void stop(ConsumerContext context)
+        public void Stop(ConsumerContext context)
         {
-            doStop(context);
+            DoStop(context);
         }
 
-        protected void doStop(ConsumerContext context)
+        protected void DoStop(ConsumerContext context)
         {
 
         }
 
-        protected abstract ISubscribeHandle doStart(ConsumerContext context);
+        protected abstract ISubscribeHandle DoStart(ConsumerContext context);
     }
 }
 

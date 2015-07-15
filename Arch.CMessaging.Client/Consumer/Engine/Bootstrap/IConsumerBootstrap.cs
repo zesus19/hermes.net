@@ -4,9 +4,9 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap
 {
 	public interface IConsumerBootstrap
 	{
-		ISubscribeHandle start (ConsumerContext consumerContext);
+		ISubscribeHandle Start (ConsumerContext consumerContext);
 
-		void stop (ConsumerContext consumerContext);
+		void Stop (ConsumerContext consumerContext);
 	}
 }
 

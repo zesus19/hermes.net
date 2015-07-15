@@ -29,20 +29,20 @@ namespace Arch.CMessaging.Client.Core.Env
 
         private ConcurrentDictionary<String, Properties> ConsumerCache = new ConcurrentDictionary<String, Properties>();
 
-        private Properties m_producerDefault;
+        private Properties producerDefault;
 
-        private Properties m_consumerDefault;
+        private Properties consumerDefault;
 
-        public Properties m_globalDefault { get; set; }
+        public Properties GlobalDefault { get; set; }
 
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultClientEnvironment));
 
-        private volatile Env m_env;
+        private volatile Env env;
 
 
         public Properties GetGlobalConfig()
         {
-            return m_globalDefault;
+            return GlobalDefault;
         }
 
         public Properties GetProducerConfig(String topic)
@@ -51,7 +51,7 @@ namespace Arch.CMessaging.Client.Core.Env
             ProducerCache.TryGetValue(topic, out properties);
             if (properties == null)
             {
-                properties = readConfigFile(String.Format(PRODUCER_PATTERN, topic), m_producerDefault);
+                properties = readConfigFile(String.Format(PRODUCER_PATTERN, topic), producerDefault);
                 ProducerCache.GetOrAdd(topic, properties);
             }
 
@@ -64,7 +64,7 @@ namespace Arch.CMessaging.Client.Core.Env
             ConsumerCache.TryGetValue(topic, out properties);
             if (properties == null)
             {
-                properties = readConfigFile(String.Format(CONSUMER_PATTERN, topic), m_consumerDefault);
+                properties = readConfigFile(String.Format(CONSUMER_PATTERN, topic), consumerDefault);
                 ConsumerCache.GetOrAdd(topic, properties);
             }
 
@@ -100,11 +100,11 @@ namespace Arch.CMessaging.Client.Core.Env
 		
         public void Initialize()
         {
-            m_producerDefault = readConfigFile(PRODUCER_DEFAULT_FILE);
-            m_consumerDefault = readConfigFile(CONSUMER_DEFAULT_FILE);
-            m_globalDefault = readConfigFile(GLOBAL_DEFAULT_FILE);
+            producerDefault = readConfigFile(PRODUCER_DEFAULT_FILE);
+            consumerDefault = readConfigFile(CONSUMER_DEFAULT_FILE);
+            GlobalDefault = readConfigFile(GLOBAL_DEFAULT_FILE);
 
-            Env? resultEnv = Hermes.getEnv();
+            Env? resultEnv = Hermes.GetEnv();
 
             NameValueCollection config = ConfigurationManager.GetSection("hermes/global") as NameValueCollection;
             if (config != null && config["env"] != null)
@@ -125,12 +125,12 @@ namespace Arch.CMessaging.Client.Core.Env
                 throw new Exception("Hermes env is not set");
             }
 
-            m_env = resultEnv.Value;
+            env = resultEnv.Value;
         }
 
         public Env GetEnv()
         {
-            return m_env;
+            return env;
         }
 
 		

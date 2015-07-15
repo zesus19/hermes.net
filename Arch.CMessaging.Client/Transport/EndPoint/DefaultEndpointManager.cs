@@ -5,7 +5,6 @@ using System.Text;
 using Arch.CMessaging.Client.Core.Ioc;
 using Arch.CMessaging.Client.MetaEntity.Entity;
 using Arch.CMessaging.Client.Core.MetaService;
-using Arch.CMessaging.Client.MetaEntity.Entity;
 
 namespace Arch.CMessaging.Client.Transport.EndPoint
 {

@@ -35,17 +35,17 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
         public const string ID = "remote";
 
         [Inject]
-        private IMetaServerLocator m_metaServerLocator;
+        private IMetaServerLocator metaServerLocator;
 
         [Inject]
-        private CoreConfig m_config;
+        private CoreConfig mconfig;
 
-        public LeaseAcquireResponse tryAcquireConsumerLease(Tpg tpg, String sessionId)
+        public LeaseAcquireResponse TryAcquireConsumerLease(Tpg tpg, String sessionId)
         {
             Dictionary<string, string> httppParams = new Dictionary<string, string>();
             httppParams.Add(SESSION_ID, sessionId);
             httppParams.Add(HOST, Local.IPV4);
-            String response = post("/lease/consumer/acquire", httppParams, tpg);
+            String response = Post("/lease/consumer/acquire", httppParams, tpg);
             if (response != null)
             {
                 LeaseAcquireResponse res = null;
@@ -67,13 +67,13 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
         }
 
 
-        public LeaseAcquireResponse tryRenewConsumerLease(Tpg tpg, ILease lease, String sessionId)
+        public LeaseAcquireResponse TryRenewConsumerLease(Tpg tpg, ILease lease, String sessionId)
         {
             Dictionary<string, string> p = new Dictionary<string, string>();
             p.Add(LEASE_ID, Convert.ToString(lease.ID));
             p.Add(SESSION_ID, sessionId);
             p.Add(HOST, Local.IPV4);
-            String response = post("/lease/consumer/renew", p, tpg);
+            String response = Post("/lease/consumer/renew", p, tpg);
             if (response != null)
             {
                 return JSON.DeserializeObject<LeaseAcquireResponse>(response);
@@ -85,7 +85,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
         }
 
 
-        public LeaseAcquireResponse tryRenewBrokerLease(String topic, int partition, ILease lease, String sessionId,
+        public LeaseAcquireResponse TryRenewBrokerLease(String topic, int partition, ILease lease, String sessionId,
                                                         int brokerPort)
         {
             throw new NotImplementedException();			
@@ -93,28 +93,28 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
         }
 
 
-        public LeaseAcquireResponse tryAcquireBrokerLease(String topic, int partition, String sessionId, int brokerPort)
+        public LeaseAcquireResponse TryAcquireBrokerLease(String topic, int partition, String sessionId, int brokerPort)
         {
             throw new NotImplementedException();			
         }
 
 
-        public List<SchemaView> listSchemas()
+        public List<SchemaView> ListSchemas()
         {
             throw new NotImplementedException();			
         }
 
 
-        public List<SubscriptionView> listSubscriptions()
+        public List<SubscriptionView> ListSubscriptions()
         {
             throw new NotImplementedException();			
         }
 
         delegate string httpTo(string ipPort);
 
-        private String post(string path, Dictionary<string, string> requestParams, Object payload)
+        private String Post(string path, Dictionary<string, string> requestParams, Object payload)
         {
-            return pollMetaServer((ipPort) =>
+            return PollMetaServer((ipPort) =>
                 {
                     UriBuilder uriBuilder = new UriBuilder("http://" + ipPort);
                     uriBuilder.Path = path;
@@ -131,7 +131,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
                     HttpWebRequest req = (HttpWebRequest)WebRequest.Create(uriBuilder.ToString());
                     req.Method = "POST";
-                    req.Timeout = m_config.MetaServerConnectTimeoutInMills + m_config.MetaServerReadTimeoutInMills;
+                    req.Timeout = mconfig.MetaServerConnectTimeoutInMills + mconfig.MetaServerReadTimeoutInMills;
 
                     if (payload != null)
                     {
@@ -164,9 +164,9 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
                 });
         }
 
-        private String pollMetaServer(httpTo httpTo)
+        private String PollMetaServer(httpTo httpTo)
         {
-            List<String> metaServerIpPorts = m_metaServerLocator.getMetaServerList();
+            List<String> metaServerIpPorts = metaServerLocator.GetMetaServerList();
 
             foreach (String ipPort in metaServerIpPorts)
             {
@@ -185,12 +185,12 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
         }
 
-        public int registerSchema(String schema, String subject)
+        public int RegisterSchema(String schema, String subject)
         {
             Dictionary<String, String> p = new Dictionary<string, string>();
             p.Add("schema", schema);
             p.Add("subject", subject);
-            String response = post("/schema/register", null, p);
+            String response = Post("/schema/register", null, p);
             if (response != null)
             {
                 try
@@ -209,7 +209,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
             return -1;
         }
 
-        public String getSchemaString(int schemaId)
+        public String GetSchemaString(int schemaId)
         {
             throw new NotImplementedException();
         }

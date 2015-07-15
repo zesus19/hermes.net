@@ -11,15 +11,15 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Pipeline
     public class ConsumerPipeline : IPipeline<object>
     {
         [Inject(BuildConstants.CONSUMER)]
-        private IPipelineSink m_pipelineSink;
+        private IPipelineSink pipelineSink;
 
         [Inject(BuildConstants.CONSUMER)]
-        private IValveRegistry m_registry;
+        private IValveRegistry registry;
 
         public object Put(object payload)
         {
-            IList<IValve> valves = m_registry.GetValveList();
-            IPipelineContext ctx = new DefaultPipelineContext(valves, m_pipelineSink);
+            IList<IValve> valves = registry.GetValveList();
+            IPipelineContext ctx = new DefaultPipelineContext(valves, pipelineSink);
 
             ctx.Next(payload);
 

@@ -15,26 +15,26 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultPullMessageResultMonitor));
 
         [Inject]
-        private ISystemClockService m_systemClockService;
+        private ISystemClockService systemClockService;
 
-        private ConcurrentDictionary<long, PullMessageCommand> m_cmds = new ConcurrentDictionary<long, PullMessageCommand>();
+        private ConcurrentDictionary<long, PullMessageCommand> cmds = new ConcurrentDictionary<long, PullMessageCommand>();
 
         private object theLock = new object();
 
         private Timer timer;
 
-        public void monitor(PullMessageCommand cmd)
+        public void Monitor(PullMessageCommand cmd)
         {
             if (cmd != null)
             {
                 lock (theLock)
                 {
-                    m_cmds[cmd.Header.CorrelationId] = cmd;
+                    cmds[cmd.Header.CorrelationId] = cmd;
                 }
             }
         }
 
-        public void resultReceived(PullMessageResultCommand result)
+        public void ResultReceived(PullMessageResultCommand result)
         {
             if (result != null)
             {
@@ -43,7 +43,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
                 {
                     lock (theLock)
                     {
-                        m_cmds.TryRemove(result.Header.CorrelationId, out pullMessageCommand);
+                        cmds.TryRemove(result.Header.CorrelationId, out pullMessageCommand);
                     }
                 }
                 catch (Exception e)
@@ -83,14 +83,14 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
 
                 lock (theLock)
                 {
-                    foreach (KeyValuePair<long, PullMessageCommand> entry in m_cmds)
+                    foreach (KeyValuePair<long, PullMessageCommand> entry in cmds)
                     {
                         PullMessageCommand cmd = entry.Value;
                         long correlationId = entry.Key;
-                        if (cmd.ExpireTime + 4000L < m_systemClockService.Now())
+                        if (cmd.ExpireTime + 4000L < systemClockService.Now())
                         {
                             PullMessageCommand foo;
-                            m_cmds.TryRemove(correlationId, out foo);
+                            cmds.TryRemove(correlationId, out foo);
                             timeoutCmds.Add(cmd);
                         }
                     }

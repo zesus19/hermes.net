@@ -20,31 +20,31 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultConsumerNotifier));
 
-        private ConcurrentDictionary<long, Pair<ConsumerContext, ProducerConsumer<Action>>> m_consumerContexs = new ConcurrentDictionary<long, Pair<ConsumerContext, ProducerConsumer<Action>>>();
+        private ConcurrentDictionary<long, Pair<ConsumerContext, ProducerConsumer<Action>>> consumerContexs = new ConcurrentDictionary<long, Pair<ConsumerContext, ProducerConsumer<Action>>>();
 
         [Inject(BuildConstants.CONSUMER)]
-        private IPipeline<object> m_pipeline;
+        private IPipeline<object> pipeline;
 
         [Inject]
-        private ConsumerConfig m_config;
+        private ConsumerConfig config;
 
         [Inject]
-        private ISystemClockService m_systemClockService;
+        private ISystemClockService systemClockService;
 
         [Inject]
-        private IClientEnvironment m_clientEnv;
+        private IClientEnvironment clientEnv;
 
         public void Register(long correlationId, ConsumerContext context)
         {
             try
             {
-                int threadCount = Convert.ToInt32(m_clientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
-                                          "consumer.notifier.threadcount", m_config.DefaultNotifierThreadCount));
+                int threadCount = Convert.ToInt32(clientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
+                                          "consumer.notifier.threadcount", config.DefaultNotifierThreadCount));
                 ProducerConsumer<Action> threadPool = new ProducerConsumer<Action>(int.MaxValue, threadCount);
                 threadPool.OnConsume += DispatchMessages;
 
                 var pair = new Pair<ConsumerContext, ProducerConsumer<Action>>(context, threadPool);
-                m_consumerContexs.TryAdd(correlationId, pair);
+                consumerContexs.TryAdd(correlationId, pair);
             }
             catch (Exception e)
             {
@@ -55,7 +55,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
         public void Deregister(long correlationId)
         {
             Pair<ConsumerContext, ProducerConsumer<Action>> pair = null;
-            m_consumerContexs.TryRemove(correlationId, out pair);
+            consumerContexs.TryRemove(correlationId, out pair);
             ConsumerContext context = pair.Key;
             pair.Value.Shutdown();
             return;
@@ -69,7 +69,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
 
         public void MessageReceived(long correlationId, List<IConsumerMessage> msgs)
         {
-            Pair<ConsumerContext, ProducerConsumer<Action>> pair = m_consumerContexs[correlationId];
+            Pair<ConsumerContext, ProducerConsumer<Action>> pair = consumerContexs[correlationId];
             ConsumerContext context = pair.Key;
             ProducerConsumer<Action> executorService = pair.Value;
 
@@ -87,7 +87,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
                             }
                         }
 
-                        m_pipeline.Put(new Pair<ConsumerContext, List<IConsumerMessage>>(context, msgs));
+                        pipeline.Put(new Pair<ConsumerContext, List<IConsumerMessage>>(context, msgs));
                     }
                     catch (Exception e)
                     {
@@ -101,7 +101,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Notifier
         public ConsumerContext Find(long correlationId)
         {
             Pair<ConsumerContext, ProducerConsumer<Action>> pair = null;
-            m_consumerContexs.TryGetValue(correlationId, out pair);
+            consumerContexs.TryGetValue(correlationId, out pair);
             return pair == null ? null : pair.Key;
         }
     }

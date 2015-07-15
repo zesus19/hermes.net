@@ -9,7 +9,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
     [Named(ServiceType = typeof(IBrokerConsumptionStrategyRegistry))]
     public class DefaultBrokerConsumptionRegistry : IBrokerConsumptionStrategyRegistry, IInitializable
     {
-        private ConcurrentDictionary<ConsumerType, IBrokerConsumptionStrategy> m_strategies = new ConcurrentDictionary<ConsumerType, IBrokerConsumptionStrategy>();
+        private ConcurrentDictionary<ConsumerType, IBrokerConsumptionStrategy> Strategies = new ConcurrentDictionary<ConsumerType, IBrokerConsumptionStrategy>();
 
         public void Initialize()
         {
@@ -19,13 +19,13 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             {
                 ConsumerType consumerType;
                 Enum.TryParse<ConsumerType>(entry.Key, out consumerType);
-                m_strategies[consumerType] = entry.Value;
+                Strategies[consumerType] = entry.Value;
             }
         }
 
         public IBrokerConsumptionStrategy FindStrategy(ConsumerType consumerType)
         {
-            return CollectionUtil.TryGet(m_strategies, consumerType);
+            return CollectionUtil.TryGet(Strategies, consumerType);
         }
     }
 }

@@ -26,22 +26,22 @@ namespace Arch.CMessaging.Client.Core.Message
 
         public bool WithHeader{ get; set; }
 
-        public byte[] readBody()
+        public byte[] ReadBody()
         {
-            return readByteBuf(Body);
+            return ReadByteBuf(Body);
         }
 
-        public byte[] readDurableProperties()
+        public byte[] ReadDurableProperties()
         {
-            return readByteBuf(DurableProperties);
+            return ReadByteBuf(DurableProperties);
         }
 
-        public byte[] readVolatileProperties()
+        public byte[] ReadVolatileProperties()
         {
-            return readByteBuf(VolatileProperties);
+            return ReadByteBuf(VolatileProperties);
         }
 
-        private byte[] readByteBuf(IoBuffer buf)
+        private byte[] ReadByteBuf(IoBuffer buf)
         {
             if (buf == null)
             {

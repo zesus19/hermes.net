@@ -8,14 +8,14 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap
     public class DefaultConsumerBootstrapManager : IConsumerBootstrapManager
     {
         [Inject]
-        private IConsumerBootstrapRegistry m_registry;
+        private IConsumerBootstrapRegistry registry;
 
-        public IConsumerBootstrap findConsumerBootStrap(String endpointType)
+        public IConsumerBootstrap FindConsumerBootStrap(String endpointType)
         {
 
             if (Endpoint.BROKER.Equals(endpointType) || Endpoint.KAFKA.Equals(endpointType))
             {
-                return m_registry.FindConsumerBootstrap(endpointType);
+                return registry.FindConsumerBootstrap(endpointType);
             }
             else
             {

@@ -17,61 +17,61 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
     public class BrokerLongPollingConsumptionStrategy : IBrokerConsumptionStrategy
     {
         [Inject]
-        private ILeaseManager<ConsumerLeaseKey> m_leaseManager;
+        private ILeaseManager<ConsumerLeaseKey> LeaseManager;
 
         [Inject]
-        private IConsumerNotifier m_consumerNotifier;
+        private IConsumerNotifier ConsumerNotifier;
 
         [Inject]
-        private IEndpointManager m_endpointManager;
+        private IEndpointManager EndpointManager;
 
         [Inject]
-        private IEndpointClient m_endpointClient;
+        private IEndpointClient EndpointClient;
 
         [Inject]
-        private IMessageCodec m_messageCodec;
+        private IMessageCodec MessageCodec;
 
         [Inject]
-        private ConsumerConfig m_config;
+        private ConsumerConfig Config;
 
         [Inject]
-        private ISystemClockService m_systemClockService;
+        private ISystemClockService SystemClockService;
 
         [Inject]
-        private IPullMessageResultMonitor m_pullMessageResultMonitor;
+        private IPullMessageResultMonitor pullMessageResultMonitor;
 
         [Inject]
-        private IClientEnvironment m_clientEnv;
+        private IClientEnvironment ClientEnv;
 
         public ISubscribeHandle Start(ConsumerContext context, int partitionId)
         {
             try
             {
-                int localCachSize = Convert.ToInt32(m_clientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
-                                            "consumer.localcache.size", m_config.DefautlLocalCacheSize));
+                int localCachSize = Convert.ToInt32(ClientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
+                                            "consumer.localcache.size", Config.DefautlLocalCacheSize));
 
-                int prefetchSize = Convert.ToInt32(m_clientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
+                int prefetchSize = Convert.ToInt32(ClientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
                                            "consumer.localcache.prefetch.threshold.percentage",
-                                           m_config.DefaultLocalCachePrefetchThresholdPercentage));
+                                           Config.DefaultLocalCachePrefetchThresholdPercentage));
 
                 LongPollingConsumerTask consumerTask = new LongPollingConsumerTask(//
                                                            context, //
                                                            partitionId,//
                                                            localCachSize, //
                                                            prefetchSize,//
-                                                           m_systemClockService);
+                                                           SystemClockService);
 
-                consumerTask.EndpointClient = m_endpointClient;
-                consumerTask.ConsumerNotifier = m_consumerNotifier;
-                consumerTask.EndpointManager = m_endpointManager;
-                consumerTask.LeaseManager = m_leaseManager;
-                consumerTask.MessageCodec = m_messageCodec;
-                consumerTask.SystemClockService = m_systemClockService;
-                consumerTask.Config = m_config;
-                consumerTask.PullMessageResultMonitor = m_pullMessageResultMonitor;
+                consumerTask.EndpointClient = EndpointClient;
+                consumerTask.ConsumerNotifier = ConsumerNotifier;
+                consumerTask.EndpointManager = EndpointManager;
+                consumerTask.LeaseManager = LeaseManager;
+                consumerTask.MessageCodec = MessageCodec;
+                consumerTask.SystemClockService = SystemClockService;
+                consumerTask.Config = Config;
+                consumerTask.PullMessageResultMonitor = pullMessageResultMonitor;
 
                 ProducerConsumer<LongPollingConsumerTask> fakeThread = new ProducerConsumer<LongPollingConsumerTask>(int.MaxValue);
-                fakeThread.OnConsume += startConsumerTaskLoop;
+                fakeThread.OnConsume += StartConsumerTaskLoop;
                 fakeThread.Produce(consumerTask);
                 
                 return new BrokerLongPollingSubscribeHandler(consumerTask);
@@ -83,25 +83,25 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             }
         }
 
-        void startConsumerTaskLoop(object sender, ConsumeEventArgs e)
+        void StartConsumerTaskLoop(object sender, ConsumeEventArgs e)
         {
             LongPollingConsumerTask task = (e.ConsumingItem as SingleConsumingItem<LongPollingConsumerTask>).Item;
-            task.run();
+            task.Run();
         }
 
         private class BrokerLongPollingSubscribeHandler : ISubscribeHandle
         {
 
-            private LongPollingConsumerTask m_consumerTask;
+            private LongPollingConsumerTask ConsumerTask;
 
             public BrokerLongPollingSubscribeHandler(LongPollingConsumerTask consumerTask)
             {
-                m_consumerTask = consumerTask;
+                ConsumerTask = consumerTask;
             }
 
             public void Close()
             {
-                m_consumerTask.Close();
+                ConsumerTask.Close();
             }
 
         }

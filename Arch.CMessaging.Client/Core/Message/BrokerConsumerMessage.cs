@@ -30,9 +30,9 @@ namespace Arch.CMessaging.Client.Core.Message
             this.BaseConsumerMessage = baseMsg;
         }
 
-        public void nack()
+        public void Nack()
         {
-            if (BaseConsumerMessage.nack())
+            if (BaseConsumerMessage.Nack())
             {
                 AckMessageCommand cmd = new AckMessageCommand();
                 cmd.Header.CorrelationId = CorrelationId;
@@ -45,7 +45,7 @@ namespace Arch.CMessaging.Client.Core.Message
         
         public string GetProperty(string name)
         {
-            return BaseConsumerMessage.getDurableAppProperty(name);
+            return BaseConsumerMessage.GetDurableAppProperty(name);
         }
 
         
@@ -79,9 +79,9 @@ namespace Arch.CMessaging.Client.Core.Message
         }
 
         
-        public void ack()
+        public void Ack()
         {
-            if (BaseConsumerMessage.ack())
+            if (BaseConsumerMessage.Ack())
             {
                 AckMessageCommand cmd = new AckMessageCommand();
                 cmd.Header.CorrelationId = CorrelationId;

@@ -2,9 +2,9 @@
 
 namespace Arch.CMessaging.Client.Consumer.Engine
 {
-	public interface ISubscribeHandle
-	{
-		void Close ();
-	}
+    public interface ISubscribeHandle
+    {
+        void Close();
+    }
 }
 

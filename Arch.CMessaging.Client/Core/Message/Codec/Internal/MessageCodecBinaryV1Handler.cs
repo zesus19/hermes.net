@@ -65,7 +65,7 @@ namespace Arch.CMessaging.Client.Core.Message.Codec.Internal
             Dictionary<string, string> volatileProperties = readProperties(decodedMessage.VolatileProperties);
             msg.PropertiesHolder = new PropertiesHolder(durableProperties, volatileProperties);
             IPayloadCodec bodyCodec = PayloadCodecFactory.GetCodecByType(decodedMessage.BodyCodecType);
-            msg.Body = bodyCodec.Decode(decodedMessage.readBody(), bodyType);
+            msg.Body = bodyCodec.Decode(decodedMessage.ReadBody(), bodyType);
 
             return msg;
         }

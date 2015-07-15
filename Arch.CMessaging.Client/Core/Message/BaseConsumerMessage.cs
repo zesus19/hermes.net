@@ -38,7 +38,7 @@ namespace Arch.CMessaging.Client.Core.Message
             PropertiesHolder = new PropertiesHolder();
         }
 
-        public bool ack()
+        public bool Ack()
         {
             bool setSuccess = status.CompareAndSet(MessageStatus.NOT_SET, MessageStatus.SUCCESS);
             if (setSuccess)
@@ -49,7 +49,7 @@ namespace Arch.CMessaging.Client.Core.Message
             return setSuccess;
         }
 
-        public bool nack()
+        public bool Nack()
         {
             bool setSuccess = status.CompareAndSet(MessageStatus.NOT_SET, MessageStatus.FAIL);
             if (setSuccess)
@@ -60,32 +60,32 @@ namespace Arch.CMessaging.Client.Core.Message
             return setSuccess;
         }
 
-        public void addDurableAppProperty(String name, String value)
+        public void AddDurableAppProperty(String name, String value)
         {
             PropertiesHolder.AddDurableAppProperty(name, value);
         }
 
-        public void addDurableSysProperty(String name, String value)
+        public void AddDurableSysProperty(String name, String value)
         {
             PropertiesHolder.AddDurableSysProperty(name, value);
         }
 
-        public String getDurableAppProperty(String name)
+        public String GetDurableAppProperty(String name)
         {
             return PropertiesHolder.GetDurableAppProperty(name);
         }
 
-        public String getDurableSysProperty(String name)
+        public String GetDurableSysProperty(String name)
         {
             return PropertiesHolder.GetDurableSysProperty(name);
         }
 
-        public void addVolatileProperty(String name, String value)
+        public void AddVolatileProperty(String name, String value)
         {
             PropertiesHolder.AddVolatileProperty(name, value);
         }
 
-        public String getVolatileProperty(String name)
+        public String GetVolatileProperty(String name)
         {
             return PropertiesHolder.GetVolatileProperty(name);
         }
@@ -95,7 +95,7 @@ namespace Arch.CMessaging.Client.Core.Message
             get{ return PropertiesHolder.RawDurableAppPropertyNames.GetEnumerator(); }
         }
 
-        public bool isAck()
+        public bool IsAck()
         {
             return status.ReadFullFence() != MessageStatus.FAIL;
         }

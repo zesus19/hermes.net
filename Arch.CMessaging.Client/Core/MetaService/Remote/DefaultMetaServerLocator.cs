@@ -22,13 +22,13 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
         private const int DEFAULT_MASTER_METASERVER_PORT = 80;
 
         [Inject]
-        private IClientEnvironment m_clientEnv;
+        private IClientEnvironment clientEnv;
 
         [Inject]
-        private CoreConfig m_coreConfig;
+        private CoreConfig coreConfig;
 
 
-        private ThreadSafe.AtomicReference<List<string>> m_metaServerList = new ThreadSafe.AtomicReference<List<string>>(new List<string>());
+        private ThreadSafe.AtomicReference<List<string>> metaServerListRef = new ThreadSafe.AtomicReference<List<string>>(new List<string>());
 
         private int m_masterMetaServerPort = DEFAULT_MASTER_METASERVER_PORT;
 
@@ -36,24 +36,24 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
         public MetaServerIpFetcher metaServerIpFetcher { get; set; }
 
-        public List<String> getMetaServerList()
+        public List<String> GetMetaServerList()
         {
-            return m_metaServerList.ReadFullFence();
+            return metaServerListRef.ReadFullFence();
         }
 
-        public void updateMetaServerList()
+        public void UpdateMetaServerList()
         {
-            if (CollectionUtil.IsNullOrEmpty(m_metaServerList.ReadFullFence()))
+            if (CollectionUtil.IsNullOrEmpty(metaServerListRef.ReadFullFence()))
             {
-                m_metaServerList.WriteFullFence(domainToIpPorts());
+                metaServerListRef.WriteFullFence(DomainToIpPorts());
             }
 
-            m_metaServerList.WriteFullFence(fetchMetaServerListFromExistingMetaServer());
+            metaServerListRef.WriteFullFence(FetchMetaServerListFromExistingMetaServer());
         }
 
-        private List<String> fetchMetaServerListFromExistingMetaServer()
+        private List<String> FetchMetaServerListFromExistingMetaServer()
         {
-            List<String> metaServerList = m_metaServerList.ReadFullFence();
+            List<String> metaServerList = metaServerListRef.ReadFullFence();
             log.Debug(string.Format("Start fetching meta server ip from meta servers {0}", metaServerList));
 
 
@@ -61,7 +61,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
             {
                 try
                 {
-                    List<String> result = doFetch(ipPort);
+                    List<String> result = DoFetch(ipPort);
                     log.Debug(string.Format("Successfully fetched meta server ip from meta server {0}", ipPort));
                     return result;
                 }
@@ -75,9 +75,9 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
             throw new Exception("Failed to fetch meta server ip list from any meta server: " + metaServerList.ToString());
         }
 
-        private List<string> domainToIpPorts()
+        private List<string> DomainToIpPorts()
         {
-            string domain = getMetaServerDomainName();
+            string domain = GetMetaServerDomainName();
             log.Info(string.Format("Meta server domain {0}", domain));
             try
             {
@@ -101,12 +101,12 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
             }
         }
 
-        private List<String> doFetch(String ipPort)
+        private List<String> DoFetch(String ipPort)
         {
             string url = string.Format("http://{0}{1}", ipPort, "/metaserver/servers");
 
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
-            req.Timeout = m_coreConfig.MetaServerConnectTimeoutInMills + m_coreConfig.MetaServerReadTimeoutInMills;
+            req.Timeout = coreConfig.MetaServerConnectTimeoutInMills + coreConfig.MetaServerReadTimeoutInMills;
 
             using (var res = (HttpWebResponse)req.BetterGetResponse())
             {
@@ -133,9 +133,9 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
             }
         }
 
-        private string getMetaServerDomainName()
+        private string GetMetaServerDomainName()
         {
-            Arch.CMessaging.Client.Core.Env.Env env = m_clientEnv.GetEnv();
+            Arch.CMessaging.Client.Core.Env.Env env = clientEnv.GetEnv();
 
             switch (env)
             {
@@ -160,22 +160,22 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
         public void Initialize()
         {
-            if (m_clientEnv.IsLocalMode())
+            if (clientEnv.IsLocalMode())
             {
                 return;
             }
 
             m_masterMetaServerPort = DEFAULT_MASTER_METASERVER_PORT;
 
-            string strMetaPort = m_clientEnv.GetGlobalConfig().GetProperty("meta.port");
+            string strMetaPort = clientEnv.GetGlobalConfig().GetProperty("meta.port");
             if (!string.IsNullOrEmpty(strMetaPort))
             {
                 m_masterMetaServerPort = Convert.ToInt32(strMetaPort);
             }
 
-            updateMetaServerList();
+            UpdateMetaServerList();
 
-            int interval = (int)m_coreConfig.MetaServerIpFetchInterval * 1000;
+            int interval = (int)coreConfig.MetaServerIpFetchInterval * 1000;
             metaServerIpFetcher = new MetaServerIpFetcher(this, interval);
             timer = new Timer(metaServerIpFetcher.Fetch, null, interval, Timeout.Infinite);
         }
@@ -196,7 +196,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
                 metaServerLocator.timer.Change(Timeout.Infinite, Timeout.Infinite);
                 try
                 {
-                    metaServerLocator.updateMetaServerList();
+                    metaServerLocator.UpdateMetaServerList();
                 }
                 catch (Exception e)
                 {

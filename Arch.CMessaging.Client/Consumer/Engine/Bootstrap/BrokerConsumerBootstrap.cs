@@ -12,7 +12,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap
         [Inject]
         private IBrokerConsumptionStrategyRegistry ConsumptionStrategyRegistry;
 
-        protected override ISubscribeHandle doStart(ConsumerContext context)
+        protected override ISubscribeHandle DoStart(ConsumerContext context)
         {
             CompositeSubscribeHandle handler = new CompositeSubscribeHandle();
 

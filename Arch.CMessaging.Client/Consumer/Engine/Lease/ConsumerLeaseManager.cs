@@ -13,12 +13,12 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Lease
         [Inject]
         private IMetaService MetaService;
 
-        public LeaseAcquireResponse tryAcquireLease(ConsumerLeaseKey key)
+        public LeaseAcquireResponse TryAcquireLease(ConsumerLeaseKey key)
         {
             return MetaService.TryAcquireConsumerLease(key.Tpg, key.SessionId);
         }
 
-        public LeaseAcquireResponse tryRenewLease(ConsumerLeaseKey key, ILease lease)
+        public LeaseAcquireResponse TryRenewLease(ConsumerLeaseKey key, ILease lease)
         {
             return MetaService.TryRenewConsumerLease(key.Tpg, lease, key.GetSessionId());
         }

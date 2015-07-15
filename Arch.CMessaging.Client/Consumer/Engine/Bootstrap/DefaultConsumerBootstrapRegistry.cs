@@ -9,7 +9,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap
     [Named(ServiceType = typeof(IConsumerBootstrapRegistry))]
     public class DefaultConsumerBootstrapRegistry : IConsumerBootstrapRegistry, IInitializable
     {
-        private ConcurrentDictionary<string, IConsumerBootstrap> m_bootstraps = new ConcurrentDictionary<string, IConsumerBootstrap>();
+        private ConcurrentDictionary<string, IConsumerBootstrap> bootstraps = new ConcurrentDictionary<string, IConsumerBootstrap>();
 
         public void Initialize()
         {
@@ -17,24 +17,24 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap
 
             foreach (KeyValuePair<string, IConsumerBootstrap> entry in bootstraps)
             {
-                m_bootstraps[entry.Key] = entry.Value;
+                this.bootstraps[entry.Key] = entry.Value;
             }
         }
 
         public void RegisterBootstrap(String endpointType, IConsumerBootstrap consumerBootstrap)
         {
-            if (m_bootstraps.ContainsKey(endpointType))
+            if (bootstraps.ContainsKey(endpointType))
             {
                 throw new Exception(string.Format("ConsumerBootstrap for endpoint type {0} is already registered", endpointType));
             }
 
-            m_bootstraps[endpointType] = consumerBootstrap;
+            bootstraps[endpointType] = consumerBootstrap;
         }
 
         public IConsumerBootstrap FindConsumerBootstrap(String endpointType)
         {
             IConsumerBootstrap bootstrap;
-            m_bootstraps.TryGetValue(endpointType, out bootstrap);
+            bootstraps.TryGetValue(endpointType, out bootstrap);
             return bootstrap;
         }
     }
