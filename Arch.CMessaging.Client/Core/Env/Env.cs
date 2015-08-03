@@ -10,6 +10,7 @@ namespace Arch.CMessaging.Client.Core.Env
         LOCAL, 
         DEV, 
         FWS, 
+        FAT,
         UAT, 
         LPT, 
         PROD
