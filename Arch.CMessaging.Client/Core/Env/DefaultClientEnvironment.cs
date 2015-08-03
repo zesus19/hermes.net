@@ -39,6 +39,12 @@ namespace Arch.CMessaging.Client.Core.Env
 
         private volatile Env env;
 
+        private Dictionary<Env, string> env2MetaDomain = new Dictionary<Env, String>();
+
+        public string getMetaServerDomainName()
+        {
+            return env2MetaDomain[GetEnv()];
+        }
 
         public Properties GetGlobalConfig()
         {
@@ -126,6 +132,18 @@ namespace Arch.CMessaging.Client.Core.Env
             }
 
             env = resultEnv.Value;
+
+            env2MetaDomain.Add(Env.LOCAL, GlobalDefault.GetProperty("local.domain", "meta.hermes.local"));
+            // TODO use real dev&lpt domain when get dev&lpt domain
+            env2MetaDomain.Add(Env.DEV, GlobalDefault.GetProperty("dev.domain", "10.3.8.63"));
+            env2MetaDomain.Add(Env.LPT, GlobalDefault.GetProperty("lpt.domain", "10.2.5.133"));
+            env2MetaDomain.Add(Env.FAT, GlobalDefault.GetProperty("fat.domain", "meta.hermes.fws.qa.nt.ctripcorp.com"));
+            env2MetaDomain.Add(Env.FWS, GlobalDefault.GetProperty("fws.domain", "meta.hermes.fws.qa.nt.ctripcorp.com"));
+            env2MetaDomain
+                .Add(Env.UAT, GlobalDefault.GetProperty("uat.domain", "meta.hermes.fx.uat.qa.nt.ctripcorp.com"));
+            env2MetaDomain.Add(Env.PROD, GlobalDefault.GetProperty("prod.domain", "meta.hermes.fx.ctripcorp.com"));
+
+            log.Info(string.Format("Meta server domains: {0}", env2MetaDomain));
         }
 
         public Env GetEnv()

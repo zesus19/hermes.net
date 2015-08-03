@@ -77,7 +77,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
         private List<string> DomainToIpPorts()
         {
-            string domain = GetMetaServerDomainName();
+            string domain = clientEnv.getMetaServerDomainName();
             log.Info(string.Format("Meta server domain {0}", domain));
             try
             {
@@ -131,31 +131,6 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
                     throw new Exception(string.Format("HTTP code is {0} when fetch meta server list"));
                 }
             }
-        }
-
-        private string GetMetaServerDomainName()
-        {
-            Arch.CMessaging.Client.Core.Env.Env env = clientEnv.GetEnv();
-
-            switch (env)
-            {
-                case Arch.CMessaging.Client.Core.Env.Env.LOCAL:
-                    return "meta.hermes.local";
-                case Arch.CMessaging.Client.Core.Env.Env.DEV:
-                    return "10.3.8.63";
-                case Arch.CMessaging.Client.Core.Env.Env.LPT:
-                    return "10.3.8.63";
-                case Arch.CMessaging.Client.Core.Env.Env.FWS:
-                    return "meta.hermes.fws.qa.nt.ctripcorp.com";
-                case Arch.CMessaging.Client.Core.Env.Env.UAT:
-                    return "meta.hermes.fx.uat.qa.nt.ctripcorp.com";
-                case Arch.CMessaging.Client.Core.Env.Env.PROD:
-                    return "meta.hermes.fx.ctripcorp.com";
-
-                default:
-                    throw new Exception(string.Format("Unknown hermes env {0}", env));
-            }
-
         }
 
         public void Initialize()
