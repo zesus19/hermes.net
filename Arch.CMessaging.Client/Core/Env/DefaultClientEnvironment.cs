@@ -13,15 +13,11 @@ namespace Arch.CMessaging.Client.Core.Env
     [Named(ServiceType = typeof(IClientEnvironment))]
     public class DefaultClientEnvironment : IClientEnvironment, IInitializable
     {
-        private static String PRODUCER_DEFAULT_FILE = "/hermes-producer.properties";
+        private static String PRODUCER_DEFAULT_SECTION = "producer";
 
-        private  static String PRODUCER_PATTERN = "/hermes-producer-{0}.properties";
+        private  static String CONSUMER_DEFAULT_SECTION = "consumer";
 
-        private  static String CONSUMER_DEFAULT_FILE = "/hermes-consumer.properties";
-
-        private  static String CONSUMER_PATTERN = "/hermes-consumer-{0}.properties";
-
-        private  static String GLOBAL_DEFAULT_FILE = "/hermes.properties";
+        private  static String GLOBAL_SECTION = "global";
 
         private static  String KEY_IS_LOCAL_MODE = "isLocalMode";
 
@@ -53,62 +49,42 @@ namespace Arch.CMessaging.Client.Core.Env
 
         public Properties GetProducerConfig(String topic)
         {
-            Properties properties;
-            ProducerCache.TryGetValue(topic, out properties);
-            if (properties == null)
-            {
-                properties = readConfigFile(String.Format(PRODUCER_PATTERN, topic), producerDefault);
-                ProducerCache.GetOrAdd(topic, properties);
-            }
-
-            return properties;
+            // TODO support read topic specific config
+            return producerDefault;
         }
 
         public Properties GetConsumerConfig(String topic)
         {
-            Properties properties;
-            ConsumerCache.TryGetValue(topic, out properties);
-            if (properties == null)
+            // TODO support read topic specific config
+            return consumerDefault;
+        }
+
+        private Properties readConfigSection(String sectionName)
+        {
+            return readConfigSection(sectionName, null);
+        }
+
+        private Properties readConfigSection(String sectionName, Properties defaults)
+        {
+            var properties = new Properties();
+            NameValueCollection config = ConfigurationManager.GetSection("hermes/" + sectionName) as NameValueCollection;
+            if (config != null)
             {
-                properties = readConfigFile(String.Format(CONSUMER_PATTERN, topic), consumerDefault);
-                ConsumerCache.GetOrAdd(topic, properties);
+                foreach (string k in config)
+                {
+                    properties.SetProperty(k, config[k]);
+                }
             }
 
             return properties;
-        }
-
-        private Properties readConfigFile(String configPath)
-        {
-            return readConfigFile(configPath, null);
-        }
-
-        private Properties readConfigFile(String configPath, Properties defaults)
-        {
-            if (GLOBAL_DEFAULT_FILE.Equals(configPath))
-            {
-                var globalProperties = new Properties();
-                NameValueCollection config = ConfigurationManager.GetSection("hermes/global") as NameValueCollection;
-                if (config != null)
-                {
-                    foreach (string k in config)
-                    {
-                        globalProperties.SetProperty(k, config[k]);
-                    }
-                }
-
-                return globalProperties;
-            }
-
-            // TODO support read config file
-            return new Properties();
         }
 
 		
         public void Initialize()
         {
-            producerDefault = readConfigFile(PRODUCER_DEFAULT_FILE);
-            consumerDefault = readConfigFile(CONSUMER_DEFAULT_FILE);
-            GlobalDefault = readConfigFile(GLOBAL_DEFAULT_FILE);
+            producerDefault = readConfigSection(PRODUCER_DEFAULT_SECTION);
+            consumerDefault = readConfigSection(CONSUMER_DEFAULT_SECTION);
+            GlobalDefault = readConfigSection(GLOBAL_SECTION);
 
             Env? resultEnv = Hermes.GetEnv();
 
