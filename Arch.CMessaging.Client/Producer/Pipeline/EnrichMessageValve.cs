@@ -8,17 +8,23 @@ using Arch.CMessaging.Client.Core.Ioc;
 using Freeway.Logging;
 using Arch.CMessaging.Client.Core.Message;
 using Arch.CMessaging.Client.Core.Utils;
+using Arch.CMessaging.Client.Core.Env;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
-	[Named (ServiceType = typeof(IValve), ServiceName = EnrichMessageValve.ID)]
-	public class EnrichMessageValve : IValve
-	{
-		private static readonly ILog log = LogManager.GetLogger (typeof(EnrichMessageValve));
-		public const string ID = "enrich";
-            
-		public void Handle (IPipelineContext ctx, Object payload)
-		{
+    [Named(ServiceType = typeof(IValve), ServiceName = EnrichMessageValve.ID)]
+    public class EnrichMessageValve : IValve, IInitializable
+    {
+        private static readonly ILog log = LogManager.GetLogger(typeof(EnrichMessageValve));
+        public const string ID = "enrich";
+
+        [Inject]
+        private IClientEnvironment clientEnv;
+
+        private bool logEnrichInfo = false;
+
+        public void Handle(IPipelineContext ctx, Object payload)
+        {
             var msg = (ProducerMessage)payload;
             var topic = msg.Topic;
             if (string.IsNullOrEmpty(topic))
@@ -31,30 +37,44 @@ namespace Arch.CMessaging.Client.Producer.Pipeline
             enrichRefKey(msg);
             enrichMessageProperties(msg, Local.IPV4);
 
-            ctx.Next (payload);
-		}
+            ctx.Next(payload);
+        }
 
-		private void enrichRefKey (ProducerMessage msg)
-		{
-			if (string.IsNullOrEmpty (msg.Key)) {
-				String refKey = System.Guid.NewGuid ().ToString ();
-				log.Info (string.Format ("Ref key not set, will set uuid as ref key(topic={0}, ref key={1})", msg.Topic, refKey));
-				msg.Key = refKey;
-			}
-		}
+        private void enrichRefKey(ProducerMessage msg)
+        {
+            if (string.IsNullOrEmpty(msg.Key))
+            {
+                String refKey = System.Guid.NewGuid().ToString();
+                if (logEnrichInfo)
+                {
+                    log.Info(string.Format("Ref key not set, will set uuid as ref key(topic={0}, ref key={1})", msg.Topic, refKey));
+                }
+                msg.Key = refKey;
+            }
+        }
 
-		private void enrichMessageProperties (ProducerMessage msg, String ip)
-		{
-			msg.AddDurableSysProperty (MessagePropertyNames.PRODUCER_IP, ip);
-		}
+        private void enrichMessageProperties(ProducerMessage msg, String ip)
+        {
+            msg.AddDurableSysProperty(MessagePropertyNames.PRODUCER_IP, ip);
+        }
 
-		private void enrichPartitionKey (ProducerMessage msg, String ip)
-		{
-			if (string.IsNullOrEmpty (msg.PartitionKey)) {
-				log.Info (string.Format ("Parition key not set, will set ip as partition key(topic={0}, ip={1})", msg.Topic, ip));
-				msg.PartitionKey = ip;
-			}
-		}
-	}
+        private void enrichPartitionKey(ProducerMessage msg, String ip)
+        {
+            if (string.IsNullOrEmpty(msg.PartitionKey))
+            {
+                if (logEnrichInfo)
+                {
+                    log.Info(string.Format("Parition key not set, will set ip as partition key(topic={0}, ip={1})", msg.Topic, ip));
+                }
+                msg.PartitionKey = ip;
+            }
+        }
+
+        public void Initialize()
+        {
+            logEnrichInfo = Convert.ToBoolean(clientEnv.GetGlobalConfig().GetProperty("logEnrichInfo", "false"));
+        }
+    }
+
 }
 
