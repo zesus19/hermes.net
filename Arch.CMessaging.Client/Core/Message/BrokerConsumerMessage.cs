@@ -25,6 +25,23 @@ namespace Arch.CMessaging.Client.Core.Message
 
         public IoSession Channel{ get; set; }
 
+        public int RetryTimesOfRetryPolicy{ get; set; }
+
+        public int ResendTimes
+        {
+            get
+            {
+                if (Resend)
+                {
+                    return RetryTimesOfRetryPolicy - BaseConsumerMessage.RemainingRetries + 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+
         public BrokerConsumerMessage(BaseConsumerMessage baseMsg)
         {
             this.BaseConsumerMessage = baseMsg;
@@ -114,6 +131,7 @@ namespace Arch.CMessaging.Client.Core.Message
             + Partition + ", m_priority=" + Priority + ", m_resend=" + Resend + ", m_groupId='" + GroupId
             + '\'' + ", m_correlationId=" + CorrelationId + ", m_channel=" + Channel + '}';
         }
+
     }
 }
 

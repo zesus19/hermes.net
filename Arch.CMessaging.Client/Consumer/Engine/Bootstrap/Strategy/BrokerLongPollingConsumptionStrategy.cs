@@ -10,6 +10,8 @@ using Arch.CMessaging.Client.Consumer.Engine.Monitor;
 using Arch.CMessaging.Client.Core.Env;
 using Arch.CMessaging.Client.Core.Ioc;
 using Arch.CMessaging.Client.Core.Collections;
+using Arch.CMessaging.Client.Core.MetaService;
+using Arch.CMessaging.Client.Core.Message.Retry;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 {
@@ -43,6 +45,9 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
         [Inject]
         private IClientEnvironment ClientEnv;
 
+        [Inject]
+        private IMetaService metaService;
+
         public ISubscribeHandle Start(ConsumerContext context, int partitionId)
         {
             try
@@ -54,12 +59,14 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                                            "consumer.localcache.prefetch.threshold.percentage",
                                            Config.DefaultLocalCachePrefetchThresholdPercentage));
 
+                IRetryPolicy retryPolicy = metaService.FindRetryPolicyByTopicAndGroup(context.Topic.Name, context.GroupId);
                 LongPollingConsumerTask consumerTask = new LongPollingConsumerTask(//
                                                            context, //
                                                            partitionId,//
                                                            localCachSize, //
                                                            prefetchSize,//
-                                                           SystemClockService);
+                                                           SystemClockService,//
+                                                           retryPolicy);
 
                 consumerTask.EndpointClient = EndpointClient;
                 consumerTask.ConsumerNotifier = ConsumerNotifier;

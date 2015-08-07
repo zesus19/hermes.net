@@ -19,6 +19,7 @@ using Arch.CMessaging.Client.Core.Future;
 using Arch.CMessaging.Client.Transport.Command;
 using Arch.CMessaging.Client.Net.Core.Buffer;
 using Arch.CMessaging.Client.Net.Core.Session;
+using Arch.CMessaging.Client.Core.Message.Retry;
 
 namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 {
@@ -62,10 +63,12 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 
         private volatile bool closed = false;
 
+        private IRetryPolicy retryPolicy;
+
         private ThreadSafe.Integer scheduleKey = new ThreadSafe.Integer(0);
 
         public LongPollingConsumerTask(ConsumerContext context, int partitionId, int cacheSize, int prefetchThreshold,
-                                       ISystemClockService systemClockService)
+                                       ISystemClockService systemClockService, IRetryPolicy retryPolicy)
         {
             Context = context;
             PartitionId = partitionId;
@@ -73,6 +76,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             this.localCachePrefetchThreshold = prefetchThreshold;
             msgs = new BlockingQueue<IConsumerMessage>(cacheSize);
             SystemClockService = systemClockService;
+            this.retryPolicy = retryPolicy;
 
             pullMessageTaskExecutorService = new ProducerConsumer<PullMessagesTask>(int.MaxValue);
             pullMessageTaskExecutorService.OnConsume += RunPullMessageTask;
@@ -338,6 +342,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                     brokerMsg.Partition = partition;
                     brokerMsg.Priority = messageMeta.Priority == 0 ? true : false;
                     brokerMsg.Resend = messageMeta.Resend;
+                    brokerMsg.RetryTimesOfRetryPolicy = retryPolicy.GetRetryTimes();
                     brokerMsg.Channel = channel;
                     brokerMsg.MsgSeq = messageMeta.Id;
 

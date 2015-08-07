@@ -30,6 +30,8 @@ namespace Arch.CMessaging.Client.Core.Message
         string Status{ get; }
 
         void Ack();
+
+        int ResendTimes{ get; }
     }
 }
 
