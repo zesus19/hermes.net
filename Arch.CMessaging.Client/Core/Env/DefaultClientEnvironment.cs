@@ -118,6 +118,7 @@ namespace Arch.CMessaging.Client.Core.Env
             env2MetaDomain
                 .Add(Env.UAT, GlobalDefault.GetProperty("uat.domain", "meta.hermes.fx.uat.qa.nt.ctripcorp.com"));
             env2MetaDomain.Add(Env.PROD, GlobalDefault.GetProperty("prod.domain", "meta.hermes.fx.ctripcorp.com"));
+            env2MetaDomain.Add(Env.PRD, GlobalDefault.GetProperty("prd.domain", "meta.hermes.fx.ctripcorp.com"));
 
             log.Info(string.Format("Meta server domains: {0}", env2MetaDomain));
         }
