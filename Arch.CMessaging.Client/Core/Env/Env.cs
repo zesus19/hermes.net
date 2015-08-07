@@ -13,6 +13,7 @@ namespace Arch.CMessaging.Client.Core.Env
         FAT,
         UAT, 
         LPT, 
-        PROD
+        PROD,
+        PRD
     }
 }
