@@ -28,78 +28,41 @@ namespace Producer
     {
         static void Main(string[] args)
         {
-            try
+            BlockingQueue<int> bq = new BlockingQueue<int>(10000);
+            var putCount = 0;
+            var takeCount = 0;
+            var timeoutCount = 0;
+            new Task(() =>
             {
-                var buffer = IoBuffer.Allocate(100);
-                buffer.Put(1);
-                buffer.Put(2);
-                buffer.Put(3);
-                buffer.Put(4);
-                buffer.Put(5);
-                buffer.Put(6);
-                buffer.Put(7);
-                buffer.Put(8);
-                buffer.Put(9);
-                buffer.Put(10);
-
-                buffer.Flip();
-                var b = buffer.Get();
-                b = buffer.Get();
-                b = buffer.Get();
-
-                var cc = buffer.GetRemainingArray();
-
-                var d = buffer.GetSlice(3);
-                var c = d.Get();
-                c = d.Get();
-                c = d.Get();
-
-
-                
-
-
-                long counter = 0;
-                ComponentsConfigurator.DefineComponents();
-                var p = Arch.CMessaging.Client.Producer.Producer.GetInstance();
-
-                new Task(() =>
+                while (true)
                 {
-                    while (true)
-                    {
-                        Console.WriteLine(counter);
-                        Thread.Sleep(500);
-                    }
-                }).Start();
+                    Console.WriteLine("{0}_{1}_{2}", putCount, takeCount, timeoutCount);
+                    Thread.Sleep(200);
+                }
+            }).Start();
 
-                new ConcurrentRunner(1, 1).Run((_) =>
+            new ConcurrentRunner(10, 1).Run((i) =>
+                {
+                    if (i % 2 == 0)
                     {
-                        for (var i = 0L; i < long.MaxValue;i++ )
+                        while (true)
                         {
-                            try
-                            {
-                                var refKey = i.ToString();
-                                //var future = p.Message("cmessage_fws", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
-                                var future = p.Message("order_new", "", string.Format("hello c#_{0}", i)).WithRefKey(refKey).Send();
-                                future.Get();
-                                Console.WriteLine("aaa");
-                                Interlocked.Increment(ref counter);
-                                if (i % 100000 == 0) Thread.Sleep(5000);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(ex.Message);
-                            }
+                            bq.Take();
+                            Interlocked.Increment(ref takeCount);
                         }
-                    });
-                Console.ReadLine();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.ReadLine();
-            }
-        }
+                    }
+                    else
+                    {
+                        for (int j = 0; j < 100000000; j++)
+                        {
+                            if (!bq.Put(i, 1)) Interlocked.Increment(ref timeoutCount);
+                            else Interlocked.Increment(ref putCount);
+                        }
+                    }
+                });
 
+            Console.ReadLine();
+        }
     }
 }
 
