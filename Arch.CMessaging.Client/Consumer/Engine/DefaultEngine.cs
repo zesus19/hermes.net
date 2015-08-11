@@ -68,8 +68,9 @@ namespace Arch.CMessaging.Client.Consumer.Engine
             {
                 if (!metaService.ContainsConsumerGroup(topic.Name, context.GroupId))
                 {
-                    log.Error(string.Format("Consumer group {0} not found for topic {1}, please add consumer group in Hermes-Portal first.",
-                            context.GroupId, topic.Name));
+                    string msg = string.Format("Consumer group {0} not found for topic {1}, please add consumer group in Hermes-Portal first.", context.GroupId, topic.Name);
+                    Console.WriteLine(msg);
+                    log.Error(msg);
                     return false;
                 }
             }
