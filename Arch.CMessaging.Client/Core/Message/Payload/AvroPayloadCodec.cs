@@ -11,11 +11,11 @@ using System.Collections.Generic;
 namespace Arch.CMessaging.Client.Core.Message.Payload
 {
     [Named(ServiceType = typeof(IPayloadCodec), ServiceName = Arch.CMessaging.Client.MetaEntity.Entity.Codec.AVRO)]
-    public class AvroPayloadCodec : IPayloadCodec, IInitializable
+    public class AvroPayloadCodec : AbstractPayloadCodec, IInitializable
     {
         private const byte MAGIC_BYTE = 0x0;
 
-        public string Type { get { return Arch.CMessaging.Client.MetaEntity.Entity.Codec.AVRO; } }
+        public override string Type { get { return Arch.CMessaging.Client.MetaEntity.Entity.Codec.AVRO; } }
 
         [Inject]
         private IMetaManager metaManager;
@@ -27,7 +27,7 @@ namespace Arch.CMessaging.Client.Core.Message.Payload
             schemaCache = new SchemaCache(metaManager);           
         }
 
-        public byte[] Encode(string topic, object obj)
+        protected override byte[] DoEncode(string topic, object obj)
         {
             if (!(obj is ISpecificRecord))
             {
@@ -69,7 +69,7 @@ namespace Arch.CMessaging.Client.Core.Message.Payload
             }
         }
 
-        public object Decode(byte[] raw, Type type)
+        protected override object DoDecode(byte[] raw, Type type)
         {
             using (MemoryStream stream = new MemoryStream(raw))
             {
