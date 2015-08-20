@@ -32,14 +32,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Arch.CFX">
-      <HintPath>..\..\Common\Lib\Framework\Release\Arch.CFX.dll</HintPath>
-    </Reference>
     <Reference Include="Arch.CMessaging.Core">
-      <HintPath>..\..\Common\Lib\Framework\Release\Arch.CMessaging.Core.dll</HintPath>
+      <HintPath>..\Arch.CMessaging.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
@@ -52,6 +48,13 @@
       <HintPath>..\Framework.Logging.V2.API.dll</HintPath>
     </Reference>
     <Reference Include="System.Web" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="Arch.CFX">
+      <HintPath>..\Arch.CFX.dll</HintPath>
+    </Reference>
+    <Reference Include="Arch.CFX.CLoggingAdapter">
+      <HintPath>..\Arch.CFX.CLoggingAdapter.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Agent\DefaultClientFactory.cs" />
@@ -873,6 +876,9 @@
     <Compile Include="Core\Utils\BlockingQueueExtension.cs" />
     <Compile Include="Transport\Command\CorrelationIdGenerator.cs" />
     <Compile Include="Core\Utils\JSON.cs" />
+    <Compile Include="Core\Message\Payload\RawMessage.cs" />
+    <Compile Include="Core\Message\Payload\AbstractPayloadCodec.cs" />
+    <Compile Include="Transport\Command\Processor\SingleThreaded.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
