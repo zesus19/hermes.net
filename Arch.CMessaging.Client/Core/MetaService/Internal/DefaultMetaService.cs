@@ -190,14 +190,35 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
             }
         }
 
-        public void Refresh()
+        public void RefreshMeta()
         {
-            RefreshMeta(manager.LoadMeta());
-        }
+            int maxTries = 10;
+            Exception exception = null;
 
-        private void RefreshMeta(Meta meta)
-        {
-            MetaCache = meta;
+            for (int i = 0; i < maxTries; i++)
+            {
+                try
+                {
+                    Meta meta = manager.LoadMeta();
+                    if (meta != null)
+                    {
+                        MetaCache = meta;
+                        return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    exception = e;
+                }
+
+                Thread.Sleep(1000);
+            }
+
+            if (exception != null)
+            {
+                log.Warn(String.Format("Failed to refresh meta from meta-server for {0} times", maxTries));
+                throw exception;
+            }
         }
 
 		
@@ -254,7 +275,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
         public void Initialize()
         {
 
-            RefreshMeta(manager.LoadMeta());
+            RefreshMeta();
 
 
             int interval = (int)config.MetaCacheRefreshIntervalSeconds * 1000;
@@ -353,7 +374,7 @@ namespace Arch.CMessaging.Client.Core.MetaService.Internal
                 try
                 {
                     metaService.timer.Change(Timeout.Infinite, Timeout.Infinite);
-                    metaService.Refresh();
+                    metaService.RefreshMeta();
                 }
                 catch (Exception e)
                 {

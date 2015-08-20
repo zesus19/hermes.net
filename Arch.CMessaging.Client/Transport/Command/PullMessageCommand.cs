@@ -53,11 +53,6 @@ namespace Arch.CMessaging.Client.Transport.Command
             m_future.Set(ack);
         }
 
-        public void OnTimeout()
-        {
-            m_future.SetException(new TimeoutException());
-        }
-
         protected override void Parse0(IoBuffer buf)
         {
             throw new NotImplementedException();

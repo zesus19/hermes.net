@@ -43,19 +43,46 @@ namespace Arch.CMessaging.Client.Core.MetaService.Remote
 
         public void UpdateMetaServerList()
         {
-            if (CollectionUtil.IsNullOrEmpty(metaServerListRef.ReadFullFence()))
+
+            int maxTries = 10;
+            Exception exception = null;
+
+            for (int i = 0; i < maxTries; i++)
             {
-                metaServerListRef.WriteFullFence(DomainToIpPorts());
+                try
+                {
+                    if (CollectionUtil.IsNullOrEmpty(metaServerListRef.ReadFullFence()))
+                    {
+                        metaServerListRef.WriteFullFence(DomainToIpPorts());
+                    }
+
+                    List<String> metaServerList = FetchMetaServerListFromExistingMetaServer();
+                    if (metaServerList != null && metaServerList.Count > 0)
+                    {
+                        metaServerListRef.WriteFullFence(metaServerList);
+                        return;
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    exception = e;
+                }
+
+                Thread.Sleep(1000);
             }
 
-            metaServerListRef.WriteFullFence(FetchMetaServerListFromExistingMetaServer());
+            if (exception != null)
+            {
+                log.Warn(String.Format("Failed to fetch meta server list for {0} times", maxTries));
+                throw exception;
+            }
+
         }
 
         private List<String> FetchMetaServerListFromExistingMetaServer()
         {
             List<String> metaServerList = metaServerListRef.ReadFullFence();
-            log.Debug(string.Format("Start fetching meta server ip from meta servers {0}", metaServerList));
-
 
             foreach (String ipPort in metaServerList)
             {

@@ -17,6 +17,7 @@ using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Producer.Sender;
 using Com.Dianping.Cat;
 using Com.Dianping.Cat.Message;
+using Arch.CMessaging.Client.MetaEntity.Entity;
 
 namespace Arch.CMessaging.Client.Producer.Monitor
 {
@@ -133,7 +134,7 @@ namespace Arch.CMessaging.Client.Producer.Monitor
 
             if (timeoutCmds.Count != 0)
             {
-                resend(timeoutCmds);
+                Resend(timeoutCmds);
             }
         }
 
@@ -157,20 +158,12 @@ namespace Arch.CMessaging.Client.Producer.Monitor
             return timeoutCmds;
         }
 
-        protected void resend(List<SendMessageCommand> timeoutCmds)
+        protected void Resend(List<SendMessageCommand> timeoutCmds)
         {
-            foreach (SendMessageCommand cmd in timeoutCmds)
+            IMessageSender messageSender = ComponentLocator.Lookup<IMessageSender>(Endpoint.BROKER);
+            if (messageSender != null)
             {
-                List<Pair<ProducerMessage, SettableFuture<SendResult>>> msgFuturePairs = cmd
-                    .GetProducerMessageFuturePairs();
-                foreach (Pair<ProducerMessage, SettableFuture<SendResult>> pair in msgFuturePairs)
-                {
-                    IMessageSender sender = ComponentLocator.Lookup<IMessageSender>();
-                    if (sender != null)
-                    {
-                        sender.Resend(pair.Key, pair.Value);
-                    }
-                }
+                messageSender.Resend(timeoutCmds);
             }
         }
     }

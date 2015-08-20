@@ -8,6 +8,8 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
         void Monitor(PullMessageCommand cmd);
 
         void ResultReceived(PullMessageResultCommand ack);
+
+        void Remove(PullMessageCommand cmd);
     }
 }
 

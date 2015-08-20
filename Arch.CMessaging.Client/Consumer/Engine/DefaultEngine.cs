@@ -49,6 +49,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine
                             {
                                 log.Error(string.Format("Failed to start consumer for topic {0}(consumer: groupId={1}, sessionId={2})",
                                         topic.Name, context.GroupId, context.SessionId), e);
+                                throw e;
                             }
                         }
                     }

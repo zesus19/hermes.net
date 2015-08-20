@@ -9,6 +9,7 @@ using Freeway.Logging;
 using Arch.CMessaging.Client.Core.Message;
 using Arch.CMessaging.Client.Core.Utils;
 using Arch.CMessaging.Client.Core.Env;
+using Arch.CMessaging.Client.Producer.Config;
 
 namespace Arch.CMessaging.Client.Producer.Pipeline
 {
@@ -19,7 +20,7 @@ namespace Arch.CMessaging.Client.Producer.Pipeline
         public const string ID = "enrich";
 
         [Inject]
-        private IClientEnvironment clientEnv;
+        private ProducerConfig config;
 
         private bool logEnrichInfo = false;
 
@@ -72,7 +73,7 @@ namespace Arch.CMessaging.Client.Producer.Pipeline
 
         public void Initialize()
         {
-            logEnrichInfo = Convert.ToBoolean(clientEnv.GetGlobalConfig().GetProperty("logEnrichInfo", "false"));
+            logEnrichInfo = config.LogEnrichInfoEnabled;
         }
     }
 
