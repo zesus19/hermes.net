@@ -62,7 +62,9 @@ namespace Arch.CMessaging.Client.Core.Message
 
         public string GetDurableAppProperty(string name)
         {
-            return DurableProperties[APP + name];
+            string val;
+            DurableProperties.TryGetValue(APP + name, out val);
+            return val;
         }
 
         public void AddDurableAppProperty(string name, string value)
@@ -74,7 +76,9 @@ namespace Arch.CMessaging.Client.Core.Message
 
         public string GetDurableSysProperty(string name)
         {
-            return DurableProperties[SYS + name];
+            string val;
+            DurableProperties.TryGetValue(SYS + name, out val);
+            return val;
         }
 
         public void AddDurableSysProperty(string name, string value)
@@ -89,7 +93,9 @@ namespace Arch.CMessaging.Client.Core.Message
 
         public string GetVolatileProperty(string name)
         {
-            return VolatileProperties[name];
+            string val;
+            VolatileProperties.TryGetValue(name, out val);
+            return val;
         }
     }
 }

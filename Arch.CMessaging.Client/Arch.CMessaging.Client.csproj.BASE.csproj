@@ -32,14 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Arch.CFX">
-      <HintPath>..\..\Common\Lib\Framework\Release\Arch.CFX.dll</HintPath>
-    </Reference>
-    <Reference Include="Arch.CMessaging.Core">
-      <HintPath>..\..\Common\Lib\Framework\Release\Arch.CMessaging.Core.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
@@ -51,135 +44,10 @@
     <Reference Include="Framework.Logging.V2.API">
       <HintPath>..\Framework.Logging.V2.API.dll</HintPath>
     </Reference>
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CMessagingV1\Agent\DefaultClientFactory.cs" />
-    <Compile Include="CMessagingV1\API\IBrowserConsumer_1.2.cs" />
-    <Compile Include="CMessagingV1\API\IConsumerChannel.cs" />
-    <Compile Include="CMessagingV1\API\IConsumerFactory.cs" />
-    <Compile Include="CMessagingV1\API\IDeadLetterConsumer.cs" />
-    <Compile Include="CMessagingV1\API\IMessage.cs" />
-    <Compile Include="CMessagingV1\API\IMessageChannel.cs" />
-    <Compile Include="CMessagingV1\API\IMessageChannelConfiguration.cs" />
-    <Compile Include="CMessagingV1\API\IMessageChannelConfigurator.cs" />
-    <Compile Include="CMessagingV1\API\IMessageChannelFactory.cs" />
-    <Compile Include="CMessagingV1\API\IMessageConsumer.cs" />
-    <Compile Include="CMessagingV1\API\IMessageProducer.cs" />
-    <Compile Include="CMessagingV1\API\IProducerChannel.cs" />
-    <Compile Include="CMessagingV1\API\IProducerFactory.cs" />
-    <Compile Include="CMessagingV1\API\IQueueConsumer.cs" />
-    <Compile Include="CMessagingV1\API\ITopicConsumer.cs" />
-    <Compile Include="CMessagingV1\Event\AckedEventHandler.cs" />
-    <Compile Include="CMessagingV1\Event\AckingEventHandler.cs" />
-    <Compile Include="CMessagingV1\Event\BrokerAckEventHandler.cs" />
-    <Compile Include="CMessagingV1\Event\BrokerNackEventHandler.cs" />
-    <Compile Include="CMessagingV1\Event\CallbackExceptionEventHandler.cs" />
-    <Compile Include="CMessagingV1\Event\ChannelOutOfCapacityEventHandler.cs" />
-    <Compile Include="CMessagingV1\Event\ConsumerCallbackEventHandler.cs" />
-    <Compile Include="CMessagingV1\Event\ConsumExceptionEventHandler.cs" />
-    <Compile Include="CMessagingV1\Event\FlowControlEventHandler.cs" />
-    <Compile Include="CMessagingV1\Impl\ChannelFactory.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\AbstractConsumer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\AppInternals\ConsumerTraceItems.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\ChannelConsumerCountor.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Check\ConsumerHealthCheck.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Check\TopicCheck.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\ConfigUtil.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\ConnectionLimitManager.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\ConsumerBuffer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\ConsumerChannel.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\ConsumerFactory.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\DeadLetterConsumer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\DefaultClient.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\DefaultMessageChannelConfiguration.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\DefaultMessageChannelConfigurator.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\DefaultService.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\HermesConsumer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\HermesMessage.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\HermesMessageReader.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\IBlockingSupport.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\IClient.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\IConsumerBuffer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\IDisposed.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\InputBuffer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\IService.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Log\LogPartitionerByConsumer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\MemoryManager.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Message.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\MessageReader.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Ack\AckMessageCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Ack\AckRequestCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Ack\AckResponseCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Ack\AckResponseLatencyMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\ChannelCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\ConsumerCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Exception\ExceptionCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Exception\ExceptionType.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Handling\HandlingCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Handling\HandlingLatencyMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\MemoryMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Message\MessageLatencyMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\MetricUtil.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\NoServerCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Pulling\PullingDiscardCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Pulling\PullingMessageCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Pulling\PullingRequestCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Pulling\PullingResponseCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Pulling\PullingResponseLatencyMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Sync\SyncCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Metrics\Util.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Models\CBox.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Models\ChunkSubMessage.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Models\ExchangePhysicalServer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Models\PhysicalServer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\ObjectFactoryLifetimeManager.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\OutputBuffer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\PullingErrorManager.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\QueueConsumer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\QueueManager.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\ServerPool.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\ServerUriManager.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\SingleTask.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\Thread.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\ThreadPool.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\TopicConsumer.cs" />
-    <Compile Include="CMessagingV1\Impl\Consumer\TwoWayConsumer.cs" />
-    <Compile Include="CMessagingV1\Impl\Logg.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\Check\ProducerHealthCheck.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\Check\ProducerValidator.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\ConfigUtil.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\HermesChannel.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\HermesProducer.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\Metrics\ExceptionCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\Metrics\RcvNackCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\Metrics\SendCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\Metrics\SendResponseCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\Metrics\SyncCountMetric.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\ObjectFactoryLifetimeManager.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\ProducerFactory.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\ProducerTraceItems.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V09\ChannelType.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V09\CMessagingDictionary.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V09\DefaultMessageChannel.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V09\DefaultMessageChannelFactory.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V09\DefaultMessageProducer.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V09\ExceptionMessageProducer.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V09\RemoteServerReader.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V09\SettingsUtils.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\ChannelBuffer.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\DefaultClient.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\DefaultServer.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\IChannelBuffer.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\IClient.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\IServer.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\MessageChannelConfiguration.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\MessageChannelConfigurator.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\MessageProducer.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\MessageWriter.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\ProducerChannel.cs" />
-    <Compile Include="CMessagingV1\Impl\Producer\V10\ProducerMessageReader.cs" />
-    <Compile Include="CMessagingV1\Impl\Version.cs" />
     <Compile Include="Core\Bo\SchemaView.cs" />
     <Compile Include="Core\Bo\SubscriptionView.cs" />
     <Compile Include="Core\Bo\Tpg.cs" />
@@ -192,18 +60,8 @@
     <Compile Include="Core\Collections\IBlockingQueue.cs" />
     <Compile Include="Core\Collections\IChunkedBlockingQueue.cs" />
     <Compile Include="Core\Collections\IConsumingItem.cs" />
-    <Compile Include="Core\Collections\IIndexedBlockingQueue.cs" />
     <Compile Include="Core\Collections\IProducerConsumer.cs" />
-    <Compile Include="Core\Collections\LRUMap.cs" />
     <Compile Include="Core\Collections\ProducerConsumer.cs" />
-    <Compile Include="Core\Collections\RedBlack.cs" />
-    <Compile Include="Core\Collections\RedBlackEnumerator.cs" />
-    <Compile Include="Core\Collections\RedBlackException.cs" />
-    <Compile Include="Core\Collections\RedBlackNode.cs" />
-    <Compile Include="Core\Collections\SequentialNode.cs" />
-    <Compile Include="Core\Collections\SortedAndIndexedBlockingQueue.cs" />
-    <Compile Include="Core\Collections\TimeoutNotifyProducerConsumer.cs" />
-    <Compile Include="Core\Collections\TimeoutNotifyQueue.cs" />
     <Compile Include="Core\Config\CoreConfig.cs" />
     <Compile Include="Core\Env\DefaultClientEnvironment.cs" />
     <Compile Include="Core\Env\IClientEnvironment.cs" />
@@ -248,11 +106,9 @@
     <Compile Include="Core\Message\PartialDecodedMessage.cs" />
     <Compile Include="Core\Message\Partition\HashPartitioningStrategy.cs" />
     <Compile Include="Core\Message\Partition\IPartitioningStrategy.cs" />
-    <Compile Include="Core\Message\Payload\AbstractPayloadCodec.cs" />
     <Compile Include="Core\Message\Payload\IPayloadCodec.cs" />
     <Compile Include="Core\Message\Payload\JsonPayloadCodec.cs" />
     <Compile Include="Core\Message\Payload\PayloadCodecFactory.cs" />
-    <Compile Include="Core\Message\Payload\RawMessage.cs" />
     <Compile Include="Core\Message\ProducerMessage.cs" />
     <Compile Include="Core\Message\PropertiesHolder.cs" />
     <Compile Include="Core\Message\Retry\IRetryPolicy.cs" />
@@ -269,7 +125,6 @@
     <Compile Include="Core\Service\DefaultSystemClockService.cs" />
     <Compile Include="Core\Service\ISystemClockService.cs" />
     <Compile Include="Core\Service\RunningStatusStatisticsService.cs" />
-    <Compile Include="Core\Utils\BufferExtension.cs" />
     <Compile Include="Core\Utils\ChecksumUtil.cs" />
     <Compile Include="Core\Utils\CollectionExtension.cs" />
     <Compile Include="Core\Utils\ComponentLocator.cs" />
@@ -879,11 +734,6 @@
     <Compile Include="Consumer\Engine\Pipeline\DefaultConsumerPipelineSink.cs" />
     <Compile Include="Consumer\Engine\Transport\Command\Processor\PullMessageResultCommandProcessor.cs" />
     <Compile Include="Core\Utils\WebRequestExtension.cs" />
-    <Compile Include="Core\Schedule\ISchedulePolicy.cs" />
-    <Compile Include="Core\Schedule\ExponentialSchedulePolicy.cs" />
-    <Compile Include="Core\Utils\BlockingQueueExtension.cs" />
-    <Compile Include="Transport\Command\CorrelationIdGenerator.cs" />
-    <Compile Include="Core\Utils\JSON.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -908,5 +758,11 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Consumer\Build\" />
+    <Folder Include="Consumer\Engine\Pipeline\" />
+    <Folder Include="Consumer\Engine\Transport\" />
+    <Folder Include="Consumer\Engine\Transport\Command\" />
+    <Folder Include="Consumer\Engine\Transport\Command\Processor\" />
+  </ItemGroup>
 </Project>
