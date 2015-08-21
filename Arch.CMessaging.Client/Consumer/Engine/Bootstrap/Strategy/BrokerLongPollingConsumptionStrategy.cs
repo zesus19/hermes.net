@@ -52,20 +52,20 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
         {
             try
             {
-                int localCachSize = Convert.ToInt32(ClientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
-                                            "consumer.localcache.size", Config.DefautlLocalCacheSize));
+                int localCacheSize = Convert.ToInt32(ClientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
+                                             "consumer.localcache.size", Config.DefautlLocalCacheSize));
 
-                int prefetchSize = Convert.ToInt32(ClientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
-                                           "consumer.localcache.prefetch.threshold.percentage",
-                                           Config.DefaultLocalCachePrefetchThresholdPercentage));
+                int prefetchThreshold = (int)(localCacheSize
+                                        * Convert.ToDouble(ClientEnv.GetConsumerConfig(context.Topic.Name).GetProperty(
+                                                "consumer.localcache.prefetch.threshold.percentage",
+                                                Config.DefaultLocalCachePrefetchThresholdPercentage)) / 100d);
 
                 IRetryPolicy retryPolicy = metaService.FindRetryPolicyByTopicAndGroup(context.Topic.Name, context.GroupId);
                 LongPollingConsumerTask consumerTask = new LongPollingConsumerTask(//
                                                            context, //
                                                            partitionId,//
-                                                           localCachSize, //
-                                                           prefetchSize,//
-                                                           SystemClockService,//
+                                                           localCacheSize, //
+                                                           prefetchThreshold,//
                                                            retryPolicy);
 
                 consumerTask.EndpointClient = EndpointClient;

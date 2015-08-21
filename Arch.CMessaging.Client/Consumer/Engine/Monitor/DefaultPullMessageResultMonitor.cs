@@ -10,7 +10,7 @@ using System.Collections.Generic;
 namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
 {
     [Named(ServiceType = typeof(IPullMessageResultMonitor))]
-    public class DefaultPullMessageResultMonitor : IPullMessageResultMonitor, IInitializable
+    public class DefaultPullMessageResultMonitor : IPullMessageResultMonitor
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(DefaultPullMessageResultMonitor));
 
@@ -19,18 +19,11 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
 
         private ConcurrentDictionary<long, PullMessageCommand> cmds = new ConcurrentDictionary<long, PullMessageCommand>();
 
-        private object theLock = new object();
-
-        private Timer timer;
-
         public void Monitor(PullMessageCommand cmd)
         {
             if (cmd != null)
             {
-                lock (theLock)
-                {
-                    cmds[cmd.Header.CorrelationId] = cmd;
-                }
+                cmds[cmd.Header.CorrelationId] = cmd;
             }
         }
 
@@ -39,17 +32,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
             if (result != null)
             {
                 PullMessageCommand pullMessageCommand = null;
-                try
-                {
-                    lock (theLock)
-                    {
-                        cmds.TryRemove(result.Header.CorrelationId, out pullMessageCommand);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
+                cmds.TryRemove(result.Header.CorrelationId, out pullMessageCommand);
 
                 if (pullMessageCommand != null)
                 {
@@ -69,48 +52,15 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Monitor
             }
         }
 
-        public void Initialize()
+        public void Remove(PullMessageCommand cmd)
         {
-            timer = new Timer(HouseKeep, null, 5000, Timeout.Infinite);
+            PullMessageCommand removedCmd = null;
+            if (cmd != null)
+            {
+                cmds.TryRemove(cmd.Header.CorrelationId, out removedCmd);
+            }
         }
 
-        private void HouseKeep(object dummy)
-        {
-            timer.Change(Timeout.Infinite, Timeout.Infinite);
-            try
-            {
-                List<PullMessageCommand> timeoutCmds = new List<PullMessageCommand>();
-
-                lock (theLock)
-                {
-                    foreach (KeyValuePair<long, PullMessageCommand> entry in cmds)
-                    {
-                        PullMessageCommand cmd = entry.Value;
-                        long correlationId = entry.Key;
-                        if (cmd.ExpireTime + 4000L < systemClockService.Now())
-                        {
-                            PullMessageCommand foo;
-                            cmds.TryRemove(correlationId, out foo);
-                            timeoutCmds.Add(cmd);
-                        }
-                    }
-
-                } 
-
-                foreach (PullMessageCommand timeoutCmd in timeoutCmds)
-                {
-                    timeoutCmd.OnTimeout();
-                }
-            }
-            catch
-            {
-                //ignore
-            }
-            finally
-            {
-                timer.Change(5000, Timeout.Infinite);
-            }
-        }
     }
 }
 

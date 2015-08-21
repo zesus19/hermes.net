@@ -68,14 +68,13 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
         private ThreadSafe.Integer scheduleKey = new ThreadSafe.Integer(0);
 
         public LongPollingConsumerTask(ConsumerContext context, int partitionId, int cacheSize, int prefetchThreshold,
-                                       ISystemClockService systemClockService, IRetryPolicy retryPolicy)
+                                       IRetryPolicy retryPolicy)
         {
             Context = context;
             PartitionId = partitionId;
             this.cacheSize = cacheSize;
             this.localCachePrefetchThreshold = prefetchThreshold;
             msgs = new BlockingQueue<IConsumerMessage>(cacheSize);
-            SystemClockService = systemClockService;
             this.retryPolicy = retryPolicy;
 
             pullMessageTaskExecutorService = new ProducerConsumer<PullMessagesTask>(int.MaxValue);
@@ -172,7 +171,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
 
                     if (msgs.Count != 0)
                     {
-                        ConsumeMessages(correlationId, cacheSize);
+                        ConsumeMessages(correlationId);
                     }
                     else
                     {
@@ -190,7 +189,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             // consume all remaining messages
             if (msgs.Count != 0)
             {
-                ConsumeMessages(correlationId, 0);
+                ConsumeMessages(correlationId);
             }
 
             ConsumerNotifier.Deregister(correlationId);
@@ -307,18 +306,11 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
             }
         }
 
-        private void ConsumeMessages(long correlationId, int maxItems)
+        private void ConsumeMessages(long correlationId)
         {
-            List<IConsumerMessage> msgsToConsume = new List<IConsumerMessage>(maxItems <= 0 ? 100 : maxItems);
+            List<IConsumerMessage> msgsToConsume = new List<IConsumerMessage>();
 
-            if (maxItems <= 0)
-            {
-                msgs.DrainTo(msgsToConsume);
-            }
-            else
-            {
-                msgs.DrainTo(msgsToConsume, maxItems);
-            }
+            msgs.DrainTo(msgsToConsume);
 
             ConsumerNotifier.MessageReceived(correlationId, msgsToConsume);
         }
@@ -420,7 +412,14 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Bootstrap.Strategy
                 PullMessageResultMonitor.Monitor(cmd);
                 EndpointClient.WriteCommand(endpoint, cmd, timeout);
 
-                ack = future.Get(timeout);
+                try
+                {
+                    ack = future.Get(timeout);
+                }
+                catch
+                {
+                    PullMessageResultMonitor.Remove(cmd);
+                }
 
                 if (ack != null)
                 {

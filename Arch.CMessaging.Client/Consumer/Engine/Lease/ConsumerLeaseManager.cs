@@ -71,7 +71,7 @@ namespace Arch.CMessaging.Client.Consumer.Engine.Lease
                 if (other.Tpg != null)
                     return false;
             }
-            else if (Tpg.Equals(other.Tpg))
+            else if (!Tpg.Equals(other.Tpg))
                 return false;
             return true;
         }

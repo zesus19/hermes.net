@@ -3,13 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Arch.CFramework.AppInternals.Validation;
 using Arch.CMessaging.Client.Impl.Producer.V09;
 using Arch.CMessaging.Core.ObjectBuilder;
 
 namespace Arch.CMessaging.Client.Impl.Producer.Check
 {
-    public class ProducerValidator : ValidatorBase
+    /*public class ProducerValidator : ValidatorBase
     {
         protected override string Name
         {
@@ -37,5 +36,5 @@ namespace Arch.CMessaging.Client.Impl.Producer.Check
             }
             return new ValidateResult(ProductStatus.Normal, "状态正常");
         }
-    }
+    }*/
 }
