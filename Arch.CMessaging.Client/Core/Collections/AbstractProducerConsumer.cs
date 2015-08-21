@@ -22,7 +22,6 @@ namespace Arch.CMessaging.Client.Core.Collections
             this.semaphore = new SemaphoreSlim(maxConsumerCount, maxConsumerCount);
             pollingThread = new Thread(InfinitePolling);
             pollingThread.IsBackground = true;
-            pollingThread.Start();
         }
 
         public bool Produce(TItem item)
@@ -60,6 +59,10 @@ namespace Arch.CMessaging.Client.Core.Collections
                     }
                     else semaphore.Release();
                 }
+                catch (ThreadAbortException)
+                {
+                    semaphore.Dispose();
+                }
                 catch (Exception)
                 {
                     semaphore.Release();
@@ -68,9 +71,14 @@ namespace Arch.CMessaging.Client.Core.Collections
         }
 
         public event EventHandler<ConsumeEventArgs> OnConsume;
-        public void Shutdown ()
+        public void Shutdown()
         {
-            // TODO shut down
+            pollingThread.Abort();   
+        }
+
+        protected void StartPolling()
+        {
+            pollingThread.Start();
         }
         protected abstract TQueue BlockingQueue { get; }
         protected abstract IConsumingItem TakeConsumingItem();
