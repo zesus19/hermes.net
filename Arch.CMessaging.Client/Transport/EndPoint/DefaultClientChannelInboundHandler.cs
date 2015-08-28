@@ -41,10 +41,7 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
 
         public override void SessionIdle(IoSession session, IdleStatus status)
         {
-            if (status == IdleStatus.BothIdle)
-            {
-                endpointClient.RemoveSession(endpoint, endpointSession);
-            }
+            endpointClient.RemoveSession(endpoint, endpointSession);
         }
     }
 }

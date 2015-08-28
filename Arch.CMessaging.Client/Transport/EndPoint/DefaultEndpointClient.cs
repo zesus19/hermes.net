@@ -152,10 +152,7 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
                         EndpointSession tmp = sessions[endpoint];
                         if (tmp == endpointSession)
                         {
-                            if (tmp.IsClosed)
-                                sessions.TryRemove(endpoint, out removedSession);
-                            else if (!tmp.IsFlushing && !tmp.HasUnflushOps)
-                                sessions.TryRemove(endpoint, out removedSession);
+                            sessions.TryRemove(endpoint, out removedSession);
                         }
                     }
                 }
@@ -175,7 +172,7 @@ namespace Arch.CMessaging.Client.Transport.EndPoint
                     .Option(SessionOption.TCP_NODELAY, true)
                     .Option(SessionOption.SO_SNDBUF, config.SendBufferSize)
                     .Option(SessionOption.SO_RCVBUF, config.ReceiveBufferSize)
-                    .Option(SessionOption.BOTH_IDLE_TIME, config.EndpointSessionMaxIdleTime)
+                    .Option(SessionOption.ANY_IDLE_TIME, config.EndpointSessionMaxIdleTime)
                     .OnSessionDestroyed((session) => this.RemoveSession(endpoint, endpointSession))
                     .Handler(chain =>
                 {
